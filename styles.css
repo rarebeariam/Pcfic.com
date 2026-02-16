@@ -170,6 +170,12 @@ nav .container {
     gap: 1rem;
 }
 
+.contact-form label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: -0.5rem;
+}
+
 .contact-form input,
 .contact-form textarea {
     padding: 1rem;
