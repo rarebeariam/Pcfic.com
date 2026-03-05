@@ -7,11 +7,42 @@
     <meta name="description" content="PCFGuard uses Positional Correlation Fields to detect network intrusions in real-time with zero training data. A product of Astronomize — patent-pending CPU-based threat detection.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #030810; }
+        body { background: #030810; font-family: sans-serif; }
+        #error-display {
+            display: none;
+            color: #ff6b6b;
+            padding: 40px;
+            font-family: monospace;
+            font-size: 13px;
+            background: #030810;
+            min-height: 100vh;
+        }
+        #error-display h2 { color: #00E5FF; margin-bottom: 16px; }
+        #error-display pre { white-space: pre-wrap; word-break: break-all; margin-top: 12px; opacity: 0.7; }
     </style>
 </head>
 <body>
     <div id="root"></div>
+    <div id="error-display">
+        <h2>PCFGuard failed to load</h2>
+        <p id="error-msg"></p>
+        <pre id="error-stack"></pre>
+        <p style="margin-top:20px;color:#5A7A9A;">← <a href="/" style="color:#00E5FF;">Back to pcfic.com</a></p>
+    </div>
+
+    <script>
+        window.process = window.process || { env: { NODE_ENV: "production" }, emit: function(){} };
+        window.onerror = function(msg, src, line, col, err) {
+            document.getElementById('root').style.display = 'none';
+            var d = document.getElementById('error-display');
+            d.style.display = 'block';
+            document.getElementById('error-msg').textContent = msg;
+            document.getElementById('error-stack').textContent = err ? err.stack : '';
+        };
+        window.onunhandledrejection = function(e) {
+            window.onerror(e.reason && e.reason.message || String(e.reason), '', 0, 0, e.reason);
+        };
+    </script>
     <script src="pcfguard.bundle.js"></script>
 </body>
 </html>
