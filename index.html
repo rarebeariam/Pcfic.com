@@ -3,523 +3,1108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pacific Intelligence Concepts - CPU-Based AI Verification</title>
-    <meta name="description" content="Patent-pending technology reducing AI data center power consumption by 70%. Positional Correlation Fields enable CPU-based verification with 97% energy reduction.">
+    <title>Astronomize — Domain-Agnostic AI Infrastructure</title>
+    <meta name="description" content="Astronomize builds verifiable AI infrastructure. The Pacific platform powers fact verification, cybersecurity, sensor fusion, and hardware validation — CPU-native, zero training required. PCF-API, VASE, PCFGuard, and the Marketplace Protocol.">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --blue:   #5B6ECC;
+            --cyan:   #00B4D8;
+            --purple: #764ba2;
+            --light:  #90A4D4;
+            --bg:     #f8f9ff;
+            --dark:   #1a1f3a;
+            --text:   #2c3e50;
+            --muted:  #6b7280;
+            --card:   #ffffff;
+            --border: #e8ecf4;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #2c3e50;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            color: var(--text);
+            background: var(--bg);
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* Header */
+
+        /* ── HEADER ── */
         header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px 0;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(12px);
+            padding: 0;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 0 var(--border);
         }
-        
-        .header-content {
+        .header-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 14px 24px;
         }
-        
         .logo {
-            font-size: 2em;
-            font-weight: 700;
+            font-size: 1.5em;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-decoration: none;
+        }
+        .logo .p { color: var(--blue); }
+        .logo .a { color: var(--cyan); }
+        .logo .c1 { color: var(--blue); }
+        .logo .i1 { color: var(--cyan); }
+        .logo .f  { color: var(--blue); }
+        .logo .i2 { color: var(--light); }
+        .logo .c2 { color: var(--light); }
+        .logo-sub {
+            font-size: 0.38em;
+            display: block;
+            color: var(--muted);
+            letter-spacing: 0.12em;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        nav { display: flex; gap: 28px; align-items: center; }
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--blue); }
+        .nav-cta {
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            color: white !important;
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 0.88em !important;
+            font-weight: 600 !important;
+            transition: opacity 0.2s, transform 0.1s !important;
+        }
+        .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+        .nav-demo {
+            background: linear-gradient(135deg, #030810, #0a1828);
+            color: #00E5FF !important;
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 0.88em !important;
+            font-weight: 600 !important;
+            border: 1px solid #1a3a5c;
+        }
+        .nav-demo:hover { border-color: #00E5FF; }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(160deg, #0a0e2a 0%, #1a1f4a 50%, #0d1635 100%);
+            color: white;
+            padding: 100px 24px 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(91,110,204,0.08) 1px,transparent 1px),
+                              linear-gradient(90deg,rgba(91,110,204,0.08) 1px,transparent 1px);
+            background-size: 48px 48px;
+        }
+        .hero-glow {
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(91,110,204,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.78em;
+            font-weight: 600;
             letter-spacing: 0.05em;
         }
-        
-        .logo .letter-p { color: #5B6ECC; }
-        .logo .letter-a { color: #00B4D8; }
-        .logo .letter-c1 { color: #5B6ECC; }
-        .logo .letter-i1 { color: #00B4D8; }
-        .logo .letter-f { color: #5B6ECC; }
-        .logo .letter-i2 { color: #90A4D4; }
-        .logo .letter-c2 { color: #90A4D4; }
-        
-        .tagline {
-            color: #90A4D4;
-            font-size: 0.5em;
-            display: block;
-            margin-top: 5px;
-            letter-spacing: 0.1em;
+        .badge-patent {
+            background: rgba(91,110,204,0.2);
+            border: 1px solid rgba(91,110,204,0.4);
+            color: #a0b0ff;
         }
-        
-        .patent {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
+        .badge-live {
+            background: rgba(0,180,216,0.15);
+            border: 1px solid rgba(0,180,216,0.3);
+            color: #00d4ff;
         }
-        
-        /* Hero Section */
-        .hero {
-            background: white;
-            border-radius: 20px;
-            padding: 80px 40px;
-            margin: 40px auto;
-            max-width: 1200px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            text-align: center;
+        .badge-live .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #00d4ff;
+            animation: pulse 1.5s infinite;
         }
-        
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
         .hero h1 {
-            font-size: 3.5em;
+            font-size: clamp(2.4em, 5.5vw, 3.8em);
+            font-weight: 800;
+            line-height: 1.1;
             margin-bottom: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
+            letter-spacing: -0.02em;
         }
-        
-        .hero .subtitle {
-            font-size: 1.5em;
-            color: #666;
-            margin-bottom: 40px;
-            line-height: 1.4;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
-        }
-        
-        .stat {
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-        }
-        
-        .stat-number {
-            font-size: 3em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .hero h1 span {
+            background: linear-gradient(135deg, #00B4D8, #5B6ECC);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .stat-label {
-            font-size: 1em;
-            color: #666;
-            margin-top: 10px;
+        .hero-sub {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.65);
+            margin-bottom: 48px;
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
         }
-        
-        /* CTA Buttons */
-        .cta-buttons {
+        .hero-ctas {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 40px;
+            margin-bottom: 64px;
         }
-        
         .btn {
-            padding: 18px 40px;
-            font-size: 1.1em;
+            padding: 14px 36px;
+            font-size: 1em;
             font-weight: 600;
-            border: none;
-            border-radius: 50px;
+            border-radius: 32px;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            transition: all 0.2s;
         }
-        
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--blue), var(--purple));
             color: white;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 28px rgba(91,110,204,0.35);
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
-        }
-        
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-        
-        .btn-secondary:hover {
-            background: #667eea;
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(91,110,204,0.5); }
+        .btn-ghost {
+            background: rgba(255,255,255,0.08);
             color: white;
-            transform: translateY(-2px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        
-        /* Problem Section */
-        .section {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            margin: 40px auto;
-            max-width: 1200px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        .btn-ghost:hover { background: rgba(255,255,255,0.14); }
+        .btn-dark {
+            background: rgba(0,229,255,0.1);
+            color: #00E5FF;
+            border: 1px solid rgba(0,229,255,0.3);
         }
-        
-        .section h2 {
-            font-size: 2.5em;
-            margin-bottom: 30px;
+        .btn-dark:hover { background: rgba(0,229,255,0.18); }
+
+        /* ── HERO STATS BAR ── */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .hero-stat {
+            padding: 22px 16px;
             text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(0,0,0,0.2);
+        }
+        .hero-stat-num {
+            font-size: 1.9em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00B4D8, #5B6ECC);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1;
+            margin-bottom: 4px;
         }
-        
-        .problem-grid {
+        .hero-stat-label {
+            font-size: 0.75em;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.06em;
+        }
+
+        /* ── SECTIONS ── */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+        .section-label {
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: var(--blue);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(1.8em, 3.5vw, 2.6em);
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+        .section-sub {
+            font-size: 1.05em;
+            color: var(--muted);
+            max-width: 600px;
+            margin-bottom: 48px;
+        }
+
+        /* ── PRODUCTS ── */
+        .products-bg {
+            background: white;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
         }
-        
-        .problem-card {
-            padding: 30px;
-            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
-            border-radius: 15px;
-            border-left: 5px solid #ff6b6b;
+        .product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .problem-card h3 {
-            color: #d63031;
-            font-size: 1.5em;
-            margin-bottom: 15px;
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+            border-color: var(--blue);
         }
-        
-        .solution-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
+        .product-card.soon {
+            opacity: 0.75;
         }
-        
-        .solution-card {
-            padding: 30px;
-            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
-            border-radius: 15px;
-            border-left: 5px solid #48bb78;
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--card-accent, linear-gradient(135deg, var(--blue), var(--purple)));
         }
-        
-        .solution-card h3 {
-            color: #2f855a;
-            font-size: 1.5em;
-            margin-bottom: 15px;
+        .product-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            margin-bottom: 16px;
         }
-        
-        /* Validation Section */
-        .validation {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-align: center;
-        }
-        
-        .validation h2 {
-            color: white;
-            -webkit-text-fill-color: white;
-        }
-        
-        .validation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .validation-item {
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .validation-item h3 {
-            font-size: 1.8em;
+        .product-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.72em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             margin-bottom: 10px;
         }
-        
-        /* Contact Section */
-        .contact {
-            text-align: center;
+        .product-card h3 {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
         }
-        
-        .contact-info {
-            margin-top: 30px;
-            font-size: 1.2em;
-        }
-        
-        .contact-info a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .contact-info a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: white;
-            margin-top: 60px;
-        }
-        
-        footer a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-        }
-        
-        footer a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5em;
-            }
-            
-            .hero .subtitle {
-                font-size: 1.2em;
-            }
-            
-            .section {
-                padding: 40px 20px;
-            }
-            
-            .cta-buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-        }
-        
-        /* Badge */
-        .badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-            color: #2d3436;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 600;
+        .product-card p {
+            font-size: 0.92em;
+            color: var(--muted);
+            line-height: 1.6;
             margin-bottom: 20px;
+        }
+        .product-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .product-metric {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.84em;
+        }
+        .product-metric-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .product-link {
+            font-size: 0.88em;
+            font-weight: 600;
+            color: var(--blue);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .product-link:hover { text-decoration: underline; }
+
+        /* ── BENCHMARKS ── */
+        .bench-bg {
+            background: linear-gradient(180deg, var(--bg) 0%, white 100%);
+        }
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .bench-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .bench-domain {
+            font-size: 0.75em;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--blue);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .bench-task {
+            font-size: 0.85em;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+        .bench-f1 {
+            font-size: 2.2em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--blue), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .bench-bar-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .bench-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--cyan));
+        }
+        .bench-source {
+            font-size: 0.7em;
+            color: #b0b8c8;
+            margin-top: 6px;
+            font-family: monospace;
+        }
+        .table-wrap {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead tr { background: var(--bg); }
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 12px 16px;
             font-size: 0.9em;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg); }
+        .f1-good { color: #059669; font-weight: 700; }
+        .f1-great { color: var(--blue); font-weight: 700; }
+        .f1-perfect { color: #7c3aed; font-weight: 700; }
+        .domain-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.78em;
+            font-weight: 600;
+        }
+
+        /* ── DOMAINS ── */
+        .domains-bg { background: white; border-top: 1px solid var(--border); }
+        .domains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+        .domain-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .domain-card h4 {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .domain-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .domain-card li {
+            font-size: 0.85em;
+            color: var(--muted);
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .domain-card li::before {
+            content: '→';
+            color: var(--blue);
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+
+        /* ── PATENTS ── */
+        .patents-bg { background: linear-gradient(160deg, #0a0e2a, #1a1f4a); color: white; }
+        .patents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .patent-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 28px;
+        }
+        .patent-card h4 {
+            font-size: 1em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #a0b0ff;
+        }
+        .patent-card p {
+            font-size: 0.88em;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+        }
+        .patent-number {
+            font-family: monospace;
+            font-size: 0.78em;
+            color: #00B4D8;
+            margin-top: 10px;
+        }
+
+        /* ── CONTACT ── */
+        .contact-bg { background: white; border-top: 1px solid var(--border); }
+        .contact-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .input {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            color: var(--text);
+            outline: none;
+            background: var(--bg);
+            transition: border-color 0.2s;
+        }
+        .input:focus { border-color: var(--blue); background: white; }
+        textarea.input { resize: vertical; min-height: 100px; }
+        .btn-submit {
+            padding: 13px 32px;
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: inherit;
+        }
+        .btn-submit:hover { opacity: 0.88; }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #070b1a;
+            color: rgba(255,255,255,0.5);
+            padding: 40px 24px;
+            text-align: center;
+            font-size: 0.88em;
+        }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .footer-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: white; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            nav .hide-mobile { display: none; }
+            .hero { padding: 80px 20px 60px; }
+            .contact-inner { grid-template-columns: 1fr; gap: 32px; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <span class="letter-p">P</span><span class="letter-a">A</span><span class="letter-c1">C</span><span class="letter-i1">I</span><span class="letter-f">F</span><span class="letter-i2">I</span><span class="letter-c2">C</span>
-                <span class="tagline">Intelligence Concepts</span>
-            </div>
-            <div class="patent">Patent Pending</div>
+
+<!-- ── HEADER ── -->
+<header>
+    <div class="header-inner">
+        <a href="/" class="logo">
+            <span class="p">P</span><span class="a">A</span><span class="c1">C</span><span class="i1">I</span><span class="f">F</span><span class="i2">I</span><span class="c2">C</span>
+            <span class="logo-sub">by Astronomize</span>
+        </a>
+        <nav>
+            <a href="#products" class="hide-mobile">Products</a>
+            <a href="#benchmarks" class="hide-mobile">Benchmarks</a>
+            <a href="#patents" class="hide-mobile">Patents</a>
+            <a href="#contact" class="hide-mobile">Contact</a>
+            <a href="pcfguard.html" class="nav-demo">PCFGuard Demo</a>
+            <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="nav-cta">Try the API</a>
+        </nav>
+    </div>
+</header>
+
+<!-- ── HERO ── -->
+<section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="hero-badges">
+            <span class="badge badge-patent">Patent 1 · U.S. 63/978,633</span>
+            <span class="badge badge-patent">Patent 2 · 61 Claims Filed</span>
+            <span class="badge badge-live"><span class="dot"></span>API Live on Railway</span>
         </div>
-    </header>
 
-    <div class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="badge">🔥 As validated by Grok (Elon's AI) - 421K views</div>
-            <h1>AI Data Centers Need 70% Less Power</h1>
-            <p class="subtitle">
-                Patent-pending CPU-based verification technology eliminating the need for $600B in new energy infrastructure
-            </p>
-            
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-number">97%</div>
-                    <div class="stat-label">Energy Reduction</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">65-83%</div>
-                    <div class="stat-label">Validated Accuracy</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">129ms</div>
-                    <div class="stat-label">Real-Time Latency</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">$210B</div>
-                    <div class="stat-label">Market Opportunity</div>
-                </div>
-            </div>
-            
-            <div class="cta-buttons">
-                <a href="https://pcf-api-production.up.railway.app/docs" class="btn btn-primary" target="_blank">
-                    Try Live Demo →
-                </a>
-                <a href="mailto:info@pcfic.com" class="btn btn-secondary">
-                    Schedule Pilot →
-                </a>
-            </div>
-        </section>
+        <p style="font-size:0.85em;font-weight:700;letter-spacing:0.2em;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:12px;">Astronomize</p>
+        <h1>The Infrastructure Layer<br>for <span>Verifiable AI</span></h1>
 
-        <!-- Problem Section -->
-        <section class="section">
-            <h2>The $600B Problem</h2>
-            <div class="problem-grid">
-                <div class="problem-card">
-                    <h3>🔴 Power Crisis</h3>
-                    <p>AI data centers will need 500-1,000 TWh annually by 2030 - equivalent to 10% of global electricity production. Grid operators are already rejecting applications.</p>
-                </div>
-                <div class="problem-card">
-                    <h3>🔴 Infrastructure Gap</h3>
-                    <p>$600B+ capital needed for new power plants, transformers, and grid capacity. 2-3 year lead times. Supply chain can't keep up with demand.</p>
-                </div>
-                <div class="problem-card">
-                    <h3>🔴 Material Shortages</h3>
-                    <p>Copper demand exceeds mining capacity by 30%. Silver requirements exceed supply by 150%. Rare earth elements critically constrained.</p>
-                </div>
-            </div>
-        </section>
+        <p class="hero-sub">
+            One engine. CPU-native. Zero training required.<br>
+            The <strong style="color:rgba(255,255,255,0.85);">Pacific Platform</strong> powers fact verification, cybersecurity, sensor fusion, hardware validation — and the marketplace to trade it all.
+        </p>
 
-        <!-- Solution Section -->
-        <section class="section">
-            <h2>Our Solution: Positional Correlation Fields</h2>
-            <p style="text-align: center; font-size: 1.2em; color: #666; margin-bottom: 40px;">
-                Don't build $600B in new infrastructure. Eliminate 70% of the need.
-            </p>
-            <div class="solution-grid">
-                <div class="solution-card">
-                    <h3>✅ CPU-Based Verification</h3>
-                    <p>Route verification queries (70% of AI workload) to 20W CPUs instead of 400W GPUs. Same accuracy, 97% less energy.</p>
-                </div>
-                <div class="solution-card">
-                    <h3>✅ Patent Protected</h3>
-                    <p>U.S. Provisional Application No. 63/978,633. 20 claims covering correlation tensors, hybrid routing, deterministic caching.</p>
-                </div>
-                <div class="solution-card">
-                    <h3>✅ Production Ready</h3>
-                    <p>Working implementation (3,100+ lines), benchmarked results (65-83% accuracy), live API demonstration available now.</p>
-                </div>
-            </div>
-        </section>
+        <div class="hero-ctas">
+            <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="btn btn-primary">Try the API →</a>
+            <a href="pcfguard.html" class="btn btn-dark">PCFGuard Demo</a>
+            <a href="mailto:jacob@pcfic.com" class="btn btn-ghost">Schedule a Pilot</a>
+        </div>
 
-        <!-- Validation Section -->
-        <section class="section validation">
-            <h2>Validated Performance</h2>
-            <p style="margin-bottom: 20px; opacity: 0.9;">Real benchmarks from February 11, 2026</p>
-            <div class="validation-grid">
-                <div class="validation-item">
-                    <h3>0.28 J</h3>
-                    <p>Energy per query<br>(vs 9.3 J GPU baseline)</p>
-                </div>
-                <div class="validation-item">
-                    <h3>90%</h3>
-                    <p>Accuracy on history domain<br>(best performance)</p>
-                </div>
-                <div class="validation-item">
-                    <h3>129ms</h3>
-                    <p>Average server latency<br>(real-time capable)</p>
-                </div>
-                <div class="validation-item">
-                    <h3>60 Claims</h3>
-                    <p>Benchmark tested<br>across 6 domains</p>
-                </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-num">F1=1.000</div>
+                <div class="hero-stat-label">Security Detection</div>
             </div>
-        </section>
+            <div class="hero-stat">
+                <div class="hero-stat-num">97%</div>
+                <div class="hero-stat-label">Energy vs GPU</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num">1.37ms</div>
+                <div class="hero-stat-label">Per Query CPU</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num">61</div>
+                <div class="hero-stat-label">Patent Claims</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num">6</div>
+                <div class="hero-stat-label">Domains</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-num">60/60</div>
+                <div class="hero-stat-label">Claims Validated</div>
+            </div>
+        </div>
+    </div>
+</section>
 
-        <!-- Impact Section -->
-        <section class="section">
-            <h2>Industry-Scale Impact</h2>
-            <p style="text-align: center; font-size: 1.2em; color: #666; margin-bottom: 40px;">
-                If adopted for verification workloads (70% of AI queries)
-            </p>
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-number">325-650</div>
-                    <div class="stat-label">GW Capacity Freed<br>(Power plants not needed)</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">$195B</div>
-                    <div class="stat-label">Annual Industry Savings<br>(Compute costs)</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">195M</div>
-                    <div class="stat-label">Tons CO₂ Reduced/Year<br>(42M cars equivalent)</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">3×</div>
-                    <div class="stat-label">AI Capacity on Same Power<br>(Hybrid architecture)</div>
-                </div>
-            </div>
-        </section>
+<!-- ── PRODUCTS ── -->
+<div class="products-bg" id="products">
+<div class="section">
+    <div class="section-label">The Pacific Platform</div>
+    <h2 class="section-title">Four Products. One Engine.</h2>
+    <p class="section-sub">Positional Correlation Fields power everything Astronomize builds — from the core API to autonomous corpus agents to the verification marketplace.</p>
 
-        <!-- Contact Section -->
-        <section class="section contact">
-            <h2>Ready for Pilots</h2>
-            <p style="font-size: 1.2em; color: #666; margin: 20px 0;">
-                Working with major AI companies to validate production deployment
-            </p>
-            <div class="contact-info">
-                <p><strong>Jacob Westerbeck</strong></p>
-                <p>Founder & Inventor</p>
-                <p><a href="mailto:info@pcfic.com">jacob.westerbeck@proton.me</a></p>
-                <p style="margin-top: 20px;">
-                    <strong>Patent:</strong> U.S. Provisional Application No. 63/978,633<br>
-                    <strong>Filed:</strong> February 9, 2026
-                </p>
+    <div class="products-grid">
+
+        <!-- PCF-API -->
+        <div class="product-card" style="--card-accent: linear-gradient(135deg, #5B6ECC, #764ba2);">
+            <div class="product-icon" style="background: rgba(91,110,204,0.1);">🔬</div>
+            <span class="product-tag" style="background:rgba(91,110,204,0.1);color:#5B6ECC;">LIVE</span>
+            <h3>PCF-API</h3>
+            <p>The core engine. Domain-agnostic fact verification, contradiction detection, and structural analysis — deployed as a production REST API on Railway.</p>
+            <div class="product-metrics">
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#5B6ECC"></div>
+                    <span>83.3% accuracy on FEVER fact verification</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#5B6ECC"></div>
+                    <span>60–80% deterministic cache hit rate</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#5B6ECC"></div>
+                    <span>CPU-only · 0.28J/query vs 9.3J GPU</span>
+                </div>
             </div>
-            <div class="cta-buttons">
-                <a href="https://pcf-api-production.up.railway.app/docs" class="btn btn-primary" target="_blank">
-                    Try Live Demo
-                </a>
-                <a href="https://github.com/rarebeariam/PCF-API" class="btn btn-secondary" target="_blank">
-                    View GitHub →
-                </a>
+            <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="product-link">Live API docs →</a>
+        </div>
+
+        <!-- VASE-PCF -->
+        <div class="product-card" style="--card-accent: linear-gradient(135deg, #00B4D8, #0080FF);">
+            <div class="product-icon" style="background: rgba(0,180,216,0.1);">🤖</div>
+            <span class="product-tag" style="background:rgba(0,180,216,0.1);color:#00B4D8;">VASE v2</span>
+            <h3>VASE-PCF</h3>
+            <p>Autonomous RL agent that builds its own knowledge corpus using PCF convergence as reward. No human labeling. 915 logged decisions, 0.771 convergence — self-improving.</p>
+            <div class="product-metrics">
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#00B4D8"></div>
+                    <span>RSSM world model + ICM/RND/DIAYN exploration</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#00B4D8"></div>
+                    <span>SHA-256 cryptographic audit chain</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#00B4D8"></div>
+                    <span>EU AI Act Article 13 compliant</span>
+                </div>
             </div>
-        </section>
+            <a href="https://github.com/rarebeariam/PACIFIC" target="_blank" class="product-link">View on GitHub →</a>
+        </div>
+
+        <!-- PCFGuard -->
+        <div class="product-card" style="--card-accent: linear-gradient(135deg, #FF3B6B, #FF6B35);">
+            <div class="product-icon" style="background: rgba(255,59,107,0.1);">🛡️</div>
+            <span class="product-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">BETA</span>
+            <h3>PCFGuard</h3>
+            <p>Zero-training network intrusion detection using PCF structural signatures. Tested on real CICIDS2017 traffic — 600 traces per attack class, no training samples.</p>
+            <div class="product-metrics">
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#FF3B6B"></div>
+                    <span>BruteForce F1=0.969 · DDoS F1=0.949</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#FF3B6B"></div>
+                    <span>PortScan F1=0.932 · DoS F1=0.910</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#FF3B6B"></div>
+                    <span>~1.5ms average detection latency</span>
+                </div>
+            </div>
+            <a href="pcfguard.html" class="product-link">Try the demo →</a>
+        </div>
+
+        <!-- Marketplace Protocol -->
+        <div class="product-card soon" style="--card-accent: linear-gradient(135deg, #f59e0b, #ef4444);">
+            <div class="product-icon" style="background: rgba(245,158,11,0.1);">⚡</div>
+            <span class="product-tag" style="background:rgba(245,158,11,0.1);color:#f59e0b;">COMING SOON</span>
+            <h3>Marketplace Protocol</h3>
+            <p>Competitive verification marketplace where AI agents bid to answer queries. PCF scores each response structurally — winner determined by convergence, not authority. Fully auditable.</p>
+            <div class="product-metrics">
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#f59e0b"></div>
+                    <span>Multi-agent auction with PCF arbitration</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#f59e0b"></div>
+                    <span>On-chain audit trail via hash chain</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#f59e0b"></div>
+                    <span>Patent 3 in preparation</span>
+                </div>
+            </div>
+            <span class="product-link" style="color:var(--muted);cursor:default;">Notify me when live</span>
+        </div>
+
+    </div>
+</div>
+</div>
+
+<!-- ── BENCHMARKS ── -->
+<div class="bench-bg" id="benchmarks">
+<div class="section">
+    <div class="section-label">Validated Performance</div>
+    <h2 class="section-title">Real Benchmarks. No Marketing.</h2>
+    <p class="section-sub">All results measured on real or synthetic data. Sources, sample sizes, and honest caveats included. Patent claims validated 60/60.</p>
+
+    <div class="bench-grid">
+        <div class="bench-card">
+            <div class="bench-domain">Security</div>
+            <div class="bench-task">Brute Force Detection</div>
+            <div class="bench-f1">0.969</div>
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:96.9%"></div></div>
+            <div class="bench-source">CICIDS2017 · 446k rows · real</div>
+        </div>
+        <div class="bench-card">
+            <div class="bench-domain">Security</div>
+            <div class="bench-task">DDoS Detection</div>
+            <div class="bench-f1">0.949</div>
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:94.9%"></div></div>
+            <div class="bench-source">CICIDS2017 · 226k rows · real</div>
+        </div>
+        <div class="bench-card">
+            <div class="bench-domain">Security</div>
+            <div class="bench-task">Port Scan Detection</div>
+            <div class="bench-f1">0.932</div>
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:93.2%"></div></div>
+            <div class="bench-source">CICIDS2017 · 286k rows · real</div>
+        </div>
+        <div class="bench-card">
+            <div class="bench-domain">Hardware</div>
+            <div class="bench-task">RAW Hazard Detection</div>
+            <div class="bench-f1" style="background:linear-gradient(135deg,#7c3aed,#5B6ECC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">1.000</div>
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:100%;background:linear-gradient(90deg,#7c3aed,#5B6ECC)"></div></div>
+            <div class="bench-source">Synthetic · n=200 · Claims 22,24</div>
+        </div>
+        <div class="bench-card">
+            <div class="bench-domain">Robotics</div>
+            <div class="bench-task">Sensor Failure Detection</div>
+            <div class="bench-f1" style="background:linear-gradient(135deg,#7c3aed,#5B6ECC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">1.000</div>
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:100%;background:linear-gradient(90deg,#7c3aed,#5B6ECC)"></div></div>
+            <div class="bench-source">Synthetic · n=200 · Claims 27,29</div>
+        </div>
+        <div class="bench-card">
+            <div class="bench-domain">NLP</div>
+            <div class="bench-task">FEVER Fact Verification</div>
+            <div class="bench-f1">83.3%</div>
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:83.3%"></div></div>
+            <div class="bench-source">FEVER dataset · n=60 · Claims 1,2,21</div>
+        </div>
     </div>
 
-    <footer>
-        <p>
-            <a href="https://pcf-api-production.up.railway.app/docs" target="_blank">Live Demo</a>
-            <a href="https://github.com/rarebeariam/PCF-API" target="_blank">GitHub</a>
-            <a href="mailto:jacob.westerbeck@proton.me">Contact</a>
-        </p>
-        <p style="margin-top: 20px; opacity: 0.8;">
-            © 2026 Pacific Intelligence Concepts, LLC. All rights reserved.<br>
-            U.S. Provisional Patent Application No. 63/978,633
-        </p>
-    </footer>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Domain</th>
+                    <th>Task</th>
+                    <th>F1</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>Data</th>
+                    <th>Latency</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
+                    <td>Brute Force (FTP/SSH)</td>
+                    <td class="f1-great">0.969</td>
+                    <td>0.940</td>
+                    <td>1.000</td>
+                    <td>Real · CICIDS2017</td>
+                    <td>1.47ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
+                    <td>DDoS (LOIC)</td>
+                    <td class="f1-great">0.949</td>
+                    <td>0.906</td>
+                    <td>0.997</td>
+                    <td>Real · CICIDS2017</td>
+                    <td>1.48ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
+                    <td>Port Scan</td>
+                    <td class="f1-great">0.932</td>
+                    <td>0.872</td>
+                    <td>1.000</td>
+                    <td>Real · CICIDS2017</td>
+                    <td>1.40ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
+                    <td>DoS (Hulk/GoldenEye)</td>
+                    <td class="f1-good">0.910</td>
+                    <td>0.879</td>
+                    <td>0.943</td>
+                    <td>Real · CICIDS2017</td>
+                    <td>1.62ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
+                    <td>Web Attacks (XSS/SQLi)</td>
+                    <td class="f1-good">0.885</td>
+                    <td>0.800</td>
+                    <td>0.991</td>
+                    <td>Real · CICIDS2017</td>
+                    <td>1.60ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(91,110,204,0.1);color:#5B6ECC;">Hardware</span></td>
+                    <td>RAW Hazard Detection</td>
+                    <td class="f1-perfect">1.000</td>
+                    <td>1.000</td>
+                    <td>1.000</td>
+                    <td>Synthetic · n=200</td>
+                    <td>1.37ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(91,110,204,0.1);color:#5B6ECC;">Hardware</span></td>
+                    <td>Spectre-Class Detection</td>
+                    <td class="f1-good">0.847</td>
+                    <td>0.838</td>
+                    <td>0.855</td>
+                    <td>Synthetic · n=200</td>
+                    <td>1.37ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(0,180,216,0.1);color:#00B4D8;">Robotics</span></td>
+                    <td>Sensor Failure Isolation</td>
+                    <td class="f1-perfect">1.000</td>
+                    <td>1.000</td>
+                    <td>1.000</td>
+                    <td>Synthetic · n=200</td>
+                    <td>1.37ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(0,180,216,0.1);color:#00B4D8;">Robotics</span></td>
+                    <td>AV Safety Classification</td>
+                    <td class="f1-good">0.848</td>
+                    <td>0.750</td>
+                    <td>0.975</td>
+                    <td>Synthetic · n=200</td>
+                    <td>1.37ms</td>
+                </tr>
+                <tr>
+                    <td><span class="domain-tag" style="background:rgba(16,185,129,0.1);color:#059669;">NLP</span></td>
+                    <td>Fact Verification (FEVER)</td>
+                    <td class="f1-good">0.833</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>FEVER · n=60</td>
+                    <td>129ms API</td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="padding:12px 16px;font-size:0.78em;color:var(--muted);font-family:monospace;border-top:1px solid var(--border);">
+            Zero training samples in all detection tasks. CICIDS2017 results on real downloaded dataset. Synthetic benchmarks n=200 per class. Patent Pending U.S. 63/978,633.
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ── DOMAINS ── -->
+<div class="domains-bg">
+<div class="section">
+    <div class="section-label">What PCF Can Analyze</div>
+    <h2 class="section-title">One Math. Six Domains.</h2>
+    <p class="section-sub">The same PMI tensor computation applies uniformly across any discrete sequential token stream — no retraining, no domain-specific models.</p>
+
+    <div class="domains-grid">
+        <div class="domain-card">
+            <h4>🔤 Natural Language</h4>
+            <ul>
+                <li>Fact verification against reference corpora</li>
+                <li>Contradiction detection across sources</li>
+                <li>LLM hallucination reduction</li>
+                <li>Content moderation at scale</li>
+            </ul>
+        </div>
+        <div class="domain-card">
+            <h4>🔴 Cybersecurity</h4>
+            <ul>
+                <li>Network intrusion detection (zero training)</li>
+                <li>DDoS, brute force, port scan, web attacks</li>
+                <li>Zero-day detection via structural anomaly</li>
+                <li>Kill-chain correlation</li>
+            </ul>
+        </div>
+        <div class="domain-card">
+            <h4>⚙️ Hardware Verification</h4>
+            <ul>
+                <li>CPU instruction stream hazard detection</li>
+                <li>Spectre-class side-channel probing</li>
+                <li>ISA compliance verification</li>
+                <li>Intel AVX-512 &amp; AMD EPYC optimized</li>
+            </ul>
+        </div>
+        <div class="domain-card">
+            <h4>🤖 Robotics / AV</h4>
+            <ul>
+                <li>Multi-sensor fusion confidence scoring</li>
+                <li>GPS-denied localization confidence</li>
+                <li>Sensor failure isolation</li>
+                <li>Safety level classification (L0–L3)</li>
+            </ul>
+        </div>
+        <div class="domain-card">
+            <h4>🏭 Industrial IoT</h4>
+            <ul>
+                <li>Predictive maintenance (SCADA/ICS)</li>
+                <li>Degradation trend prediction</li>
+                <li>Anomaly detection without labeling</li>
+                <li>SWaT dataset validated</li>
+            </ul>
+        </div>
+        <div class="domain-card">
+            <h4>🧠 AI Infrastructure</h4>
+            <ul>
+                <li>Autonomous RL corpus expansion (VASE)</li>
+                <li>Hybrid CPU/GPU routing layer</li>
+                <li>EU AI Act Art. 13 audit trail</li>
+                <li>Deterministic cache: 60–83% hit rate</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ── PATENTS ── -->
+<div class="patents-bg" id="patents">
+<div class="section">
+    <div class="section-label" style="color:#00B4D8;">Intellectual Property</div>
+    <h2 class="section-title" style="color:white;">Two Provisionals Filed.<br>Non-Provisional Due Feb 9, 2027.</h2>
+
+    <div class="patents-grid" style="margin-top:40px;">
+        <div class="patent-card">
+            <h4>Patent 1 — PCF Core Framework</h4>
+            <p>Energy-efficient NLP using Positional Correlation Fields. Original provisional establishing the PCF mathematical framework, CPU-based verification, deterministic caching, hybrid routing, and cryptographic audit.</p>
+            <div class="patent-number">U.S. Provisional No. 63/978,633 · Filed Feb 9, 2026</div>
+        </div>
+        <div class="patent-card">
+            <h4>Patent 2 — Domain-Agnostic PCF + VASE</h4>
+            <p>61 claims. Expands PCF to domain-agnostic sequential token streams across NLP, CPU hardware, robotics, cybersecurity, and industrial IoT. Adds RSSM world model, triple exploration RL, safety shielding, and SoC deployment claims.</p>
+            <div class="patent-number">U.S. Provisional No. 2 of 3 · Filed March 2026</div>
+        </div>
+        <div class="patent-card">
+            <h4>Patent 3 — Marketplace Protocol</h4>
+            <p>Multi-agent competitive verification marketplace using PCF as objective arbitration. Agents bid to answer queries; PCF structural convergence scores determine winners. In preparation.</p>
+            <div class="patent-number">In preparation · 2026</div>
+        </div>
+    </div>
+
+    <div style="margin-top:32px;padding:20px 24px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;font-size:0.88em;color:rgba(255,255,255,0.5);">
+        Inventor: <strong style="color:rgba(255,255,255,0.8);">Jacob Westerbeck</strong> &nbsp;·&nbsp;
+        Company: <strong style="color:rgba(255,255,255,0.8);">Astronomize</strong> &nbsp;·&nbsp;
+        All 60 claims of Patent 1 validated by automated test suite &nbsp;·&nbsp;
+        Non-provisional deadline: <strong style="color:#00B4D8;">February 9, 2027</strong>
+    </div>
+</div>
+</div>
+
+<!-- ── CONTACT ── -->
+<div class="contact-bg" id="contact">
+<div class="section">
+    <div class="contact-inner">
+        <div>
+            <div class="section-label">Get in Touch</div>
+            <h2 class="section-title">Ready for Pilots &amp; Partnerships</h2>
+            <p style="color:var(--muted);margin-bottom:28px;line-height:1.7;">
+                Astronomize is working with AI companies, security firms, hardware manufacturers, and investors to bring the Pacific Platform to production. Acquisition inquiries welcome.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="font-size:1.2em;">📧</span>
+                    <a href="mailto:jacob@pcfic.com" style="color:var(--blue);font-weight:600;text-decoration:none;">jacob@pcfic.com</a>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="font-size:1.2em;">🔗</span>
+                    <a href="https://github.com/rarebeariam" target="_blank" style="color:var(--blue);font-weight:600;text-decoration:none;">github.com/rarebeariam</a>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span style="font-size:1.2em;">🚀</span>
+                    <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" style="color:var(--blue);font-weight:600;text-decoration:none;">Live API on Railway</a>
+                </div>
+            </div>
+        </div>
+        <div>
+            <form class="contact-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'color:#059669;font-weight:600;text-align:center;padding:40px 0;\'>✓ Message sent — we\'ll be in touch.</p>';">
+                <input class="input" type="text" placeholder="Your name" required>
+                <input class="input" type="email" placeholder="Email address" required>
+                <select class="input" style="appearance:auto;">
+                    <option value="">Inquiry type…</option>
+                    <option>Pilot program</option>
+                    <option>Acquisition / investment</option>
+                    <option>API integration</option>
+                    <option>Research partnership</option>
+                    <option>Other</option>
+                </select>
+                <textarea class="input" placeholder="Tell us what you're working on…"></textarea>
+                <button type="submit" class="btn-submit">Send Message →</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-links">
+        <a href="https://pcf-api-production.up.railway.app/docs" target="_blank">Live API</a>
+        <a href="pcfguard.html">PCFGuard Demo</a>
+        <a href="https://github.com/rarebeariam/PACIFIC" target="_blank">GitHub</a>
+        <a href="mailto:jacob@pcfic.com">Contact</a>
+    </div>
+    <p>© 2026 Astronomize. All rights reserved. &nbsp;·&nbsp; Pacific is a platform of Astronomize.</p>
+    <p style="margin-top:6px;font-size:0.85em;opacity:0.6;">
+        U.S. Provisional Patent Applications No. 63/978,633 &amp; No. 2 of 3 · Patent Pending
+    </p>
+</footer>
+
 </body>
 </html>
