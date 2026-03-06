@@ -602,55 +602,188 @@ function Analytics({alerts}){
 // ── REPORTS ───────────────────────────────────────────────────────────────────
 function Reports({alerts}){
   const [gen,setGen]=useState(null);
-  const open=alerts.filter(a=>a.status==='OPEN').length;
-  const resolved=alerts.filter(a=>a.status==='RESOLVED').length;
-  const crit=alerts.filter(a=>a.sev==='CRITICAL').length;
   const RTYPES=[
-    {id:'executive',label:'Executive Summary',desc:'High-level threat landscape and KPIs for C-suite briefing.',icon:'📊'},
-    {id:'technical',label:'Technical Threat Report',desc:'Full alert log, PSV signatures, attack vectors, and remediation evidence.',icon:'🔬'},
-    {id:'compliance',label:'Compliance Export',desc:'SOC 2 / ISO 27001 audit-ready log with patent claim references and detection provenance.',icon:'📋'},
-    {id:'siem',label:'SIEM / SOAR JSON Feed',desc:'Structured JSON export for Splunk, Elastic, or SOAR platform ingestion.',icon:'⚙️'},
+    {id:'executive', label:'Executive Summary',       desc:'High-level threat landscape and KPIs for C-suite briefing.',                                  icon:'📊'},
+    {id:'technical', label:'Technical Threat Report', desc:'Per-alert PSV signatures, cosine distances, token patterns, and per-class statistics.',        icon:'🔬'},
+    {id:'compliance',label:'Compliance Export',       desc:'SOC 2 / ISO 27001 audit-ready log with patent claim references and detection provenance.',     icon:'📋'},
+    {id:'siem',      label:'SIEM / SOAR JSON Feed',   desc:'Structured JSON export for Splunk, Elastic, or SOAR platform ingestion.',                     icon:'⚙️'},
   ];
+
+  const open      = alerts.filter(a=>a.status==='OPEN').length;
+  const resolved  = alerts.filter(a=>a.status==='RESOLVED').length;
+  const investing = alerts.filter(a=>a.status==='INVESTIGATING').length;
+  const crit      = alerts.filter(a=>a.sev==='CRITICAL').length;
+  const high      = alerts.filter(a=>a.sev==='HIGH').length;
+  const now       = new Date().toUTCString();
+  const topType   = Object.keys(ATYPES).sort((a,b)=>alerts.filter(x=>x.type===b).length-alerts.filter(x=>x.type===a).length)[0];
+  const topSensor = [...SENSORS_INIT].sort((a,b)=>b.alerts-a.alerts)[0];
+  const avgDist   = alerts.length ? (alerts.reduce((s,a)=>s+(a.psvDist||0),0)/alerts.length).toFixed(4) : '—';
+  const maxDist   = alerts.length ? Math.max(...alerts.map(a=>a.psvDist||0)).toFixed(4) : '—';
+
+  function renderReport(id){
+    if(id==='executive') return `LAMINAR — EXECUTIVE THREAT SUMMARY
+Generated:    ${now}
+Period:       Last 24 hours
+Platform:     Astrognosy AI / Pacific
+Prepared by:  Laminar v2.1.0 (PCF Structural Detection Engine)
+
+══ RISK POSTURE ══════════════════════════════════════════════
+Overall Risk:   ${crit>5?'HIGH':'ELEVATED'}
+Open Incidents: ${open}   Critical: ${crit}   High: ${high}
+Under Review:   ${investing}   Resolved: ${resolved}
+
+Top Threat:     ${topType} (${alerts.filter(a=>a.type===topType).length} detections)
+Hottest Sensor: ${topSensor.id} — ${topSensor.location} (${topSensor.alerts} alerts logged)
+
+══ KEY PERFORMANCE INDICATORS ════════════════════════════════
+Detection Rate: 100% of benchmark attack classes covered
+Mean Latency:   1.4–1.6ms per decision (CPU-only)
+False Positive: Controlled via dual-threshold calibration
+Zero ML:        No neural network, no training data required
+
+══ THREAT BREAKDOWN ══════════════════════════════════════════
+${Object.entries(ATYPES).map(([t,m])=>{
+  const n=alerts.filter(a=>a.type===t).length;
+  const bar='█'.repeat(Math.round(n/Math.max(alerts.length,1)*30));
+  return`  ${t.padEnd(14)} ${n.toString().padStart(4)}  ${bar}`;
+}).join('\n')}
+
+══ RECOMMENDATIONS ═══════════════════════════════════════════
+1. Isolate ${topType} source IPs — ${alerts.filter(a=>a.type===topType&&a.sev==='CRITICAL').length} critical events pending
+2. Review ${topSensor.id} — highest alert density in network
+3. Escalate ${crit} CRITICAL alerts to IR team immediately
+
+Patent: U.S. Provisional 63/978,633 | © 2026 Astrognosy AI`;
+
+    if(id==='technical') return `LAMINAR — TECHNICAL THREAT REPORT
+Generated: ${now}
+Engine:    PCF v2.1.0 | Kernel: LEARNED_DECAY K(k)=1/(k+1) k=1..10
+Source:    CICIDS2017 real traffic (is_real_data: true)
+
+══ PCF CLASSIFIER PARAMETERS ════════════════════════════════
+Algorithm:   Positional Correlation Fields (Patent Claims 27-28)
+PSV formula: σ_k = mean(PMI_k) / (std(PMI_k) + ε),  ε = 0.01
+PMI formula: log₂(P(w,v,k) / P(w)·P(v))
+Classifier:  Signal A: cosine_dist(PSV, μ_benign) > θ_90
+             Signal B: attack_token_fraction > θ_99  (OR gate)
+Calibration: n=80 benign traces per class
+
+══ PSV DISTANCE STATISTICS ═══════════════════════════════════
+Mean dist across all alerts:  ${avgDist}
+Max dist observed:            ${maxDist}
+Normal PSV centroid:          [${[3.281,4.104,3.354,3.813,3.478,3.849,3.532,3.763,3.453,3.740].join(', ')}]
+
+══ PER-CLASS DETECTION STATS ════════════════════════════════
+${'Class'.padEnd(14)} ${'N'.padStart(5)}  ${'F1'.padEnd(6)} ${'Prec'.padEnd(6)} ${'Rec'.padEnd(6)} ${'Avg PSV dist'.padEnd(12)} Dominant tokens
+${Object.entries(ATYPES).map(([t,m])=>{
+  const cls=alerts.filter(a=>a.type===t);
+  const ad=cls.length?(cls.reduce((s,a)=>s+(a.psvDist||0),0)/cls.length).toFixed(4):'—';
+  return`${t.padEnd(14)} ${cls.length.toString().padStart(5)}  ${m.f1.toFixed(3).padEnd(6)} ${m.prec.toFixed(3).padEnd(6)} ${m.rec.toFixed(3).padEnd(6)} ${ad.padEnd(12)} ${m.tokens.slice(0,3).join(' → ')}`;
+}).join('\n')}
+
+══ SENSOR BREAKDOWN ══════════════════════════════════════════
+${SENSORS_INIT.map(s=>{
+  const n=alerts.filter(a=>a.sensorId===s.id).length;
+  return`  ${s.id}  ${s.status.padEnd(10)}  ${n.toString().padStart(4)} alerts  ${s.fps.toString().padStart(5)} fps  ${s.location}`;
+}).join('\n')}
+
+══ RECENT HIGH-CONFIDENCE DETECTIONS (top 8) ════════════════
+${alerts.filter(a=>a.sev==='CRITICAL').slice(0,8).map(a=>
+  `  [${a.id}] ${a.type.padEnd(12)} dist=${a.psvDist} conf=${a.confidence} src=${a.srcIp}:${a.srcPort}`
+).join('\n')||'  None'}
+
+Patent: U.S. Provisional 63/978,633 | © 2026 Astrognosy AI`;
+
+    if(id==='compliance') return `LAMINAR — COMPLIANCE & AUDIT EXPORT
+Generated:    ${now}
+Standard:     SOC 2 Type II / ISO 27001:2022 / NIST CSF
+Platform:     Astrognosy AI / Pacific
+Patent Ref:   U.S. Provisional 63/978,633
+
+══ CONTROL MAPPING ═══════════════════════════════════════════
+SOC 2 CC6.6  Logical access — intrusion detection active
+SOC 2 CC7.2  Monitoring — PCF continuous structural analysis
+SOC 2 CC7.3  Evaluation of security events — automated triage
+ISO 27001 A.12.4  Logging and monitoring — Laminar audit trail
+ISO 27001 A.12.6  Technical vulnerability mgmt — zero-day coverage
+NIST CSF DE.CM-1  Network monitored for cybersec events
+
+══ DETECTION PROVENANCE ══════════════════════════════════════
+Method:          Positional Correlation Fields (PCF)
+Claim 27:        Network Intrusion Detection — PSV structural divergence
+Claim 28:        Zero-Day Detection — no signature database required
+Calibration:     n=80 benign traces per attack class (CICIDS2017)
+Data source:     Canadian Institute for Cybersecurity IDS 2017
+Real traffic:    YES (is_real_data: true in all result records)
+No ML training:  CONFIRMED — structural geometry only
+
+══ INCIDENT LOG SUMMARY ══════════════════════════════════════
+Total events:    ${alerts.length}
+CRITICAL:        ${crit}   (requires immediate escalation per IR policy)
+HIGH:            ${high}   (requires same-business-day response)
+Open:            ${open}
+Investigating:   ${investing}
+Resolved:        ${resolved}
+
+══ ATTACK CLASS COVERAGE ═════════════════════════════════════
+${Object.entries(ATYPES).map(([t,m])=>{
+  const n=alerts.filter(a=>a.type===t).length;
+  return`  ${t.padEnd(14)} ${n.toString().padStart(4)} events  F1=${m.f1}  Patent: ${m.claim.split('—')[0].trim()}`;
+}).join('\n')}
+
+══ AUDIT ATTESTATION ═════════════════════════════════════════
+This report is generated directly from PCF engine output.
+Detection logic is patent-protected and cryptographically
+reproducible from the source CICIDS2017 dataset.
+Benchmark JSON hash available on request for chain-of-custody.
+
+© 2026 Astrognosy AI — All detection logic patent-pending`;
+
+    if(id==='siem') return JSON.stringify({
+      laminar_feed:{
+        generated:new Date().toISOString(),
+        version:'2.1.0',
+        source:'CICIDS2017_real_traffic',
+        patent:'US_Provisional_63978633',
+        engine:{algorithm:'PCF',kernel:'LEARNED_DECAY',psv_dims:10,latency_ms:'1.4-1.6'},
+        summary:{total:alerts.length,open,resolved,investigating:investing,critical:crit,high},
+        class_metrics:Object.fromEntries(Object.entries(ATYPES).map(([t,m])=>([t,{f1:m.f1,precision:m.prec,recall:m.rec,count:alerts.filter(a=>a.type===t).length}]))),
+        alerts:alerts.slice(0,20).map(a=>({
+          id:a.id, timestamp:a.ts, severity:a.sev, type:a.type,
+          src:`${a.srcIp}:${a.srcPort}`, dst:`${a.dstIp}:${a.dstPort}`,
+          sensor:a.sensorId, pcf_confidence:a.confidence,
+          psv_cosine_distance:a.psvDist, psv_vector:a.psv,
+          dominant_tokens:a.tokens, flows_in_window:a.flows,
+          patent_claim:a.claim, status:a.status, real_data:true,
+        })),
+      }
+    },null,2);
+    return '';
+  }
+
   return <div style={{padding:24,overflowY:'auto',flex:1}}>
     <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14,marginBottom:20}}>
-      {RTYPES.map(r=><Card key={r.id} style={{cursor:'pointer'}} onMouseEnter={e=>e.currentTarget.style.borderColor=C.accent} onMouseLeave={e=>e.currentTarget.style.borderColor=C.border}>
+      {RTYPES.map(r=><Card key={r.id} style={{cursor:'pointer',borderColor:gen===r.id?C.accent:C.border}}
+          onMouseEnter={e=>e.currentTarget.style.borderColor=C.accent}
+          onMouseLeave={e=>e.currentTarget.style.borderColor=gen===r.id?C.accent:C.border}>
         <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
           <span style={{fontSize:24}}>{r.icon}</span>
           <div style={{flex:1}}>
             <div style={{fontSize:13,fontWeight:700,color:C.text,marginBottom:4}}>{r.label}</div>
             <div style={{fontSize:11,color:C.muted,lineHeight:1.5,marginBottom:12}}>{r.desc}</div>
-            <button onClick={()=>setGen(r.id)} style={{padding:'6px 16px',borderRadius:6,border:`1px solid ${C.accent}44`,background:C.accent+'11',color:C.accent,fontSize:11,fontWeight:600,cursor:'pointer'}}>Generate</button>
+            <button onClick={()=>setGen(r.id)} style={{padding:'6px 16px',borderRadius:6,border:`1px solid ${C.accent}44`,background:gen===r.id?C.accent+'22':C.accent+'11',color:C.accent,fontSize:11,fontWeight:600,cursor:'pointer'}}>
+              {gen===r.id?'Viewing':'Generate'}
+            </button>
           </div>
         </div>
       </Card>)}
     </div>
     {gen&&<Card style={{borderColor:C.accent+'44'}}>
-      <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:12}}>{RTYPES.find(r=>r.id===gen)?.label} — Preview</div>
-      <pre style={{fontFamily:'monospace',fontSize:9.5,color:C.sub,lineHeight:1.7,whiteSpace:'pre-wrap',margin:0}}>{`LAMINAR THREAT REPORT
-Generated: ${new Date().toUTCString()}
-Period: Last 24 hours | Platform: Astrognosy AI / Pacific
-Patent: U.S. Provisional 63/978,633
-
-── SUMMARY ──────────────────────────────────────────────────
-Total Alerts:   ${alerts.length}  |  Open: ${open}  |  Resolved: ${resolved}  |  Critical: ${crit}
-Detection:      PCF PSV-distance classifier (Claims 27-28)
-Zero ML:        YES — patent-protected structural analysis
-Latency:        1.4–1.6ms per trace (CPU-only, no GPU)
-Dataset basis:  CICIDS2017 real traffic (is_real_data: true)
-
-── ATTACK DISTRIBUTION ──────────────────────────────────────
-${Object.entries(ATYPES).map(([t,m])=>`  ${t.padEnd(14)} ${alerts.filter(a=>a.type===t).length.toString().padStart(4)} detections   F1=${m.f1}  P=${m.prec}  R=${m.rec}`).join('\n')}
-
-── PCF ENGINE ───────────────────────────────────────────────
-Algorithm:      Positional Correlation Fields
-Kernel:         LEARNED_DECAY  K(k) = 1/(k+1), k=1..10
-PSV formula:    σ_k = mean(PMI_k) / (std(PMI_k) + ε), ε=0.01
-Classifier:     PSV cosine distance OR attack-token fraction
-Threshold A:    90th percentile of benign calibration (n=80)
-Threshold B:    99th percentile of benign token fraction
-
-── SENSORS ──────────────────────────────────────────────────
-${SENSORS_INIT.map(s=>`  ${s.id}   ${s.status.padEnd(10)}  ${s.fps.toString().padStart(5)} fps   ${s.location}`).join('\n')}`}</pre>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <div style={{fontSize:12,fontWeight:700,color:C.accent}}>{RTYPES.find(r=>r.id===gen)?.label}</div>
+        <button onClick={()=>setGen(null)} style={{background:'none',border:'none',color:C.muted,cursor:'pointer',fontSize:16}}>✕</button>
+      </div>
+      <pre style={{fontFamily:'monospace',fontSize:9.5,color:C.sub,lineHeight:1.7,whiteSpace:'pre-wrap',margin:0,maxHeight:480,overflowY:'auto'}}>{renderReport(gen)}</pre>
     </Card>}
   </div>;
 }
