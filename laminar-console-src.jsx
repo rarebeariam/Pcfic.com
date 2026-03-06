@@ -13,27 +13,27 @@ const ATYPES = {
     desc:'Repeated authentication attempts against SSH/FTP services.',
     tokens:['AUTH_BRUTE','AUTH_BRUTE','AUTH_BRUTE','NET_SEND','SYS_READ','SYS_WRITE'],
     psv:[3.475,3.851,3.439,3.687,3.640,3.740,3.437,3.507,3.414,3.643],
-    claim:'Claim 31 — PCF applied to authentication event streams' },
+    claim:'Claim 27 — Network Intrusion Detection via PSV structural divergence' },
   DDoS:{ color:C.warn, icon:'💥', f1:0.949, prec:0.906, rec:0.997,
     desc:'High-volume packet flood from distributed source IPs (LOIC pattern).',
     tokens:['NET_FLOOD','NET_FLOOD','NET_LARGE_SEND','NET_FLOOD','SYS_WRITE','SYS_READ'],
     psv:[3.184,2.888,3.175,3.218,3.247,2.864,3.304,2.887,2.957,3.030],
-    claim:'Claim 31 — PCF applied to volumetric flow event streams' },
+    claim:'Claim 27 — Network Intrusion Detection via PSV structural divergence' },
   PortScan:{ color:C.purple, icon:'🔍', f1:0.932, prec:0.872, rec:1.000,
     desc:'Sequential probe of destination ports, near-zero duration flows.',
     tokens:['NET_PORTSCAN','NET_PORTSCAN','NET_PORTSCAN','NET_PORTSCAN','SYS_READ','SYS_WRITE'],
     psv:[2.752,3.374,2.771,3.017,2.514,2.888,2.290,2.987,2.358,2.784],
-    claim:'Claim 32 — PCF kill-chain: NET_PORTSCAN → AUTH_BRUTE sequence' },
+    claim:'Claim 28 — Zero-Day Attack Detection without signature database' },
   DoS:{ color:C.amber, icon:'⚡', f1:0.910, prec:0.879, rec:0.943,
     desc:'Single-source service exhaustion — Hulk, GoldenEye, slowloris patterns.',
     tokens:['NET_FLOOD','NET_LARGE_SEND','NET_SLOW_CONN','NET_FLOOD','SYS_WRITE','SYS_READ'],
     psv:[3.195,3.059,3.143,3.205,3.058,2.788,3.247,3.096,2.957,2.756],
-    claim:'Claim 31 — PCF applied to connection-exhaustion event streams' },
+    claim:'Claim 27 — Network Intrusion Detection via PSV structural divergence' },
   WebAttack:{ color:C.blue, icon:'🌐', f1:0.885, prec:0.800, rec:0.991,
     desc:'HTTP-layer attacks: XSS, SQL injection, web credential brute-force.',
     tokens:['NET_SEND','NET_FLOOD','NET_RECV','NET_LARGE_SEND','SYS_READ','SYS_WRITE'],
     psv:[3.525,4.052,3.479,3.947,3.662,4.084,3.607,3.852,3.536,3.886],
-    claim:'Claim 31 — PCF applied to HTTP request event streams' },
+    claim:'Claim 28 — Zero-Day Attack Detection without signature database' },
 };
 
 const NORMAL_PSV = [3.281,4.104,3.354,3.813,3.478,3.849,3.532,3.763,3.453,3.740];
@@ -631,7 +631,7 @@ Patent: U.S. Provisional 63/978,633
 
 ── SUMMARY ──────────────────────────────────────────────────
 Total Alerts:   ${alerts.length}  |  Open: ${open}  |  Resolved: ${resolved}  |  Critical: ${crit}
-Detection:      PCF PSV-distance classifier (Claims 31-32)
+Detection:      PCF PSV-distance classifier (Claims 27-28)
 Zero ML:        YES — patent-protected structural analysis
 Latency:        1.4–1.6ms per trace (CPU-only, no GPU)
 Dataset basis:  CICIDS2017 real traffic (is_real_data: true)
