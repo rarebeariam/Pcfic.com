@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createRoot } from "react-dom/client";
 
 const C = {
   bg:'#020810', surface:'#060e1c', panel:'#0b1628', panelHi:'#0f1e38',
@@ -701,7 +702,7 @@ function Settings(){
 }
 
 // ── ROOT ──────────────────────────────────────────────────────────────────────
-export default function LaminarConsole(){
+function LaminarConsole(){
   const [section,setSection]=useState('dashboard');
   const [alerts,setAlerts]=useState(INIT_ALERTS);
   const [investigating,setInvestigating]=useState(null);
@@ -746,3 +747,5 @@ export default function LaminarConsole(){
     {investigating&&<Investigator alert={investigating} onClose={()=>setInvestigating(null)} onStatusChange={handleStatus}/>}
   </div>;
 }
+
+createRoot(document.getElementById('root')).render(<LaminarConsole/>);
