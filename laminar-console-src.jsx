@@ -79,7 +79,8 @@ function genAlert(seed, hoursAgo=null){
   };
 }
 
-const INIT_ALERTS = Array.from({length:50},(_,i)=>genAlert(i*17+42,(i/50)*23))
+// Fallback for when JSON hasn't loaded yet
+const INIT_ALERTS = Array.from({length:12},(_,i)=>genAlert(i*17+42,(i/12)*23))
   .sort((a,b)=>new Date(b.ts)-new Date(a.ts));
 
 function fmtTime(iso){ const d=new Date(iso); return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}); }
@@ -213,11 +214,12 @@ function Sidebar({active,onNav,openCount,liveCount}){
 }
 
 // ── TOPBAR ────────────────────────────────────────────────────────────────────
-function TopBar({section,critCount}){
+function TopBar({section,critCount,dataLoaded}){
   const titles={dashboard:'Dashboard',threats:'Threat Management',sensors:'Sensor Network',analytics:'Analytics',reports:'Reports',settings:'Settings'};
   return <div style={{height:54,background:C.surface,borderBottom:`1px solid ${C.border}`,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 24px',flexShrink:0}}>
     <div style={{fontSize:16,fontWeight:700,color:C.text}}>{titles[section]}</div>
     <div style={{display:'flex',alignItems:'center',gap:16}}>
+      {dataLoaded&&<div style={{display:'flex',alignItems:'center',gap:5,background:C.success+'18',border:`1px solid ${C.success}44`,padding:'3px 10px',borderRadius:5,fontSize:10,color:C.success,fontWeight:700,letterSpacing:'0.06em'}}>● CICIDS2017 LIVE</div>}
       {critCount>0&&<div style={{display:'flex',alignItems:'center',gap:6,background:C.danger+'22',border:`1px solid ${C.danger}44`,padding:'4px 12px',borderRadius:6,fontSize:11,color:C.danger,fontWeight:700}}>⚠ {critCount} CRITICAL</div>}
       <div style={{fontSize:11,color:C.muted,fontFamily:'monospace'}}>{new Date().toUTCString().slice(0,25)}</div>
     </div>
@@ -708,16 +710,41 @@ function LaminarConsole(){
   const [investigating,setInvestigating]=useState(null);
   const [sensors]=useState(SENSORS_INIT);
   const [liveCount,setLiveCount]=useState(11805);
-  const seedRef=useRef(9999);
+  const [dataLoaded,setDataLoaded]=useState(false);
+  const replayRef=useRef(null);   // real alerts queue for live replay
+  const replayIdxRef=useRef(0);
+
+  // Load real benchmark alerts from JSON then replay them as "live" detections
+  useEffect(()=>{
+    fetch('laminar-alerts-data.json')
+      .then(r=>r.json())
+      .then(data=>{
+        // Show the first 50 sorted by ts desc as the initial feed
+        const sorted=[...data].sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+        setAlerts(sorted.slice(0,50));
+        // Store the rest for live replay (oldest first)
+        replayRef.current=[...data].sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+        setDataLoaded(true);
+      })
+      .catch(()=>{ /* stay on fallback */ });
+  },[]);
 
   useEffect(()=>{
     const t=setInterval(()=>setLiveCount(c=>Math.max(8000,c+Math.round((Math.random()-0.5)*400))),2000);
     return()=>clearInterval(t);
   },[]);
 
+  // Live replay: surface real alerts one at a time, cycling through the dataset
   useEffect(()=>{
     const t=setInterval(()=>{
-      if(Math.random()>0.55){const a=genAlert(seedRef.current++,0);setAlerts(prev=>[a,...prev].slice(0,300));}
+      if(replayRef.current&&replayRef.current.length>0){
+        const idx=replayIdxRef.current % replayRef.current.length;
+        replayIdxRef.current++;
+        const base=replayRef.current[idx];
+        // Give it a fresh "now" timestamp so it appears as new
+        const fresh={...base, id:`ALT-${Date.now()}`, ts:new Date().toISOString(), status:'OPEN'};
+        setAlerts(prev=>[fresh,...prev].slice(0,500));
+      }
     },4500);
     return()=>clearInterval(t);
   },[]);
@@ -734,7 +761,7 @@ function LaminarConsole(){
     <style>{`*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:${C.bg}}::-webkit-scrollbar-thumb{background:${C.border2};border-radius:3px}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
     <Sidebar active={section} onNav={setSection} openCount={openCount} liveCount={liveCount.toLocaleString()}/>
     <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden'}}>
-      <TopBar section={section} critCount={critCount}/>
+      <TopBar section={section} critCount={critCount} dataLoaded={dataLoaded}/>
       <div style={{flex:1,overflow:'hidden',display:'flex',flexDirection:'column'}}>
         {section==='dashboard' &&<Dashboard alerts={alerts} sensors={sensors} liveCount={liveCount} onInvestigate={setInvestigating}/>}
         {section==='threats'   &&<ThreatFeed alerts={alerts} onInvestigate={setInvestigating} onStatusChange={handleStatus}/>}
