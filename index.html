@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Astrognosy AI — Domain-Agnostic AI Infrastructure</title>
-    <meta name="description" content="Astrognosy AI builds verifiable AI infrastructure. The Pacific platform powers fact verification, cybersecurity, sensor fusion, and hardware validation — CPU-native, zero training required. PCF-API, VASE, PCFGuard, and the Marketplace Protocol.">
+    <meta name="description" content="Astrognosy AI builds verifiable AI infrastructure. The Pacific platform powers fact verification, cybersecurity, sensor fusion, and hardware validation — CPU-native, zero training required. PCF-API, VASE, Laminar, and the Marketplace Protocol.">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -597,11 +597,83 @@
         }
         .footer-links a:hover { color: white; }
 
+        /* ── LAMINAR SPOTLIGHT ── */
+        .laminar-bg { background: white; border-top: 1px solid var(--border); }
+        .laminar-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 72px;
+            align-items: center;
+        }
+        .laminar-eyebrow {
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 12px;
+        }
+        .laminar-title {
+            font-size: 3.2em;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .laminar-subtitle {
+            font-size: 1em;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+        .laminar-desc {
+            font-size: 0.95em;
+            color: var(--text);
+            line-height: 1.75;
+            margin-bottom: 28px;
+            max-width: 440px;
+        }
+        .laminar-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .laminar-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .laminar-result {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+        }
+        .lr-label {
+            font-size: 0.72em;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .lr-val { font-size: 1.3em; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+        .lr-note { font-size: 0.68em; color: #b0b8c8; font-family: monospace; }
+        .laminar-footnote {
+            grid-column: 1 / -1;
+            font-size: 0.72em;
+            color: var(--muted);
+            font-family: monospace;
+            text-align: center;
+            padding: 8px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
             nav .hide-mobile { display: none; }
             .hero { padding: 80px 20px 60px; }
             .contact-inner { grid-template-columns: 1fr; gap: 32px; }
+            .laminar-split { grid-template-columns: 1fr; gap: 36px; }
+            .laminar-title { font-size: 2.4em; }
         }
     </style>
 </head>
@@ -616,10 +688,10 @@
         </a>
         <nav>
             <a href="#products" class="hide-mobile">Products</a>
-            <a href="#benchmarks" class="hide-mobile">Benchmarks</a>
+            <a href="#laminar" class="hide-mobile">Laminar</a>
             <a href="#patents" class="hide-mobile">Patents</a>
             <a href="#contact" class="hide-mobile">Contact</a>
-            <a href="pcfguard.html" class="nav-demo">PCFGuard Demo</a>
+            <a href="pcfguard.html" class="nav-demo">Laminar Demo</a>
             <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="nav-cta">Try the API</a>
         </nav>
     </div>
@@ -646,7 +718,7 @@
 
         <div class="hero-ctas">
             <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="btn btn-primary">Try the API →</a>
-            <a href="pcfguard.html" class="btn btn-dark">PCFGuard Demo</a>
+            <a href="pcfguard.html" class="btn btn-dark">Laminar Demo</a>
             <a href="mailto:jacob@pcfic.com" class="btn btn-ghost">Schedule a Pilot</a>
         </div>
 
@@ -678,6 +750,47 @@
         </div>
     </div>
 </section>
+
+<!-- ── LAMINAR SPOTLIGHT ── -->
+<div class="laminar-bg" id="laminar">
+<div class="section">
+    <div class="laminar-split">
+        <div>
+            <div class="laminar-eyebrow">Network Security · By Pacific</div>
+            <h2 class="laminar-title">Laminar</h2>
+            <p class="laminar-subtitle">Threat detection without a training phase.</p>
+            <p class="laminar-desc">Laminar applies Positional Correlation Fields to the structural geometry of packet flows — detecting intrusions, DDoS, and port scans from first principles. No baseline period. No model updates when new attacks emerge. CPU-only, under 2ms per decision.</p>
+            <div class="laminar-actions">
+                <a href="pcfguard.html" class="btn btn-primary">Try the demo →</a>
+                <a href="mailto:jacob@pcfic.com" class="btn btn-ghost">Request access</a>
+            </div>
+        </div>
+        <div class="laminar-results">
+            <div class="laminar-result">
+                <div class="lr-label">Brute Force</div>
+                <div class="lr-val">F1 0.969</div>
+                <div class="lr-note">CICIDS2017 · real traffic</div>
+            </div>
+            <div class="laminar-result">
+                <div class="lr-label">DDoS</div>
+                <div class="lr-val">F1 0.949</div>
+                <div class="lr-note">CICIDS2017 · real traffic</div>
+            </div>
+            <div class="laminar-result">
+                <div class="lr-label">Port Scan</div>
+                <div class="lr-val">F1 0.932</div>
+                <div class="lr-note">CICIDS2017 · real traffic</div>
+            </div>
+            <div class="laminar-result">
+                <div class="lr-label">Detection Latency</div>
+                <div class="lr-val">~1.5ms</div>
+                <div class="lr-note">CPU-only · no GPU required</div>
+            </div>
+            <div class="laminar-footnote">Zero training samples in all detection tasks. Results on real CICIDS2017 dataset.</div>
+        </div>
+    </div>
+</div>
+</div>
 
 <!-- ── PRODUCTS ── -->
 <div class="products-bg" id="products">
@@ -734,12 +847,12 @@
             <a href="https://github.com/rarebeariam/PACIFIC" target="_blank" class="product-link">View on GitHub →</a>
         </div>
 
-        <!-- PCFGuard -->
+        <!-- Laminar -->
         <div class="product-card" style="--card-accent: linear-gradient(135deg, #FF3B6B, #FF6B35);">
             <div class="product-icon" style="background: rgba(255,59,107,0.1);">🛡️</div>
             <span class="product-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">BETA</span>
-            <h3>PCFGuard</h3>
-            <p>Zero-training network intrusion detection using PCF structural signatures. Tested on real CICIDS2017 traffic — 600 traces per attack class, no training samples.</p>
+            <h3>Laminar</h3>
+            <p>Zero-training network intrusion detection. Laminar reads structural flow geometry using PCF — five attack classes detected out-of-the-box on real CICIDS2017 traffic.</p>
             <div class="product-metrics">
                 <div class="product-metric">
                     <div class="product-metric-dot" style="background:#FF3B6B"></div>
@@ -747,11 +860,11 @@
                 </div>
                 <div class="product-metric">
                     <div class="product-metric-dot" style="background:#FF3B6B"></div>
-                    <span>PortScan F1=0.932 · DoS F1=0.910</span>
+                    <span>PortScan F1=0.932 · DoS F1=0.910 · Web F1=0.885</span>
                 </div>
                 <div class="product-metric">
                     <div class="product-metric-dot" style="background:#FF3B6B"></div>
-                    <span>~1.5ms average detection latency</span>
+                    <span>~1.5ms latency · CPU-only · zero training</span>
                 </div>
             </div>
             <a href="pcfguard.html" class="product-link">Try the demo →</a>
@@ -784,170 +897,6 @@
 </div>
 </div>
 
-<!-- ── BENCHMARKS ── -->
-<div class="bench-bg" id="benchmarks">
-<div class="section">
-    <div class="section-label">Validated Performance</div>
-    <h2 class="section-title">Real Benchmarks. No Marketing.</h2>
-    <p class="section-sub">All results measured on real or synthetic data. Sources, sample sizes, and honest caveats included. Patent claims validated 60/60.</p>
-
-    <div class="bench-grid">
-        <div class="bench-card">
-            <div class="bench-domain">Security</div>
-            <div class="bench-task">Brute Force Detection</div>
-            <div class="bench-f1">0.969</div>
-            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:96.9%"></div></div>
-            <div class="bench-source">CICIDS2017 · 446k rows · real</div>
-        </div>
-        <div class="bench-card">
-            <div class="bench-domain">Security</div>
-            <div class="bench-task">DDoS Detection</div>
-            <div class="bench-f1">0.949</div>
-            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:94.9%"></div></div>
-            <div class="bench-source">CICIDS2017 · 226k rows · real</div>
-        </div>
-        <div class="bench-card">
-            <div class="bench-domain">Security</div>
-            <div class="bench-task">Port Scan Detection</div>
-            <div class="bench-f1">0.932</div>
-            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:93.2%"></div></div>
-            <div class="bench-source">CICIDS2017 · 286k rows · real</div>
-        </div>
-        <div class="bench-card">
-            <div class="bench-domain">Hardware</div>
-            <div class="bench-task">RAW Hazard Detection</div>
-            <div class="bench-f1" style="background:linear-gradient(135deg,#7c3aed,#5B6ECC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">1.000</div>
-            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:100%;background:linear-gradient(90deg,#7c3aed,#5B6ECC)"></div></div>
-            <div class="bench-source">Synthetic · n=200 · Claims 22,24</div>
-        </div>
-        <div class="bench-card">
-            <div class="bench-domain">Robotics</div>
-            <div class="bench-task">Sensor Failure Detection</div>
-            <div class="bench-f1" style="background:linear-gradient(135deg,#7c3aed,#5B6ECC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">1.000</div>
-            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:100%;background:linear-gradient(90deg,#7c3aed,#5B6ECC)"></div></div>
-            <div class="bench-source">Synthetic · n=200 · Claims 27,29</div>
-        </div>
-        <div class="bench-card">
-            <div class="bench-domain">NLP</div>
-            <div class="bench-task">FEVER Fact Verification</div>
-            <div class="bench-f1">83.3%</div>
-            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:83.3%"></div></div>
-            <div class="bench-source">FEVER dataset · n=60 · Claims 1,2,21</div>
-        </div>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Domain</th>
-                    <th>Task</th>
-                    <th>F1</th>
-                    <th>Precision</th>
-                    <th>Recall</th>
-                    <th>Data</th>
-                    <th>Latency</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
-                    <td>Brute Force (FTP/SSH)</td>
-                    <td class="f1-great">0.969</td>
-                    <td>0.940</td>
-                    <td>1.000</td>
-                    <td>Real · CICIDS2017</td>
-                    <td>1.47ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
-                    <td>DDoS (LOIC)</td>
-                    <td class="f1-great">0.949</td>
-                    <td>0.906</td>
-                    <td>0.997</td>
-                    <td>Real · CICIDS2017</td>
-                    <td>1.48ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
-                    <td>Port Scan</td>
-                    <td class="f1-great">0.932</td>
-                    <td>0.872</td>
-                    <td>1.000</td>
-                    <td>Real · CICIDS2017</td>
-                    <td>1.40ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
-                    <td>DoS (Hulk/GoldenEye)</td>
-                    <td class="f1-good">0.910</td>
-                    <td>0.879</td>
-                    <td>0.943</td>
-                    <td>Real · CICIDS2017</td>
-                    <td>1.62ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(255,59,107,0.1);color:#FF3B6B;">Security</span></td>
-                    <td>Web Attacks (XSS/SQLi)</td>
-                    <td class="f1-good">0.885</td>
-                    <td>0.800</td>
-                    <td>0.991</td>
-                    <td>Real · CICIDS2017</td>
-                    <td>1.60ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(91,110,204,0.1);color:#5B6ECC;">Hardware</span></td>
-                    <td>RAW Hazard Detection</td>
-                    <td class="f1-perfect">1.000</td>
-                    <td>1.000</td>
-                    <td>1.000</td>
-                    <td>Synthetic · n=200</td>
-                    <td>1.37ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(91,110,204,0.1);color:#5B6ECC;">Hardware</span></td>
-                    <td>Spectre-Class Detection</td>
-                    <td class="f1-good">0.847</td>
-                    <td>0.838</td>
-                    <td>0.855</td>
-                    <td>Synthetic · n=200</td>
-                    <td>1.37ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(0,180,216,0.1);color:#00B4D8;">Robotics</span></td>
-                    <td>Sensor Failure Isolation</td>
-                    <td class="f1-perfect">1.000</td>
-                    <td>1.000</td>
-                    <td>1.000</td>
-                    <td>Synthetic · n=200</td>
-                    <td>1.37ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(0,180,216,0.1);color:#00B4D8;">Robotics</span></td>
-                    <td>AV Safety Classification</td>
-                    <td class="f1-good">0.848</td>
-                    <td>0.750</td>
-                    <td>0.975</td>
-                    <td>Synthetic · n=200</td>
-                    <td>1.37ms</td>
-                </tr>
-                <tr>
-                    <td><span class="domain-tag" style="background:rgba(16,185,129,0.1);color:#059669;">NLP</span></td>
-                    <td>Fact Verification (FEVER)</td>
-                    <td class="f1-good">0.833</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>FEVER · n=60</td>
-                    <td>129ms API</td>
-                </tr>
-            </tbody>
-        </table>
-        <div style="padding:12px 16px;font-size:0.78em;color:var(--muted);font-family:monospace;border-top:1px solid var(--border);">
-            Zero training samples in all detection tasks. CICIDS2017 results on real downloaded dataset. Synthetic benchmarks n=200 per class. Patent Pending U.S. 63/978,633.
-        </div>
-    </div>
-</div>
-</div>
 
 <!-- ── DOMAINS ── -->
 <div class="domains-bg">
@@ -1097,7 +1046,7 @@
 <footer>
     <div class="footer-links">
         <a href="https://pcf-api-production.up.railway.app/docs" target="_blank">Live API</a>
-        <a href="pcfguard.html">PCFGuard Demo</a>
+        <a href="pcfguard.html">Laminar Demo</a>
         <a href="https://github.com/rarebeariam/PACIFIC" target="_blank">GitHub</a>
         <a href="mailto:jacob@pcfic.com">Contact</a>
     </div>
