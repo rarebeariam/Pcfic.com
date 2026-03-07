@@ -667,6 +667,67 @@
             border-radius: 8px;
         }
 
+        /* ── LIVE API DEMO ── */
+        .demo-bg { background: linear-gradient(160deg, #0a0e2a 0%, #131830 100%); }
+        .demo-section { max-width: 840px; margin: 0 auto; padding: 80px 24px; }
+        .claim-chip {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,180,216,0.3);
+            background: rgba(0,180,216,0.08);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.82em;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.18s;
+        }
+        .claim-chip:hover { border-color: rgba(0,180,216,0.7); color: white; background: rgba(0,180,216,0.15); }
+        .claim-chip.active { border-color: #00B4D8; color: #00B4D8; background: rgba(0,180,216,0.18); font-weight: 600; }
+        .pcf-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95em;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .pcf-input:focus { border-color: rgba(0,180,216,0.5); }
+        .pcf-select {
+            flex: 1;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 10px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+        }
+        .pcf-verify-btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #5B6ECC, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .pcf-verify-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .pcf-verify-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .pcf-result { animation: fadeIn 0.3s ease; }
+
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
             nav .hide-mobile { display: none; }
@@ -689,6 +750,7 @@
         <nav>
             <a href="#products" class="hide-mobile">Products</a>
             <a href="#laminar" class="hide-mobile">Laminar</a>
+            <a href="#demo" class="hide-mobile">Try Live</a>
             <a href="#patents" class="hide-mobile">Patents</a>
             <a href="#contact" class="hide-mobile">Contact</a>
             <a href="laminar-console.html" class="nav-demo">Laminar Console</a>
@@ -960,6 +1022,40 @@
 </div>
 </div>
 
+<!-- ── LIVE API DEMO ── -->
+<div class="demo-bg" id="demo">
+<div class="demo-section">
+    <div class="section-label" style="color:#00B4D8;">Live API · PCF-API on Railway</div>
+    <h2 style="font-size:clamp(1.8em,3.5vw,2.6em);font-weight:800;color:white;margin-bottom:12px;letter-spacing:-0.02em;">Try PCF Live</h2>
+    <p style="font-size:1.05em;color:rgba(255,255,255,0.5);margin-bottom:36px;line-height:1.6;max-width:600px;">Submit any factual claim. The API analyzes it against a curated corpus using Positional Correlation Fields — no LLM, no embeddings. CPU-only. Results in milliseconds.</p>
+
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+        <button class="claim-chip active" onclick="setChip(this,'medical')" data-corpus="medical">Vaccine efficacy</button>
+        <button class="claim-chip" onclick="setChip(this,'climate')" data-corpus="climate">Climate warming</button>
+        <button class="claim-chip" onclick="setChip(this,'economics')" data-corpus="economics">GDP definition</button>
+        <button class="claim-chip" onclick="setChip(this,'technology')" data-corpus="technology">LLM infrastructure</button>
+        <button class="claim-chip" onclick="setChip(this,'history')" data-corpus="history">Great Pyramid</button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+        <textarea id="pcf-claim" class="pcf-input" rows="3" placeholder="Enter any factual claim to verify...">The measles vaccine is effective and widely used in childhood immunization programs</textarea>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <select id="pcf-corpus" class="pcf-select">
+                <option value="medical">Medical corpus</option>
+                <option value="climate">Climate corpus</option>
+                <option value="economics">Economics corpus</option>
+                <option value="history">History corpus</option>
+                <option value="technology">Technology corpus</option>
+                <option value="general">General corpus</option>
+            </select>
+            <button id="pcf-btn" class="pcf-verify-btn" onclick="runPCF()">Verify →</button>
+        </div>
+    </div>
+
+    <div id="pcf-result" class="pcf-result" style="display:none;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:28px;"></div>
+</div>
+</div>
+
 <!-- ── PATENTS ── -->
 <div class="patents-bg" id="patents">
 <div class="section">
@@ -1045,5 +1141,89 @@
     </p>
 </footer>
 
+<script>
+const CHIP_CLAIMS = {
+    medical:    'The measles vaccine is effective and widely used in childhood immunization programs',
+    climate:    'Global average surface temperatures have risen approximately 1.1 degrees Celsius since the pre-industrial era',
+    economics:  'GDP measures the total monetary value of all finished goods and services produced within a country\'s borders',
+    technology: 'Large language models like GPT-4 require massive GPU infrastructure for training and inference',
+    history:    'The Great Pyramid of Giza was constructed around 2560 BCE during the reign of Pharaoh Khufu'
+};
+
+function setChip(btn, corpus) {
+    document.querySelectorAll('.claim-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('pcf-claim').value = CHIP_CLAIMS[corpus] || '';
+    document.getElementById('pcf-corpus').value = corpus;
+}
+
+async function runPCF() {
+    const claim = document.getElementById('pcf-claim').value.trim();
+    const corpus = document.getElementById('pcf-corpus').value;
+    if (!claim) return;
+
+    const btn = document.getElementById('pcf-btn');
+    const resultEl = document.getElementById('pcf-result');
+    btn.textContent = 'Analyzing…';
+    btn.disabled = true;
+    resultEl.style.display = 'none';
+
+    try {
+        const res = await fetch('https://pcf-api-production.up.railway.app/api/v1/verify', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({claim, corpus_name: corpus})
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const d = await res.json();
+
+        const isSupported    = d.verdict === 'SUPPORTED';
+        const isContradicted = d.verdict === 'CONTRADICTED';
+        const vColor = isSupported ? '#10b981' : isContradicted ? '#ef4444' : '#f59e0b';
+        const vBg    = isSupported ? 'rgba(16,185,129,0.15)' : isContradicted ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)';
+        const confPct = Math.round(d.confidence * 100);
+
+        resultEl.innerHTML = `
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+                <div style="padding:8px 22px;border-radius:8px;background:${vBg};border:1px solid ${vColor}50;font-weight:800;font-size:1.05em;color:${vColor};letter-spacing:0.06em;">${d.verdict.replace('_',' ')}</div>
+                <div style="flex:1;min-width:200px;">
+                    <div style="font-size:0.7em;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">PCF Confidence</div>
+                    <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:7px;overflow:hidden;">
+                        <div style="height:100%;width:${confPct}%;background:${vColor};border-radius:4px;"></div>
+                    </div>
+                    <div style="font-size:0.8em;color:rgba(255,255,255,0.5);margin-top:5px;">${confPct}% confidence &nbsp;·&nbsp; truth score ${d.truth_score.toFixed(2)}/10</div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;">
+                <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;">
+                    <div style="font-size:0.68em;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Latency</div>
+                    <div style="font-size:1.25em;font-weight:700;color:white;font-family:monospace;">${d.processing_time_ms.toFixed(1)}<span style="font-size:0.6em;opacity:0.6;">ms</span></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;">
+                    <div style="font-size:0.68em;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Energy</div>
+                    <div style="font-size:1.25em;font-weight:700;color:white;font-family:monospace;">${d.energy_joules.toFixed(3)}<span style="font-size:0.6em;opacity:0.6;">J</span></div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;">
+                    <div style="font-size:0.68em;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Sources</div>
+                    <div style="font-size:1.25em;font-weight:700;color:white;font-family:monospace;">${d.sources_analyzed}</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px;">
+                    <div style="font-size:0.68em;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Cache</div>
+                    <div style="font-size:1.25em;font-weight:700;font-family:monospace;color:${d.cache_hit ? '#10b981' : 'rgba(255,255,255,0.4)'};">${d.cache_hit ? 'HIT' : 'MISS'}</div>
+                </div>
+            </div>
+            <div style="font-size:0.7em;color:rgba(255,255,255,0.25);font-family:monospace;">PCF-API · Positional Correlation Fields · CPU-only · no LLM · no embeddings · no GPU</div>
+        `;
+        resultEl.style.display = 'block';
+        resultEl.className = 'pcf-result';
+    } catch(e) {
+        resultEl.innerHTML = `<div style="color:#ef4444;font-family:monospace;font-size:0.88em;">Error: ${e.message}. The API may be sleeping — try again in a moment.</div>`;
+        resultEl.style.display = 'block';
+    }
+
+    btn.textContent = 'Verify →';
+    btn.disabled = false;
+}
+</script>
 </body>
 </html>
