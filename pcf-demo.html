@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCF API — Claim Verification · Astrognosy AI</title>
+    <meta name="description" content="Live PCF claim verification. Structural fact analysis using Positional Correlation Fields — no LLM, no embeddings, CPU-only.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        /* HEADER */
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.9em; font-weight:700; letter-spacing:0.12em; color:#5B6ECC; }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(91,110,204,0.12); border:1px solid rgba(91,110,204,0.3); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#8899ee; letter-spacing:0.08em; }
+        .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#5B6ECC; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        /* HERO */
+        .hero { padding:52px 28px 40px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#5B6ECC; text-transform:uppercase; margin-bottom:14px; }
+        .hero h1 { font-size:clamp(2em,4vw,3em); font-weight:800; letter-spacing:-0.03em; margin-bottom:12px; }
+        .hero h1 span { background:linear-gradient(135deg,#5B6ECC,#00B4D8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.95em; color:rgba(255,255,255,0.45); max-width:560px; margin:0 auto 32px; line-height:1.7; }
+        .hero-stats { display:flex; gap:0; justify-content:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; overflow:hidden; max-width:600px; margin:0 auto; }
+        .hstat { flex:1; padding:18px 12px; text-align:center; border-right:1px solid rgba(255,255,255,0.07); }
+        .hstat:last-child { border-right:none; }
+        .hstat-val { font-size:1.4em; font-weight:800; background:linear-gradient(135deg,#5B6ECC,#00B4D8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:monospace; }
+        .hstat-label { font-size:0.65em; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.1em; margin-top:3px; }
+
+        /* MAIN */
+        .main { max-width:900px; margin:0 auto; padding:40px 28px 60px; }
+
+        /* CHIPS */
+        .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+        .chip { padding:6px 14px; border-radius:20px; border:1px solid rgba(91,110,204,0.3); background:rgba(91,110,204,0.08); color:rgba(255,255,255,0.55); font-size:0.8em; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.18s; }
+        .chip:hover { border-color:rgba(91,110,204,0.6); color:rgba(255,255,255,0.85); }
+        .chip.active { border-color:#5B6ECC; color:#8899ee; background:rgba(91,110,204,0.18); font-weight:600; }
+
+        /* INPUTS */
+        .input-group { display:flex; flex-direction:column; gap:12px; margin-bottom:0; }
+        .pcf-textarea { width:100%; padding:14px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:white; font-size:0.95em; font-family:inherit; resize:vertical; min-height:80px; outline:none; transition:border-color 0.2s; }
+        .pcf-textarea:focus { border-color:rgba(91,110,204,0.5); }
+        .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .pcf-select { flex:1; min-width:180px; padding:11px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:rgba(255,255,255,0.8); font-size:0.88em; font-family:inherit; outline:none; cursor:pointer; }
+        .verify-btn { padding:11px 28px; background:linear-gradient(135deg,#5B6ECC,#764ba2); color:white; border:none; border-radius:10px; font-size:0.92em; font-weight:600; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.1s; white-space:nowrap; }
+        .verify-btn:hover { opacity:0.88; transform:translateY(-1px); }
+        .verify-btn:disabled { opacity:0.45; transform:none; cursor:default; }
+
+        /* RESULT */
+        .result-wrap { margin-top:20px; }
+        .result-empty { text-align:center; padding:48px; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.08); border-radius:14px; color:rgba(255,255,255,0.2); font-size:0.9em; }
+        .result-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:28px; animation:fadeUp 0.3s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+        .verdict-row { display:flex; align-items:center; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+        .verdict-badge { padding:8px 22px; border-radius:8px; font-weight:800; font-size:1em; letter-spacing:0.06em; }
+        .v-supported { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .v-contradicted { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .v-insufficient { background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; }
+        .conf-area { flex:1; min-width:200px; }
+        .conf-label { font-size:0.68em; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:7px; }
+        .conf-bar-track { background:rgba(255,255,255,0.07); border-radius:4px; height:7px; overflow:hidden; margin-bottom:5px; }
+        .conf-bar-fill { height:100%; border-radius:4px; transition:width 0.7s ease; }
+        .conf-numbers { font-size:0.8em; color:rgba(255,255,255,0.45); }
+        .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; }
+        .metric { background:rgba(255,255,255,0.04); border-radius:8px; padding:14px; }
+        .metric-label { font-size:0.65em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px; }
+        .metric-val { font-size:1.2em; font-weight:700; font-family:monospace; color:white; }
+        .metric-unit { font-size:0.6em; opacity:0.5; }
+        .api-note { margin-top:14px; font-size:0.68em; color:rgba(255,255,255,0.2); font-family:monospace; }
+
+        /* CORPUS PANEL */
+        .section-head { font-size:0.72em; font-weight:700; letter-spacing:0.2em; color:#5B6ECC; text-transform:uppercase; margin:48px 0 18px; }
+        .corpus-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
+        .corpus-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px 18px; cursor:pointer; transition:all 0.18s; }
+        .corpus-card:hover { border-color:rgba(91,110,204,0.4); background:rgba(91,110,204,0.06); }
+        .corpus-card.selected { border-color:#5B6ECC; background:rgba(91,110,204,0.1); }
+        .corpus-name { font-size:0.82em; font-weight:700; color:rgba(255,255,255,0.75); text-transform:capitalize; margin-bottom:4px; }
+        .corpus-docs { font-size:0.72em; color:rgba(255,255,255,0.3); font-family:monospace; }
+
+        /* FOOTER */
+        footer { text-align:center; padding:32px 24px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.72em; color:rgba(255,255,255,0.2); margin-top:40px; }
+        footer a { color:rgba(91,110,204,0.6); text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">PCF-API</div>
+    <div class="live-pill"><span class="dot"></span>LIVE ON RAILWAY</div>
+</div>
+
+<div class="hero">
+    <div class="hero-eyebrow">Pacific Platform · Fact Verification</div>
+    <h1>Claim Verification<br>via <span>Positional Correlation Fields</span></h1>
+    <p class="hero-sub">Submit any factual claim. PCF compares its structural geometry against a curated corpus — no LLM, no embeddings, no GPU. Verdict in milliseconds.</p>
+    <div class="hero-stats">
+        <div class="hstat"><div class="hstat-val">~165ms</div><div class="hstat-label">Avg Latency</div></div>
+        <div class="hstat"><div class="hstat-val">0.28J</div><div class="hstat-label">Per Query</div></div>
+        <div class="hstat"><div class="hstat-val">720</div><div class="hstat-label">Corpus Docs</div></div>
+        <div class="hstat"><div class="hstat-val">CPU</div><div class="hstat-label">Only</div></div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="chips" id="chips">
+        <button class="chip active" onclick="setChip(this,'medical','The measles vaccine is effective and widely used in childhood immunization programs')">Vaccine efficacy</button>
+        <button class="chip" onclick="setChip(this,'climate','Global average surface temperatures have risen approximately 1.1 degrees Celsius since the pre-industrial era')">Climate warming</button>
+        <button class="chip" onclick="setChip(this,'economics','GDP measures the total monetary value of all finished goods and services produced within a country\'s borders')">GDP definition</button>
+        <button class="chip" onclick="setChip(this,'technology','Large language models like GPT-4 require massive GPU infrastructure for training and inference')">LLM infrastructure</button>
+        <button class="chip" onclick="setChip(this,'history','The Great Pyramid of Giza was constructed around 2560 BCE during the reign of Pharaoh Khufu')">Great Pyramid</button>
+    </div>
+
+    <div class="input-group">
+        <textarea id="claim" class="pcf-textarea" rows="3" placeholder="Enter any factual claim to verify…">The measles vaccine is effective and widely used in childhood immunization programs</textarea>
+        <div class="row">
+            <select id="corpus" class="pcf-select">
+                <option value="medical">Medical corpus</option>
+                <option value="climate">Climate corpus</option>
+                <option value="economics">Economics corpus</option>
+                <option value="history">History corpus</option>
+                <option value="technology">Technology corpus</option>
+                <option value="general">General corpus</option>
+            </select>
+            <button id="btn" class="verify-btn" onclick="verifyClaim()">Verify →</button>
+        </div>
+    </div>
+
+    <div class="result-wrap">
+        <div class="result-empty" id="empty">Enter a claim above and click Verify — results appear here.</div>
+        <div class="result-card" id="result" style="display:none;"></div>
+    </div>
+
+    <div class="section-head">Corpora</div>
+    <div class="corpus-grid" id="corpus-grid">
+        <div class="corpus-card" style="opacity:0.4;text-align:center;grid-column:1/-1;">Loading corpora…</div>
+    </div>
+
+</div>
+
+<footer>
+    <p><a href="https://pcf-api-production.up.railway.app/docs" target="_blank">API Docs →</a> &nbsp;·&nbsp; <a href="/">← Astrognosy AI</a></p>
+    <p style="margin-top:8px;">U.S. Provisional Patent Applications No. 63/978,633 · Patent Pending · © 2026 Astrognosy AI</p>
+</footer>
+
+<script>
+const API = 'https://pcf-api-production.up.railway.app';
+const CHIP_MAP = {};
+
+function setChip(btn, corpus, claim) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('claim').value = claim;
+    document.getElementById('corpus').value = corpus;
+    document.querySelectorAll('.corpus-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.corpus === corpus);
+    });
+}
+
+async function verifyClaim() {
+    const claim = document.getElementById('claim').value.trim();
+    const corpus = document.getElementById('corpus').value;
+    if (!claim) return;
+
+    const btn = document.getElementById('btn');
+    btn.textContent = 'Analyzing…';
+    btn.disabled = true;
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+
+    try {
+        const res = await fetch(API + '/api/v1/verify', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({claim, corpus_name: corpus})
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const isS = d.verdict === 'SUPPORTED', isC = d.verdict === 'CONTRADICTED';
+        const vColor = isS ? '#10b981' : isC ? '#ef4444' : '#f59e0b';
+        const vClass = isS ? 'v-supported' : isC ? 'v-contradicted' : 'v-insufficient';
+        const confPct = Math.round(d.confidence * 100);
+
+        const el = document.getElementById('result');
+        el.innerHTML = `
+            <div class="verdict-row">
+                <div class="verdict-badge ${vClass}">${d.verdict.replace(/_/g,' ')}</div>
+                <div class="conf-area">
+                    <div class="conf-label">PCF Confidence</div>
+                    <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${confPct}%;background:${vColor};"></div></div>
+                    <div class="conf-numbers">${confPct}% confidence &nbsp;·&nbsp; truth score ${d.truth_score.toFixed(2)}/10</div>
+                </div>
+            </div>
+            <div class="metrics">
+                <div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${d.processing_time_ms.toFixed(1)}<span class="metric-unit">ms</span></div></div>
+                <div class="metric"><div class="metric-label">Energy</div><div class="metric-val">${d.energy_joules.toFixed(3)}<span class="metric-unit">J</span></div></div>
+                <div class="metric"><div class="metric-label">Sources</div><div class="metric-val">${d.sources_analyzed}</div></div>
+                <div class="metric"><div class="metric-label">Cache</div><div class="metric-val" style="color:${d.cache_hit?'#10b981':'rgba(255,255,255,0.4)'};">${d.cache_hit?'HIT':'MISS'}</div></div>
+            </div>
+            <div class="api-note">PCF-API · pcf-api-production.up.railway.app · Positional Correlation Fields · no LLM · no GPU</div>`;
+        el.style.display = 'block';
+    } catch(e) {
+        const el = document.getElementById('result');
+        el.innerHTML = `<div style="color:#ef4444;font-family:monospace;font-size:0.88em;">Error: ${e.message}</div>`;
+        el.style.display = 'block';
+    }
+
+    btn.textContent = 'Verify →';
+    btn.disabled = false;
+}
+
+async function loadCorpora() {
+    try {
+        const res = await fetch(API + '/api/v1/corpora');
+        const data = await res.json();
+        const grid = document.getElementById('corpus-grid');
+        grid.innerHTML = '';
+        for (const [name, info] of Object.entries(data.corpora)) {
+            const card = document.createElement('div');
+            card.className = 'corpus-card' + (name === 'medical' ? ' selected' : '');
+            card.dataset.corpus = name;
+            card.innerHTML = `<div class="corpus-name">${name}</div><div class="corpus-docs">${info.documents} documents</div>`;
+            card.onclick = () => {
+                document.getElementById('corpus').value = name;
+                document.querySelectorAll('.corpus-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            };
+            grid.appendChild(card);
+        }
+    } catch(e) { /* silent */ }
+}
+
+loadCorpora();
+</script>
+</body>
+</html>

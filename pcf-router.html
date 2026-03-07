@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCF Router — Hybrid Routing · Astrognosy AI</title>
+    <meta name="description" content="PCF Router: confidence-based hybrid routing. PCF handles high-confidence claims on CPU. Uncertain claims route to LLM with deterministic caching.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.9em; font-weight:700; letter-spacing:0.12em; color:#00B4D8; }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.3); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#00B4D8; letter-spacing:0.08em; }
+        .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#00B4D8; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        .hero { padding:52px 28px 44px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#00B4D8; text-transform:uppercase; margin-bottom:14px; }
+        .hero h1 { font-size:clamp(2em,4vw,2.8em); font-weight:800; letter-spacing:-0.03em; margin-bottom:12px; }
+        .hero h1 span { background:linear-gradient(135deg,#00B4D8,#5B6ECC); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.95em; color:rgba(255,255,255,0.45); max-width:580px; margin:0 auto 36px; line-height:1.7; }
+
+        /* ROUTING DIAGRAM */
+        .arch { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin:0 auto; max-width:700px; }
+        .arch-box { padding:14px 20px; border-radius:10px; text-align:center; font-size:0.8em; }
+        .arch-input { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.7); }
+        .arch-pcf { background:rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.3); color:#00B4D8; }
+        .arch-cpu { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; }
+        .arch-llm { background:rgba(118,75,162,0.1); border:1px solid rgba(118,75,162,0.3); color:#a78bfa; }
+        .arch-arrow { font-size:1.4em; color:rgba(255,255,255,0.2); padding:0 8px; }
+        .arch-split { display:flex; flex-direction:column; gap:8px; align-items:center; }
+        .arch-label { font-size:0.62em; font-weight:600; letter-spacing:0.1em; margin-bottom:3px; opacity:0.7; }
+        .arch-val { font-size:0.88em; font-weight:700; }
+
+        /* TABS */
+        .tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.07); max-width:900px; margin:0 auto; padding:0 28px; }
+        .tab { padding:16px 24px; font-size:0.88em; font-weight:600; color:rgba(255,255,255,0.35); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; letter-spacing:0.04em; }
+        .tab:hover { color:rgba(255,255,255,0.65); }
+        .tab.active { color:#00B4D8; border-bottom-color:#00B4D8; }
+
+        .main { max-width:900px; margin:0 auto; padding:36px 28px 60px; }
+        .panel { display:none; }
+        .panel.active { display:block; }
+
+        /* INPUTS */
+        .label { font-size:0.72em; font-weight:700; letter-spacing:0.15em; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:8px; }
+        .pcf-textarea { width:100%; padding:14px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:white; font-size:0.92em; font-family:inherit; resize:vertical; min-height:72px; outline:none; transition:border-color 0.2s; }
+        .pcf-textarea:focus { border-color:rgba(0,180,216,0.4); }
+        .run-btn { padding:11px 28px; background:linear-gradient(135deg,#00B4D8,#0080aa); color:white; border:none; border-radius:10px; font-size:0.92em; font-weight:600; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.1s; margin-top:12px; }
+        .run-btn:hover { opacity:0.88; transform:translateY(-1px); }
+        .run-btn:disabled { opacity:0.45; transform:none; cursor:default; }
+
+        /* CHIPS */
+        .chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+        .chip { padding:5px 13px; border-radius:20px; border:1px solid rgba(0,180,216,0.25); background:rgba(0,180,216,0.06); color:rgba(255,255,255,0.5); font-size:0.78em; cursor:pointer; font-family:inherit; transition:all 0.18s; }
+        .chip:hover { border-color:rgba(0,180,216,0.5); color:rgba(255,255,255,0.8); }
+        .chip.active { border-color:#00B4D8; color:#00B4D8; background:rgba(0,180,216,0.14); font-weight:600; }
+
+        /* RESULT */
+        .result-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:28px; animation:fadeUp 0.3s ease; margin-top:20px; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+        /* ROUTING RESULT */
+        .route-header { display:flex; align-items:center; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+        .route-badge { padding:8px 20px; border-radius:8px; font-weight:800; font-size:0.95em; letter-spacing:0.06em; }
+        .rb-local { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .rb-llm { background:rgba(118,75,162,0.15); border:1px solid rgba(118,75,162,0.4); color:#a78bfa; }
+        .rb-unsupported { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .route-reason { font-family:monospace; font-size:0.8em; color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:6px; padding:6px 12px; }
+        .verdict-row { display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+        .verdict-badge { padding:8px 22px; border-radius:8px; font-weight:800; font-size:1em; letter-spacing:0.06em; }
+        .v-supported { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .v-contradicted { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .v-insufficient { background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; }
+        .conf-area { flex:1; min-width:200px; }
+        .conf-label { font-size:0.68em; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; }
+        .conf-track { background:rgba(255,255,255,0.07); border-radius:4px; height:7px; overflow:hidden; margin-bottom:5px; }
+        .conf-fill { height:100%; border-radius:4px; transition:width 0.7s ease; }
+        .conf-nums { font-size:0.78em; color:rgba(255,255,255,0.4); }
+        .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; }
+        .metric { background:rgba(255,255,255,0.04); border-radius:8px; padding:14px; }
+        .metric-label { font-size:0.65em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px; }
+        .metric-val { font-size:1.2em; font-weight:700; font-family:monospace; color:white; }
+        .metric-unit { font-size:0.58em; opacity:0.5; }
+        .api-note { margin-top:14px; font-size:0.68em; color:rgba(255,255,255,0.2); font-family:monospace; }
+
+        /* CONTRADICTION RESULT */
+        .contra-result { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:16px; }
+        .contra-main { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+        .contra-badge { padding:8px 20px; border-radius:8px; font-weight:800; font-size:0.95em; letter-spacing:0.05em; }
+        .cb-yes { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .cb-no { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .contra-explain { font-size:0.88em; color:rgba(255,255,255,0.6); line-height:1.6; background:rgba(255,255,255,0.03); border-left:2px solid rgba(255,255,255,0.1); border-radius:0 6px 6px 0; padding:12px 16px; margin-bottom:18px; }
+
+        /* GRID 2-COL for contra inputs */
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:0; }
+        @media(max-width:600px) { .two-col { grid-template-columns:1fr; } .arch { flex-direction:column; } }
+
+        footer { text-align:center; padding:32px 24px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.72em; color:rgba(255,255,255,0.2); margin-top:40px; }
+        footer a { color:rgba(0,180,216,0.5); text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">PCF ROUTER</div>
+    <div class="live-pill"><span class="dot"></span>LIVE ON RAILWAY</div>
+</div>
+
+<div class="hero">
+    <div class="hero-eyebrow">Pacific Platform · Hybrid Routing</div>
+    <h1>PCF First.<br><span>LLM Only When Uncertain.</span></h1>
+    <p class="hero-sub">Every claim runs through PCF first. High-confidence results are served by CPU at near-zero cost. Uncertain claims route to Claude Haiku — results cached deterministically so cost approaches $0 over time.</p>
+
+    <div class="arch">
+        <div class="arch-box arch-input"><div class="arch-label">Claim</div><div class="arch-val">Input</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box arch-pcf"><div class="arch-label">Score</div><div class="arch-val">PCF Engine</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-split">
+            <div class="arch-box arch-cpu"><div class="arch-label">≥ 0.55 · free</div><div class="arch-val">CPU · $0</div></div>
+            <div class="arch-box arch-llm"><div class="arch-label">&lt; 0.55 · cached</div><div class="arch-val">Claude Haiku</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('routing',this)">Hybrid Routing</div>
+    <div class="tab" onclick="switchTab('contradiction',this)">Contradiction Detection</div>
+</div>
+
+<div class="main">
+
+    <!-- ROUTING PANEL -->
+    <div class="panel active" id="panel-routing">
+        <div class="chips">
+            <button class="chip active" onclick="setChip(this,'The measles vaccine is safe and effective for children')">Vaccine safety</button>
+            <button class="chip" onclick="setChip(this,'The Earth is approximately 6,000 years old')">Earth age</button>
+            <button class="chip" onclick="setChip(this,'GDP is a common measure of economic output')">GDP</button>
+            <button class="chip" onclick="setChip(this,'xkzvqp flurble zorb blargh meeple')">Nonsense claim</button>
+        </div>
+        <div class="label">Claim to route</div>
+        <textarea id="route-claim" class="pcf-textarea" rows="3" placeholder="Enter any factual claim…">The measles vaccine is safe and effective for children</textarea>
+        <button id="route-btn" class="run-btn" onclick="runRouting()">Route via PCF →</button>
+        <div id="route-result" style="display:none;"></div>
+    </div>
+
+    <!-- CONTRADICTION PANEL -->
+    <div class="panel" id="panel-contradiction">
+        <div class="chips">
+            <button class="chip active" onclick="setContraChip(this,'Vaccines cause autism in children','Extensive research shows no link between vaccines and autism')">Vaccines / autism</button>
+            <button class="chip" onclick="setContraChip(this,'Climate change is primarily driven by human activity','Climate has always changed naturally with no human influence')">Climate</button>
+            <button class="chip" onclick="setContraChip(this,'Coffee increases alertness and productivity','Coffee has no effect on cognitive performance or energy')">Coffee</button>
+        </div>
+        <div class="two-col">
+            <div>
+                <div class="label">Claim A</div>
+                <textarea id="text-a" class="pcf-textarea" rows="4" placeholder="First claim…">Vaccines cause autism in children</textarea>
+            </div>
+            <div>
+                <div class="label">Claim B</div>
+                <textarea id="text-b" class="pcf-textarea" rows="4" placeholder="Second claim…">Extensive research shows no link between vaccines and autism</textarea>
+            </div>
+        </div>
+        <button id="contra-btn" class="run-btn" onclick="runContradiction()">Detect Contradiction →</button>
+        <div id="contra-result" style="display:none;"></div>
+    </div>
+
+</div>
+
+<footer>
+    <p><a href="https://pcf-api-production.up.railway.app/docs" target="_blank">PCF-API Docs →</a> &nbsp;·&nbsp; <a href="/">← Astrognosy AI</a></p>
+    <p style="margin-top:8px;">U.S. Provisional Patent Applications No. 63/978,633 · Patent Pending · © 2026 Astrognosy AI</p>
+</footer>
+
+<script>
+const ROUTER = 'https://pcf-router-production.up.railway.app';
+
+function switchTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+}
+
+function setChip(btn, claim) {
+    document.querySelectorAll('#panel-routing .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('route-claim').value = claim;
+}
+
+function setContraChip(btn, a, b) {
+    document.querySelectorAll('#panel-contradiction .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('text-a').value = a;
+    document.getElementById('text-b').value = b;
+}
+
+async function runRouting() {
+    const claim = document.getElementById('route-claim').value.trim();
+    if (!claim) return;
+    const btn = document.getElementById('route-btn');
+    btn.textContent = 'Routing…';
+    btn.disabled = true;
+    document.getElementById('route-result').style.display = 'none';
+
+    try {
+        const res = await fetch(ROUTER + '/verify/full', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({claim})
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const isLocal = d.served_by === 'pcf';
+        const isS = d.verdict === 'SUPPORTED', isC = d.verdict === 'CONTRADICTED';
+        const vColor = isS ? '#10b981' : isC ? '#ef4444' : '#f59e0b';
+        const vClass = isS ? 'v-supported' : isC ? 'v-contradicted' : 'v-insufficient';
+        const confPct = Math.round((d.pcf_confidence || d.confidence || 0) * 100);
+        const routeLabel = isLocal ? 'SERVED BY PCF — FREE' : 'ROUTED TO LLM';
+        const routeClass = isLocal ? 'rb-local' : 'rb-llm';
+        const costLabel = isLocal ? '$0.000' : (d.claude_cached ? '$0.000 (cached)' : '~$0.001');
+
+        const el = document.getElementById('route-result');
+        el.innerHTML = `<div class="result-card">
+            <div class="route-header">
+                <div class="route-badge ${routeClass}">${routeLabel}</div>
+                <div class="route-reason">${d.routing_reason || (isLocal ? 'pcf_confident' : 'needs_claude')}</div>
+            </div>
+            <div class="verdict-row">
+                <div class="verdict-badge ${vClass}">${(d.verdict||'').replace(/_/g,' ')}</div>
+                <div class="conf-area">
+                    <div class="conf-label">PCF Confidence Score</div>
+                    <div class="conf-track"><div class="conf-fill" style="width:${confPct}%;background:${vColor};"></div></div>
+                    <div class="conf-nums">${confPct}% · threshold 55%</div>
+                </div>
+            </div>
+            <div class="metrics">
+                <div class="metric"><div class="metric-label">PCF Latency</div><div class="metric-val">${(d.pcf_time_ms||d.processing_time_ms||0).toFixed(1)}<span class="metric-unit">ms</span></div></div>
+                <div class="metric"><div class="metric-label">Total Time</div><div class="metric-val">${(d.total_time_ms||d.pcf_time_ms||0).toFixed(1)}<span class="metric-unit">ms</span></div></div>
+                <div class="metric"><div class="metric-label">Served By</div><div class="metric-val" style="font-size:0.9em;color:${isLocal?'#10b981':'#a78bfa'};">${isLocal?'CPU':'LLM'}</div></div>
+                <div class="metric"><div class="metric-label">Cost</div><div class="metric-val" style="font-size:0.9em;color:${isLocal?'#10b981':'rgba(255,255,255,0.6)'};">${costLabel}</div></div>
+            </div>
+            <div class="api-note">PCF Router · pcf-router-production.up.railway.app · Patent Pending · CPU-native</div>
+        </div>`;
+        el.style.display = 'block';
+    } catch(e) {
+        const el = document.getElementById('route-result');
+        el.innerHTML = `<div class="result-card" style="color:#ef4444;font-family:monospace;font-size:0.88em;">Error: ${e.message}</div>`;
+        el.style.display = 'block';
+    }
+
+    btn.textContent = 'Route via PCF →';
+    btn.disabled = false;
+}
+
+async function runContradiction() {
+    const text_a = document.getElementById('text-a').value.trim();
+    const text_b = document.getElementById('text-b').value.trim();
+    if (!text_a || !text_b) return;
+    const btn = document.getElementById('contra-btn');
+    btn.textContent = 'Analyzing…';
+    btn.disabled = true;
+    document.getElementById('contra-result').style.display = 'none';
+
+    try {
+        const res = await fetch(ROUTER + '/contradiction', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({text_a, text_b})
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const isContra = d.is_contradiction;
+        const confPct = Math.round(d.confidence * 100);
+        const varPct = Math.min(100, Math.round((d.structural_variance / 5000) * 100));
+
+        const el = document.getElementById('contra-result');
+        el.innerHTML = `<div class="result-card">
+            <div class="contra-main">
+                <div class="contra-badge ${isContra?'cb-yes':'cb-no'}">${isContra ? 'CONTRADICTION DETECTED' : 'NO CONTRADICTION'}</div>
+                <div class="conf-area">
+                    <div class="conf-label">Detection Confidence</div>
+                    <div class="conf-track"><div class="conf-fill" style="width:${confPct}%;background:${isContra?'#ef4444':'#10b981'};"></div></div>
+                    <div class="conf-nums">${confPct}%</div>
+                </div>
+            </div>
+            <div class="contra-explain">${d.explanation}</div>
+            <div class="metrics">
+                <div class="metric"><div class="metric-label">Structural Variance</div><div class="metric-val">${d.structural_variance.toFixed(0)}</div></div>
+                <div class="metric"><div class="metric-label">Topical Overlap</div><div class="metric-val">${Math.round(d.topical_similarity*100)}<span class="metric-unit">%</span></div></div>
+                <div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${d.processing_time_ms.toFixed(2)}<span class="metric-unit">ms</span></div></div>
+            </div>
+            <div class="api-note">PCF Router · contradiction endpoint · structural divergence via PMI tensor · no LLM</div>
+        </div>`;
+        el.style.display = 'block';
+    } catch(e) {
+        const el = document.getElementById('contra-result');
+        el.innerHTML = `<div class="result-card" style="color:#ef4444;font-family:monospace;font-size:0.88em;">Error: ${e.message}</div>`;
+        el.style.display = 'block';
+    }
+
+    btn.textContent = 'Detect Contradiction →';
+    btn.disabled = false;
+}
+</script>
+</body>
+</html>

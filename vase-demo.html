@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VASE — Autonomous Corpus Builder · Astrognosy AI</title>
+    <meta name="description" content="VASE: RL agent builds its own training corpus. No human labeling. PCF scores the corpus and provides the learning signal. SHA-256 auditable decisions.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(0,0,0,0.4); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.9em; font-weight:700; letter-spacing:0.12em; color:#10b981; }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#10b981; letter-spacing:0.08em; }
+        .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#10b981; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        .hero { padding:52px 28px 44px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#10b981; text-transform:uppercase; margin-bottom:14px; }
+        .hero h1 { font-size:clamp(2em,4vw,2.8em); font-weight:800; letter-spacing:-0.03em; margin-bottom:12px; }
+        .hero h1 span { background:linear-gradient(135deg,#10b981,#00B4D8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.95em; color:rgba(255,255,255,0.45); max-width:580px; margin:0 auto 36px; line-height:1.7; }
+        .hero-flow { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+        .flow-box { padding:10px 18px; border-radius:9px; font-size:0.8em; text-align:center; }
+        .flow-agent { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; }
+        .flow-pcf { background:rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.3); color:#00B4D8; }
+        .flow-corpus { background:rgba(91,110,204,0.1); border:1px solid rgba(91,110,204,0.3); color:#8899ee; }
+        .flow-arrow { color:rgba(255,255,255,0.2); font-size:1.2em; }
+        .flow-label { font-size:0.62em; color:rgba(255,255,255,0.35); margin-top:3px; }
+
+        .main { max-width:960px; margin:0 auto; padding:40px 28px 60px; }
+        .section-label { font-size:0.72em; font-weight:700; letter-spacing:0.2em; color:#10b981; text-transform:uppercase; margin-bottom:14px; }
+
+        /* DOCUMENT POOL */
+        .doc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; margin-bottom:36px; }
+        .doc-chip { padding:10px 14px; border-radius:8px; font-size:0.8em; line-height:1.45; transition:all 0.25s; }
+        .doc-chip .doc-label { font-size:0.65em; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:3px; }
+        .doc-chip .doc-text { color:rgba(255,255,255,0.7); }
+        .doc-signal { background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); }
+        .doc-signal .doc-label { color:#10b981; }
+        .doc-noise { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); }
+        .doc-noise .doc-label { color:rgba(255,255,255,0.25); }
+        .doc-chip.picked { box-shadow:0 0 0 2px #10b981; transform:scale(1.02); }
+        .doc-chip.picked .doc-label { color:#10b981 !important; }
+
+        /* CONFIG */
+        .config-row { display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap; margin-bottom:24px; }
+        .config-group { display:flex; flex-direction:column; gap:6px; }
+        .config-label { font-size:0.68em; font-weight:600; letter-spacing:0.12em; color:rgba(255,255,255,0.3); text-transform:uppercase; }
+        .config-select { padding:10px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:9px; color:rgba(255,255,255,0.8); font-size:0.88em; font-family:inherit; outline:none; cursor:pointer; }
+        .run-btn { padding:11px 30px; background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:10px; font-size:0.92em; font-weight:600; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.1s; }
+        .run-btn:hover { opacity:0.88; transform:translateY(-1px); }
+        .run-btn:disabled { opacity:0.45; transform:none; cursor:default; }
+
+        /* RESULTS */
+        .results { display:none; }
+        .results.visible { display:block; animation:fadeUp 0.3s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+        /* EPISODES */
+        .episodes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; margin-bottom:36px; }
+        .episode-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px; }
+        .ep-num { font-size:0.68em; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:8px; }
+        .ep-conf { font-size:1.5em; font-weight:800; font-family:monospace; margin-bottom:8px; }
+        .ep-bar-track { background:rgba(255,255,255,0.07); border-radius:3px; height:5px; overflow:hidden; margin-bottom:7px; }
+        .ep-bar-fill { height:100%; border-radius:3px; transition:width 0.7s ease; }
+        .ep-goal { font-size:0.7em; font-weight:600; letter-spacing:0.06em; }
+        .ep-goal-yes { color:#10b981; }
+        .ep-goal-no { color:rgba(255,255,255,0.25); }
+        .ep-docs { font-size:0.68em; color:rgba(255,255,255,0.3); margin-top:4px; }
+
+        /* SUMMARY GRID */
+        .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:32px; }
+        .sum-card { background:rgba(255,255,255,0.04); border-radius:8px; padding:16px; }
+        .sum-label { font-size:0.65em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px; }
+        .sum-val { font-size:1.3em; font-weight:700; font-family:monospace; color:white; }
+
+        /* FINAL CORPUS */
+        .final-docs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px; }
+        .final-doc { padding:7px 14px; border-radius:20px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; font-size:0.8em; line-height:1.4; }
+
+        /* AUDIT */
+        .audit-card { background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:12px; padding:22px; margin-bottom:32px; }
+        .audit-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+        .audit-badge { padding:6px 16px; border-radius:6px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; font-size:0.8em; font-weight:700; letter-spacing:0.06em; }
+        .audit-title { font-size:0.9em; font-weight:700; color:rgba(255,255,255,0.7); }
+        .audit-hashes { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .hash-item { background:rgba(0,0,0,0.3); border-radius:6px; padding:10px 12px; }
+        .hash-key { font-size:0.62em; color:rgba(255,255,255,0.25); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:3px; }
+        .hash-val { font-family:monospace; font-size:0.78em; color:rgba(16,185,129,0.8); word-break:break-all; }
+
+        /* EXPLORATION SIGNALS */
+        .signals-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:16px; }
+        .signal-bar { background:rgba(255,255,255,0.04); border-radius:8px; padding:14px; }
+        .signal-label { font-size:0.68em; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; }
+        .signal-track { background:rgba(255,255,255,0.07); border-radius:3px; height:5px; overflow:hidden; margin-bottom:5px; }
+        .signal-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#10b981,#00B4D8); }
+        .signal-val { font-size:0.8em; font-family:monospace; color:rgba(255,255,255,0.5); }
+
+        .api-note { font-size:0.68em; color:rgba(255,255,255,0.2); font-family:monospace; margin-top:12px; }
+
+        footer { text-align:center; padding:32px 24px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.72em; color:rgba(255,255,255,0.2); margin-top:40px; }
+        footer a { color:rgba(16,185,129,0.5); text-decoration:none; }
+
+        @media(max-width:600px) { .audit-hashes { grid-template-columns:1fr; } .config-row { flex-direction:column; align-items:stretch; } }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">VASE-PCF</div>
+    <div class="live-pill"><span class="dot"></span>LIVE ON RAILWAY</div>
+</div>
+
+<div class="hero">
+    <div class="hero-eyebrow">Pacific Platform · Autonomous Corpus Builder</div>
+    <h1>AI That Builds Its Own<br><span>Training Data.</span></h1>
+    <p class="hero-sub">VASE is a reinforcement learning agent that assembles its own knowledge corpus — no human labeling required. PCF scores each candidate document structurally; improved corpus confidence is the reward signal.</p>
+
+    <div class="hero-flow">
+        <div class="flow-box flow-agent"><div>RL Agent</div><div class="flow-label">Selects docs</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box flow-pcf"><div>PCF Scoring</div><div class="flow-label">Structural confidence</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box flow-agent"><div>Reward Signal</div><div class="flow-label">ΔConfidence</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box flow-corpus"><div>Corpus</div><div class="flow-label">Builds itself</div></div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="section-label">Candidate Document Pool</div>
+    <div class="doc-grid" id="doc-pool">
+        <div style="opacity:0.3;text-align:center;grid-column:1/-1;font-size:0.85em;">Loading document pool…</div>
+    </div>
+
+    <div class="section-label">Run Agent</div>
+    <div class="config-row">
+        <div class="config-group">
+            <div class="config-label">Episodes</div>
+            <select id="episodes" class="config-select">
+                <option value="3">3 episodes</option>
+                <option value="5" selected>5 episodes</option>
+                <option value="8">8 episodes</option>
+            </select>
+        </div>
+        <div class="config-group">
+            <div class="config-label">Confidence Target</div>
+            <select id="threshold" class="config-select">
+                <option value="0.70">70% threshold</option>
+                <option value="0.75" selected>75% threshold</option>
+                <option value="0.80">80% threshold</option>
+            </select>
+        </div>
+        <button id="run-btn" class="run-btn" onclick="runVASE()">Run Agent →</button>
+    </div>
+
+    <div class="results" id="results">
+
+        <div class="section-label">Episode Progression</div>
+        <div class="episodes-grid" id="episodes-grid"></div>
+
+        <div class="section-label">Session Summary</div>
+        <div class="summary-grid" id="summary-grid"></div>
+
+        <div class="section-label">Final Corpus Selected</div>
+        <div class="final-docs" id="final-docs"></div>
+
+        <div class="section-label">Audit Chain</div>
+        <div class="audit-card" id="audit-card"></div>
+
+        <div class="section-label">Exploration Signals</div>
+        <div class="signals-grid" id="signals-grid"></div>
+        <div class="api-note" id="api-note"></div>
+
+    </div>
+
+</div>
+
+<footer>
+    <p><a href="/">← Astrognosy AI</a> &nbsp;·&nbsp; <a href="pcf-demo.html">PCF-API Demo</a> &nbsp;·&nbsp; <a href="pcf-router.html">PCF Router Demo</a></p>
+    <p style="margin-top:8px;">U.S. Provisional Patent Applications No. 63/978,633 · Patent Pending · © 2026 Astrognosy AI</p>
+</footer>
+
+<script>
+const VASE_API = 'https://vase-pcf-api-production.up.railway.app';
+
+async function loadDocs() {
+    try {
+        const res = await fetch(VASE_API + '/api/docs');
+        const data = await res.json();
+        const grid = document.getElementById('doc-pool');
+        grid.innerHTML = '';
+        data.candidate_docs.forEach(doc => {
+            const el = document.createElement('div');
+            el.className = 'doc-chip ' + (doc.type === 'SIGNAL' ? 'doc-signal' : 'doc-noise');
+            el.id = 'doc-' + doc.index;
+            el.innerHTML = `<div class="doc-label">${doc.type === 'SIGNAL' ? 'Signal' : 'Noise'} · ${doc.label}</div><div class="doc-text">${doc.text}</div>`;
+            grid.appendChild(el);
+        });
+    } catch(e) { /* silent */ }
+}
+
+async function runVASE() {
+    const episodes = parseInt(document.getElementById('episodes').value);
+    const threshold = parseFloat(document.getElementById('threshold').value);
+    const btn = document.getElementById('run-btn');
+    btn.textContent = 'Agent running…';
+    btn.disabled = true;
+
+    // Reset picked state on doc pool
+    document.querySelectorAll('.doc-chip').forEach(c => c.classList.remove('picked'));
+    document.getElementById('results').classList.remove('visible');
+
+    try {
+        const res = await fetch(VASE_API + '/api/run', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({episodes, confidence_threshold: threshold})
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        renderResults(d, threshold);
+    } catch(e) {
+        alert('Agent error: ' + e.message);
+    }
+
+    btn.textContent = 'Run Agent →';
+    btn.disabled = false;
+}
+
+function renderResults(d, threshold) {
+    // Episodes
+    const epGrid = document.getElementById('episodes-grid');
+    epGrid.innerHTML = '';
+    const maxConf = Math.max(...d.episode_log.map(e => e.confidence));
+    d.episode_log.forEach(ep => {
+        const pct = Math.round(ep.confidence * 100);
+        const barW = Math.round((ep.confidence / Math.max(maxConf, 0.01)) * 100);
+        const reached = ep.goal_reached;
+        const card = document.createElement('div');
+        card.className = 'episode-card';
+        card.innerHTML = `
+            <div class="ep-num">Episode ${ep.episode}</div>
+            <div class="ep-conf" style="color:${reached?'#10b981':'rgba(255,255,255,0.65)'};">${pct}%</div>
+            <div class="ep-bar-track"><div class="ep-bar-fill" style="width:${barW}%;background:${reached?'#10b981':'#5B6ECC'};"></div></div>
+            <div class="ep-goal ${reached?'ep-goal-yes':'ep-goal-no'}">${reached?'✓ Goal reached':'○ Below target'}</div>
+            <div class="ep-docs">${ep.docs_added} docs added · skill ${ep.skill}</div>`;
+        epGrid.appendChild(card);
+    });
+
+    // Summary
+    const sumGrid = document.getElementById('summary-grid');
+    const r = d.result;
+    const meta = d.meta;
+    sumGrid.innerHTML = `
+        <div class="sum-card"><div class="sum-label">Peak Confidence</div><div class="sum-val">${Math.round(r.peak_confidence*100)}%</div></div>
+        <div class="sum-card"><div class="sum-label">Goals Reached</div><div class="sum-val">${r.goals_reached} / ${meta.episodes_run}</div></div>
+        <div class="sum-card"><div class="sum-label">Total Steps</div><div class="sum-val">${meta.total_steps}</div></div>
+        <div class="sum-card"><div class="sum-label">Final Corpus</div><div class="sum-val">${d.corpus.final_docs.length} docs</div></div>
+        <div class="sum-card"><div class="sum-label">Signal Ratio</div><div class="sum-val">${Math.round(d.corpus.signal_ratio*100)}%</div></div>
+        <div class="sum-card"><div class="sum-label">Training Loss</div><div class="sum-val" style="color:${d.training_loss.trend==='improving'?'#10b981':'#f59e0b'};font-size:0.9em;">${d.training_loss.trend}</div></div>`;
+
+    // Final corpus docs — highlight in pool
+    const finalDocs = document.getElementById('final-docs');
+    finalDocs.innerHTML = '';
+    d.corpus.final_docs.forEach(text => {
+        const chip = document.createElement('div');
+        chip.className = 'final-doc';
+        chip.textContent = text;
+        finalDocs.appendChild(chip);
+    });
+
+    // Highlight picked docs in pool
+    const topPicked = d.document_frequency.filter(df => df.picks > 0);
+    topPicked.forEach(df => {
+        const el = document.getElementById('doc-' + df.index);
+        if (el) el.classList.add('picked');
+    });
+
+    // Audit
+    const audit = r.audit;
+    document.getElementById('audit-card').innerHTML = `
+        <div class="audit-header">
+            <div class="audit-badge">${audit.sha256_valid ? '✓ SHA-256 VALID' : '✗ INVALID'}</div>
+            <div class="audit-title">${audit.entries} decisions logged · cryptographic audit chain</div>
+        </div>
+        <div class="audit-hashes">
+            <div class="hash-item"><div class="hash-key">First Entry Hash</div><div class="hash-val">${audit.first_hash}</div></div>
+            <div class="hash-item"><div class="hash-key">Last Entry Hash</div><div class="hash-val">${audit.last_hash}</div></div>
+        </div>`;
+
+    // Exploration signals (generic labels — no algorithm names)
+    const rb = d.reward_breakdown;
+    const signals = [
+        {label:'Curiosity Signal',   val: rb.icm_curiosity_mean,  max: 2.0},
+        {label:'Novelty Detection',  val: rb.rnd_novelty_mean,    max: 0.05},
+        {label:'Skill Coverage',     val: rb.diayn_skill_mean,    max: 0.05},
+        {label:'Task Reward',        val: rb.extrinsic_mean,      max: 0.3},
+    ];
+    const sigGrid = document.getElementById('signals-grid');
+    sigGrid.innerHTML = '';
+    signals.forEach(s => {
+        const pct = Math.min(100, Math.round((s.val / s.max) * 100));
+        const el = document.createElement('div');
+        el.className = 'signal-bar';
+        el.innerHTML = `<div class="signal-label">${s.label}</div>
+            <div class="signal-track"><div class="signal-fill" style="width:${pct}%;"></div></div>
+            <div class="signal-val">${s.val.toFixed(4)}</div>`;
+        sigGrid.appendChild(el);
+    });
+
+    document.getElementById('api-note').textContent =
+        'VASE-PCF · vase-pcf-api-production.up.railway.app · RL agent · PCF confidence as reward · SHA-256 audit · no human labeling';
+
+    document.getElementById('results').classList.add('visible');
+    document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+loadDocs();
+</script>
+</body>
+</html>

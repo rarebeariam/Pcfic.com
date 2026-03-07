@@ -750,7 +750,7 @@
         <nav>
             <a href="#products" class="hide-mobile">Products</a>
             <a href="#laminar" class="hide-mobile">Laminar</a>
-            <a href="#demo" class="hide-mobile">Try Live</a>
+            <a href="pcf-demo.html" class="hide-mobile">Try Live</a>
             <a href="#patents" class="hide-mobile">Patents</a>
             <a href="#contact" class="hide-mobile">Contact</a>
             <a href="laminar-console.html" class="nav-demo">Laminar Console</a>
@@ -854,7 +854,7 @@
 <div class="products-bg" id="products">
 <div class="section">
     <div class="section-label">The Pacific Platform</div>
-    <h2 class="section-title">Four Products. One Engine.</h2>
+    <h2 class="section-title">Five Products. One Engine.</h2>
     <p class="section-sub">Positional Correlation Fields power everything Astrognosy AI builds — from the core API to autonomous corpus agents to the verification marketplace.</p>
 
     <div class="products-grid">
@@ -879,7 +879,33 @@
                     <span>CPU-only · 0.28J/query vs 9.3J GPU</span>
                 </div>
             </div>
-            <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="product-link">Live API docs →</a>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
+                <a href="pcf-demo.html" class="product-link">Interactive Demo →</a>
+                <a href="https://pcf-api-production.up.railway.app/docs" target="_blank" class="product-link" style="color:var(--muted);font-weight:500;">API Docs</a>
+            </div>
+        </div>
+
+        <!-- PCF ROUTER -->
+        <div class="product-card" style="--card-accent: linear-gradient(135deg, #00B4D8, #5B6ECC);">
+            <div class="product-icon" style="background: rgba(0,180,216,0.1);">⚡</div>
+            <span class="product-tag" style="background:rgba(0,180,216,0.1);color:#00B4D8;">LIVE</span>
+            <h3>PCF Router</h3>
+            <p>Confidence-based hybrid routing. PCF handles high-confidence claims on CPU at near-zero cost. Uncertain claims route to LLM — results cached deterministically so API cost approaches zero over time.</p>
+            <div class="product-metrics">
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#00B4D8"></div>
+                    <span>PCF-first routing · LLM only when uncertain</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#00B4D8"></div>
+                    <span>Deterministic caching · cost → $0 over time</span>
+                </div>
+                <div class="product-metric">
+                    <div class="product-metric-dot" style="background:#00B4D8"></div>
+                    <span>Contradiction detection via structural divergence</span>
+                </div>
+            </div>
+            <a href="pcf-router.html" class="product-link">Interactive Demo →</a>
         </div>
 
         <!-- VASE-PCF -->
@@ -902,7 +928,10 @@
                     <span>EU AI Act Article 13 compliant</span>
                 </div>
             </div>
-            <a href="mailto:jacob@pcfic.com" class="product-link">Request Access →</a>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
+                <a href="vase-demo.html" class="product-link">Interactive Demo →</a>
+                <a href="mailto:jacob@pcfic.com" class="product-link" style="color:var(--muted);font-weight:500;">Request Access</a>
+            </div>
         </div>
 
         <!-- Laminar -->
@@ -1019,40 +1048,6 @@
             </ul>
         </div>
     </div>
-</div>
-</div>
-
-<!-- ── LIVE API DEMO ── -->
-<div class="demo-bg" id="demo">
-<div class="demo-section">
-    <div class="section-label" style="color:#00B4D8;">Live API · PCF-API on Railway</div>
-    <h2 style="font-size:clamp(1.8em,3.5vw,2.6em);font-weight:800;color:white;margin-bottom:12px;letter-spacing:-0.02em;">Try PCF Live</h2>
-    <p style="font-size:1.05em;color:rgba(255,255,255,0.5);margin-bottom:36px;line-height:1.6;max-width:600px;">Submit any factual claim. The API analyzes it against a curated corpus using Positional Correlation Fields — no LLM, no embeddings. CPU-only. Results in milliseconds.</p>
-
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-        <button class="claim-chip active" onclick="setChip(this,'medical')" data-corpus="medical">Vaccine efficacy</button>
-        <button class="claim-chip" onclick="setChip(this,'climate')" data-corpus="climate">Climate warming</button>
-        <button class="claim-chip" onclick="setChip(this,'economics')" data-corpus="economics">GDP definition</button>
-        <button class="claim-chip" onclick="setChip(this,'technology')" data-corpus="technology">LLM infrastructure</button>
-        <button class="claim-chip" onclick="setChip(this,'history')" data-corpus="history">Great Pyramid</button>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
-        <textarea id="pcf-claim" class="pcf-input" rows="3" placeholder="Enter any factual claim to verify...">The measles vaccine is effective and widely used in childhood immunization programs</textarea>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-            <select id="pcf-corpus" class="pcf-select">
-                <option value="medical">Medical corpus</option>
-                <option value="climate">Climate corpus</option>
-                <option value="economics">Economics corpus</option>
-                <option value="history">History corpus</option>
-                <option value="technology">Technology corpus</option>
-                <option value="general">General corpus</option>
-            </select>
-            <button id="pcf-btn" class="pcf-verify-btn" onclick="runPCF()">Verify →</button>
-        </div>
-    </div>
-
-    <div id="pcf-result" class="pcf-result" style="display:none;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:28px;"></div>
 </div>
 </div>
 
