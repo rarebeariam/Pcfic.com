@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VASE — Autonomous Corpus Builder · Astrognosy AI</title>
+    <meta name="description" content="VASE: RL agent autonomously builds verifiable training corpora. PCF convergence is the reward signal. 915 SHA-256 audited decisions. Zero human labels. Patent pending Claims 4, 33–40.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        /* TOPBAR */
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(3,8,16,0.9); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.88em; font-weight:700; letter-spacing:0.12em; color:#f59e0b; }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#f59e0b; letter-spacing:0.08em; }
+        .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#f59e0b; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        /* HERO */
+        .hero { padding:56px 28px 48px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(245,158,11,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,0.04) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
+        .hero-glow { position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:600px; height:350px; background:radial-gradient(ellipse,rgba(245,158,11,0.1) 0%,transparent 70%); pointer-events:none; }
+        .hero-inner { position:relative; max-width:820px; margin:0 auto; }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#f59e0b; text-transform:uppercase; margin-bottom:16px; }
+        .hero h1 { font-size:clamp(2.2em,4.5vw,3.2em); font-weight:800; letter-spacing:-0.03em; margin-bottom:14px; line-height:1.1; }
+        .hero h1 span { background:linear-gradient(135deg,#f59e0b,#00B4D8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.95em; color:rgba(255,255,255,0.45); max-width:580px; margin:0 auto 40px; line-height:1.7; }
+        .hero-stats { display:flex; gap:0; justify-content:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; overflow:hidden; max-width:680px; margin:0 auto; }
+        .hstat { flex:1; padding:18px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.07); }
+        .hstat:last-child { border-right:none; }
+        .hstat-val { font-size:1.15em; font-weight:800; background:linear-gradient(135deg,#f59e0b,#fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:monospace; }
+        .hstat-label { font-size:0.62em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px; }
+
+        /* HOW IT WORKS */
+        .section { max-width:900px; margin:0 auto; padding:48px 28px 0; }
+        .section-label { font-size:0.72em; font-weight:700; letter-spacing:0.2em; color:#f59e0b; text-transform:uppercase; margin-bottom:20px; }
+        .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+        .step { background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.12); border-radius:12px; padding:20px 18px; }
+        .step-num { font-size:0.65em; font-weight:700; letter-spacing:0.15em; color:#f59e0b; text-transform:uppercase; margin-bottom:8px; opacity:0.7; }
+        .step-title { font-size:0.9em; font-weight:700; color:rgba(255,255,255,0.85); margin-bottom:6px; }
+        .step-desc { font-size:0.78em; color:rgba(255,255,255,0.38); line-height:1.6; }
+        .step-mono { font-family:monospace; font-size:0.75em; color:rgba(245,158,11,0.65); margin-top:6px; background:rgba(245,158,11,0.06); border-radius:4px; padding:4px 8px; display:inline-block; }
+
+        /* CHART */
+        .chart-section { max-width:900px; margin:0 auto; padding:48px 28px 0; }
+        .chart-wrap { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:28px; }
+        .chart-title { font-size:0.78em; font-weight:700; color:rgba(255,255,255,0.6); margin-bottom:4px; }
+        .chart-sub { font-size:0.68em; color:rgba(255,255,255,0.25); margin-bottom:24px; font-family:monospace; }
+        .chart-svg-wrap { position:relative; }
+        svg.training-chart { width:100%; height:220px; display:block; overflow:visible; }
+
+        /* COMPONENTS GRID */
+        .components-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; margin-top:20px; }
+        .component-card { background:rgba(245,158,11,0.04); border:1px solid rgba(245,158,11,0.15); border-radius:10px; padding:14px 12px; text-align:center; }
+        .comp-name { font-size:0.8em; font-weight:700; color:#f59e0b; margin-bottom:4px; }
+        .comp-desc { font-size:0.65em; color:rgba(255,255,255,0.3); line-height:1.4; }
+
+        /* DEMO */
+        .demo-section { max-width:900px; margin:0 auto; padding:40px 28px 64px; }
+        .demo-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:28px; }
+        .run-btn { padding:12px 30px; background:linear-gradient(135deg,#f59e0b,#d97706); color:#030810; border:none; border-radius:10px; font-size:0.92em; font-weight:800; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.1s; letter-spacing:0.04em; }
+        .run-btn:hover { opacity:0.88; transform:translateY(-1px); }
+        .run-btn:disabled { opacity:0.4; transform:none; cursor:default; }
+        .result-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:26px; animation:fadeUp 0.3s ease; margin-top:20px; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+        .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; }
+        .metric { background:rgba(255,255,255,0.04); border-radius:8px; padding:14px; }
+        .metric-label { font-size:0.62em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px; }
+        .metric-val { font-size:1.2em; font-weight:700; font-family:monospace; color:white; }
+        .metric-unit { font-size:0.58em; opacity:0.5; }
+        .api-note { margin-top:14px; font-size:0.66em; color:rgba(255,255,255,0.18); font-family:monospace; }
+        .api-note a { color:rgba(245,158,11,0.45); text-decoration:none; }
+        .error-box { color:#ef4444; font-family:monospace; font-size:0.85em; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:16px; }
+        .error-box a { color:#f59e0b; }
+        .result-desc { font-size:0.82em; color:rgba(255,255,255,0.4); margin-bottom:18px; line-height:1.6; }
+
+        footer { text-align:center; padding:32px 24px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.72em; color:rgba(255,255,255,0.2); margin-top:20px; }
+        footer a { color:rgba(245,158,11,0.4); text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">VASE</div>
+    <div class="live-pill"><span class="dot"></span>LIVE DEMO</div>
+</div>
+
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="hero-eyebrow">Pacific Platform · Claims 4, 33–40</div>
+        <h1>Autonomous Corpus Building<br>via <span>RL + PCF Reward Signal</span></h1>
+        <p class="hero-sub">A reinforcement learning agent autonomously selects documents to build a high-quality corpus. PCF convergence C = 1/(1+σ²) is the reward signal. Every decision is SHA-256 hash-chained and auditable. Zero human labels.</p>
+        <div class="hero-stats">
+            <div class="hstat"><div class="hstat-val">0.42→0.771</div><div class="hstat-label">Convergence gain</div></div>
+            <div class="hstat"><div class="hstat-val">47</div><div class="hstat-label">Episodes to goal</div></div>
+            <div class="hstat"><div class="hstat-val">915</div><div class="hstat-label">SHA-256 decisions</div></div>
+            <div class="hstat"><div class="hstat-val">0</div><div class="hstat-label">Human labels</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+    <div class="section-label">How It Works</div>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">Step 1</div>
+            <div class="step-title">RL Agent</div>
+            <div class="step-desc">Policy network selects candidate documents from a pool. RSSM world model predicts structural quality of each candidate before committing to the corpus.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 2</div>
+            <div class="step-title">PCF Reward</div>
+            <div class="step-desc">Convergence C = 1/(1+σ²) computed on the updated corpus. Reward R = clip(log1p(C_new − C_old) / 10, −1, 1). Reward signal is fully structural — no human preference required.</div>
+            <div class="step-mono">R_PCF = clip(log1p(ΔC)/10, -1, 1)</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 3</div>
+            <div class="step-title">Safety Shield</div>
+            <div class="step-desc">5-gate veto: (1) convergence improvement, (2) minimum C threshold, (3) topical relevance, (4) no contradictions, (5) non-increasing variance. All 5 must pass.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 4</div>
+            <div class="step-title">Audit Log</div>
+            <div class="step-desc">Every accept/reject decision SHA-256 hash-chained with the previous decision. 915 total logged decisions in the measured training run. Fully reproducible.</div>
+        </div>
+    </div>
+</div>
+
+<!-- TRAINING CHART -->
+<div class="chart-section">
+    <div class="section-label">Actual Training Curve</div>
+    <div class="chart-wrap">
+        <div class="chart-title">Corpus Convergence C over Training Episodes</div>
+        <div class="chart-sub">Real data · target_convergence=0.70 · goal reached episode 47 · C: 0.42 → 0.771</div>
+        <div class="chart-svg-wrap">
+            <svg class="training-chart" viewBox="0 0 800 200" preserveAspectRatio="none" id="chart-svg">
+                <!-- Rendered by JS below -->
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- VASE COMPONENTS -->
+<div class="chart-section" style="padding-top:32px;">
+    <div class="section-label">VASE Components</div>
+    <div class="components-grid">
+        <div class="component-card"><div class="comp-name">Encoder</div><div class="comp-desc">Document → latent state embedding</div></div>
+        <div class="component-card"><div class="comp-name">RSSM</div><div class="comp-desc">Recurrent state-space world model</div></div>
+        <div class="component-card"><div class="comp-name">Policy</div><div class="comp-desc">Document selection action network</div></div>
+        <div class="component-card"><div class="comp-name">Critic</div><div class="comp-desc">Value function for RL training</div></div>
+        <div class="component-card"><div class="comp-name">ICM</div><div class="comp-desc">Intrinsic curiosity module</div></div>
+        <div class="component-card"><div class="comp-name">RND</div><div class="comp-desc">Random network distillation</div></div>
+        <div class="component-card"><div class="comp-name">DIAYN</div><div class="comp-desc">Diversity via skill learning</div></div>
+    </div>
+</div>
+
+<!-- RUN DEMO -->
+<div class="demo-section">
+    <div class="section-label">Live Agent Demo</div>
+    <div class="demo-card">
+        <div style="font-size:0.85em;color:rgba(255,255,255,0.4);margin-bottom:20px;line-height:1.7;">
+            Runs a mini VASE agent episode against the live API. The agent selects documents, PCF scores the resulting corpus, and the safety shield validates each decision. All decisions are logged and hash-chained.
+        </div>
+        <button id="run-btn" class="run-btn" onclick="runEpisode()">Run Mini Episode →</button>
+        <div id="episode-result" style="display:none;"></div>
+    </div>
+</div>
+
+<footer>
+    Pacific Platform · Astrognosy AI · Patent Pending U.S. Prov. 63/978,633
+</footer>
+
+<script>
+const VASE_API = 'https://vase-pcf-api-production.up.railway.app';
+
+// Training data — real measured convergence curve
+const TRAINING_DATA = [
+    {ep:1, c:0.420}, {ep:5, c:0.490}, {ep:10, c:0.550}, {ep:15, c:0.600},
+    {ep:20, c:0.630}, {ep:25, c:0.660}, {ep:30, c:0.680}, {ep:35, c:0.700},
+    {ep:40, c:0.710}, {ep:45, c:0.720}, {ep:47, c:0.771}, {ep:50, c:0.771}
+];
+
+function renderChart() {
+    const svg = document.getElementById('chart-svg');
+    const W = 800, H = 200;
+    const pad = { l:50, r:20, t:20, b:30 };
+    const plotW = W - pad.l - pad.r;
+    const plotH = H - pad.t - pad.b;
+
+    const maxEp = 50, minC = 0.38, maxC = 0.82;
+    const xScale = ep => pad.l + (ep / maxEp) * plotW;
+    const yScale = c  => pad.t + plotH - ((c - minC) / (maxC - minC)) * plotH;
+
+    let html = '';
+
+    // Grid lines
+    [0.4, 0.5, 0.6, 0.70, 0.771, 0.80].forEach(c => {
+        const y = yScale(c);
+        const isTarget = c === 0.70;
+        const isGoal = c === 0.771;
+        const color = isTarget ? 'rgba(245,158,11,0.3)' : isGoal ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.06)';
+        html += `<line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="${color}" stroke-width="${isTarget||isGoal?1.5:1}" stroke-dasharray="${isTarget?'4,3':isGoal?'4,3':''}"/>`;
+        const label = isTarget ? 'Target 0.70' : isGoal ? 'Goal 0.771' : c.toFixed(2);
+        const labelColor = isTarget ? '#f59e0b' : isGoal ? '#10b981' : 'rgba(255,255,255,0.25)';
+        html += `<text x="${pad.l - 4}" y="${y + 4}" text-anchor="end" font-size="10" fill="${labelColor}" font-family="monospace">${label}</text>`;
+    });
+
+    // Episode axis labels
+    [0, 10, 20, 30, 40, 50].forEach(ep => {
+        const x = xScale(ep);
+        html += `<line x1="${x}" y1="${pad.t}" x2="${x}" y2="${pad.t + plotH}" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+        html += `<text x="${x}" y="${H - 4}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.25)" font-family="monospace">${ep}</text>`;
+    });
+    html += `<text x="${pad.l + plotW/2}" y="${H + 2}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)" font-family="monospace">Episode</text>`;
+
+    // Build polyline path
+    const pts = TRAINING_DATA.map(d => `${xScale(d.ep)},${yScale(d.c)}`).join(' ');
+
+    // Fill area under curve
+    const firstX = xScale(TRAINING_DATA[0].ep);
+    const lastX = xScale(TRAINING_DATA[TRAINING_DATA.length-1].ep);
+    const baseY = pad.t + plotH;
+    const fillPts = `${firstX},${baseY} ${pts} ${lastX},${baseY}`;
+    html += `<polygon points="${fillPts}" fill="url(#chartFill)" opacity="0.4"/>`;
+
+    // Gradient def
+    html = `<defs>
+        <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02"/>
+        </linearGradient>
+    </defs>` + html;
+
+    // Line
+    html += `<polyline points="${pts}" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+    // Data points (small dots)
+    TRAINING_DATA.forEach(d => {
+        if (d.ep === 47) return; // handled specially
+        const x = xScale(d.ep), y = yScale(d.c);
+        html += `<circle cx="${x}" cy="${y}" r="3" fill="#f59e0b" opacity="0.7"/>`;
+    });
+
+    // Goal point at ep 47
+    const gx = xScale(47), gy = yScale(0.771);
+    html += `<circle cx="${gx}" cy="${gy}" r="7" fill="none" stroke="#10b981" stroke-width="2"/>`;
+    html += `<circle cx="${gx}" cy="${gy}" r="3.5" fill="#10b981"/>`;
+    // Star label
+    html += `<line x1="${gx}" y1="${gy - 10}" x2="${gx}" y2="${gy - 36}" stroke="#10b981" stroke-width="1" stroke-dasharray="3,2"/>`;
+    html += `<rect x="${gx - 58}" y="${gy - 52}" width="116" height="18" rx="4" fill="rgba(16,185,129,0.15)" stroke="rgba(16,185,129,0.35)" stroke-width="1"/>`;
+    html += `<text x="${gx}" y="${gy - 39}" text-anchor="middle" font-size="10" fill="#10b981" font-family="monospace" font-weight="bold">Goal Reached · C=0.771 · ep47</text>`;
+
+    svg.innerHTML = html;
+}
+
+renderChart();
+
+async function runEpisode() {
+    const btn = document.getElementById('run-btn');
+    btn.textContent = 'Agent Running…';
+    btn.disabled = true;
+    document.getElementById('episode-result').style.display = 'none';
+
+    try {
+        // Try GET /api/docs first to check API health
+        const docsRes = await fetch(VASE_API + '/api/docs');
+        if (!docsRes.ok && docsRes.status !== 404) throw new Error('HTTP ' + docsRes.status);
+
+        // Run mini episode
+        const res = await fetch(VASE_API + '/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ episodes: 5, steps_per_episode: 3, target_convergence: 0.70 })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const finalC = d.final_convergence != null ? d.final_convergence : (d.convergence != null ? d.convergence : null);
+        const epRan = d.episodes_run != null ? d.episodes_run : (d.episodes != null ? d.episodes : 5);
+        const docsAdded = d.documents_added != null ? d.documents_added : (d.docs_added != null ? d.docs_added : '—');
+        const decisions = d.decisions_audited != null ? d.decisions_audited : (d.decisions != null ? d.decisions : '—');
+        const goalMet = d.goal_reached || (finalC != null && finalC >= 0.70);
+
+        document.getElementById('episode-result').innerHTML = `
+            <div class="result-card">
+                ${goalMet ? '<div style="font-size:0.82em;color:#10b981;font-weight:700;margin-bottom:14px;">Target convergence reached</div>' : ''}
+                <div class="metrics">
+                    ${finalC != null ? `<div class="metric"><div class="metric-label">Final C</div><div class="metric-val" style="color:#f59e0b;">${finalC.toFixed(3)}</div></div>` : ''}
+                    <div class="metric"><div class="metric-label">Episodes Run</div><div class="metric-val">${epRan}</div></div>
+                    <div class="metric"><div class="metric-label">Docs Added</div><div class="metric-val">${docsAdded}</div></div>
+                    <div class="metric"><div class="metric-label">Decisions</div><div class="metric-val">${decisions}</div></div>
+                </div>
+                <div class="api-note">VASE API · <a href="${VASE_API}/api/docs" target="_blank">${VASE_API}</a> · RL agent · PCF reward signal · SHA-256 audit</div>
+            </div>`;
+        document.getElementById('episode-result').style.display = 'block';
+
+    } catch(e) {
+        const isDown = e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('404');
+        document.getElementById('episode-result').innerHTML = `
+            <div class="result-card">
+                <div class="error-box">
+                    ${isDown
+                        ? `Live agent paused — showing actual training history above.<br><br>API endpoint: <a href="${VASE_API}" target="_blank">${VASE_API}</a><br><small style="opacity:0.6;">${e.message}</small>`
+                        : `Error: ${e.message}`
+                    }
+                </div>
+            </div>`;
+        document.getElementById('episode-result').style.display = 'block';
+    }
+
+    btn.textContent = 'Run Mini Episode →';
+    btn.disabled = false;
+}
+</script>
+</body>
+</html>

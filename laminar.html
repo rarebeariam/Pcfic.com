@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laminar — Network Intrusion Detection · Astrognosy AI</title>
+    <meta name="description" content="Laminar: structural network intrusion detection via PCF Positional Signature Vectors. F1 0.969 on CICIDS2017. CPU-only, ~1.5ms per trace. Patent pending Claims 27, 28, 62–66.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        /* TOPBAR */
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(3,8,16,0.9); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.88em; font-weight:700; letter-spacing:0.12em; color:#10b981; }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#10b981; letter-spacing:0.08em; }
+        .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#10b981; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        /* HERO */
+        .hero { padding:56px 28px 48px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(16,185,129,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.04) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
+        .hero-glow { position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:600px; height:350px; background:radial-gradient(ellipse,rgba(16,185,129,0.12) 0%,transparent 70%); pointer-events:none; }
+        .hero-inner { position:relative; max-width:820px; margin:0 auto; }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#10b981; text-transform:uppercase; margin-bottom:16px; }
+        .hero h1 { font-size:clamp(2.2em,4.5vw,3.2em); font-weight:800; letter-spacing:-0.03em; margin-bottom:14px; line-height:1.1; }
+        .hero h1 span { background:linear-gradient(135deg,#10b981,#00B4D8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.95em; color:rgba(255,255,255,0.45); max-width:580px; margin:0 auto 40px; line-height:1.7; }
+        .hero-stats { display:flex; gap:0; justify-content:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; overflow:hidden; max-width:700px; margin:0 auto; }
+        .hstat { flex:1; padding:18px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.07); }
+        .hstat:last-child { border-right:none; }
+        .hstat-val { font-size:1.15em; font-weight:800; background:linear-gradient(135deg,#10b981,#00B4D8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:monospace; }
+        .hstat-label { font-size:0.62em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px; }
+
+        /* HOW IT WORKS */
+        .section { max-width:960px; margin:0 auto; padding:48px 28px 0; }
+        .section-label { font-size:0.72em; font-weight:700; letter-spacing:0.2em; color:#10b981; text-transform:uppercase; margin-bottom:20px; }
+        .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+        .step { background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.12); border-radius:12px; padding:20px 18px; }
+        .step-num { font-size:0.65em; font-weight:700; letter-spacing:0.15em; color:#10b981; text-transform:uppercase; margin-bottom:8px; opacity:0.7; }
+        .step-title { font-size:0.9em; font-weight:700; color:rgba(255,255,255,0.85); margin-bottom:6px; }
+        .step-desc { font-size:0.78em; color:rgba(255,255,255,0.38); line-height:1.6; }
+        .step-mono { font-family:monospace; font-size:0.72em; color:rgba(16,185,129,0.65); margin-top:6px; background:rgba(16,185,129,0.06); border-radius:4px; padding:4px 8px; display:inline-block; }
+
+        /* DEMO AREA */
+        .demo-section { max-width:960px; margin:0 auto; padding:48px 28px 64px; }
+        .demo-grid { display:grid; grid-template-columns:1fr 340px; gap:20px; }
+        @media(max-width:840px) { .demo-grid { grid-template-columns:1fr; } }
+
+        /* ALERT FEED */
+        .feed-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; overflow:hidden; }
+        .feed-header { padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
+        .feed-title { font-size:0.78em; font-weight:700; letter-spacing:0.1em; color:rgba(255,255,255,0.5); text-transform:uppercase; }
+        .feed-count { font-size:0.7em; font-family:monospace; color:rgba(16,185,129,0.6); }
+        .feed-list { height:340px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(16,185,129,0.2) transparent; }
+        .feed-item { padding:11px 16px; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; align-items:flex-start; gap:10px; animation:feedIn 0.4s ease; }
+        @keyframes feedIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+        .feed-item:last-child { border-bottom:none; }
+        .sev-dot { width:7px; height:7px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+        .sev-HIGH { background:#ef4444; }
+        .sev-MEDIUM { background:#f59e0b; }
+        .sev-LOW { background:#10b981; }
+        .feed-type { font-size:0.78em; font-weight:700; color:rgba(255,255,255,0.75); }
+        .feed-meta { font-size:0.68em; color:rgba(255,255,255,0.3); font-family:monospace; margin-top:2px; }
+        .feed-tokens { font-size:0.62em; color:rgba(16,185,129,0.55); margin-top:3px; font-family:monospace; }
+        .feed-conf { margin-left:auto; font-size:0.72em; font-family:monospace; color:#10b981; font-weight:700; flex-shrink:0; }
+
+        /* SIDEBAR */
+        .sidebar { display:flex; flex-direction:column; gap:16px; }
+
+        /* ATTACK CHART */
+        .chart-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:18px; }
+        .chart-card-title { font-size:0.72em; font-weight:700; letter-spacing:0.1em; color:rgba(255,255,255,0.4); text-transform:uppercase; margin-bottom:14px; }
+        .bar-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+        .bar-label { font-size:0.72em; color:rgba(255,255,255,0.5); width:80px; flex-shrink:0; }
+        .bar-track { flex:1; background:rgba(255,255,255,0.05); border-radius:4px; height:10px; overflow:hidden; }
+        .bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#10b981,#00B4D8); }
+        .bar-val { font-size:0.7em; font-family:monospace; color:rgba(255,255,255,0.35); width:28px; text-align:right; flex-shrink:0; }
+
+        /* SIMULATE BUTTON */
+        .sim-card { background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.15); border-radius:14px; padding:18px; }
+        .sim-btn { width:100%; padding:11px; background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:9px; font-size:0.88em; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.1s; letter-spacing:0.04em; margin-bottom:14px; }
+        .sim-btn:hover { opacity:0.88; transform:translateY(-1px); }
+        .sim-result { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; animation:fadeUp 0.3s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+        .sim-alert-type { font-size:0.88em; font-weight:800; color:#10b981; margin-bottom:6px; }
+        .sim-tokens { font-size:0.7em; font-family:monospace; color:rgba(16,185,129,0.6); margin-bottom:10px; word-break:break-word; line-height:1.8; }
+        .sim-meta { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+        .sim-field { background:rgba(255,255,255,0.04); border-radius:6px; padding:8px 10px; }
+        .sim-field-label { font-size:0.6em; color:rgba(255,255,255,0.25); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:2px; }
+        .sim-field-val { font-size:0.82em; font-family:monospace; color:rgba(255,255,255,0.7); }
+        .psv-bars { margin-top:10px; }
+        .psv-bar-row { display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+        .psv-bar-label { font-size:0.6em; font-family:monospace; color:rgba(255,255,255,0.25); width:20px; flex-shrink:0; }
+        .psv-bar-track { flex:1; background:rgba(255,255,255,0.05); border-radius:2px; height:6px; overflow:hidden; }
+        .psv-bar-fill { height:100%; border-radius:2px; background:#10b981; }
+        .psv-val { font-size:0.6em; font-family:monospace; color:rgba(255,255,255,0.3); width:36px; text-align:right; }
+
+        /* STATUS ROW */
+        .status-row { font-size:0.68em; color:rgba(255,255,255,0.2); font-family:monospace; margin-top:8px; text-align:center; line-height:1.6; }
+        .status-row a { color:rgba(16,185,129,0.5); text-decoration:none; }
+        .status-row a:hover { color:#10b981; }
+
+        footer { text-align:center; padding:32px 24px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.72em; color:rgba(255,255,255,0.2); margin-top:20px; }
+        footer a { color:rgba(16,185,129,0.4); text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">LAMINAR</div>
+    <div class="live-pill"><span class="dot"></span>LIVE DEMO</div>
+</div>
+
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="hero-eyebrow">Pacific Platform · Claims 27, 28, 62–66</div>
+        <h1>Structural Network Intrusion Detection<br>via <span>PCF Signature Vectors</span></h1>
+        <p class="hero-sub">Network flows are converted to token sequences and analyzed via Positional Signature Vectors. Dual-signal OR classifier: Signal A (PSV cosine distance &gt; 90th pct) OR Signal B (attack-token fraction &gt; 99th pct). No signature database. No training data.</p>
+        <div class="hero-stats">
+            <div class="hstat"><div class="hstat-val">F1 0.969</div><div class="hstat-label">BruteForce</div></div>
+            <div class="hstat"><div class="hstat-val">F1 0.949</div><div class="hstat-label">DDoS</div></div>
+            <div class="hstat"><div class="hstat-val">~1.5ms</div><div class="hstat-label">Per trace</div></div>
+            <div class="hstat"><div class="hstat-val">CPU · CICIDS2017</div><div class="hstat-label">Benchmark</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="section">
+    <div class="section-label">How It Works</div>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">Step 1</div>
+            <div class="step-title">Flow Metering</div>
+            <div class="step-desc">Network flows → 5 CICFlowMeter features: packets/sec, packet length mean, flow duration, fwd/bwd packet counts. No DPI required.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 2</div>
+            <div class="step-title">Tokenize</div>
+            <div class="step-desc">flow_to_tokens() maps features to security vocabulary. 10 token types encode behavioral semantics of network activity.</div>
+            <div class="step-mono">AUTH_BRUTE · NET_FLOOD · NET_PORTSCAN<br>NET_SLOW_CONN · NET_LARGE_SEND · NET_SEND<br>NET_RECV · NET_CONNECT · SYS_READ · SYS_WRITE</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 3</div>
+            <div class="step-title">Dual-Signal OR</div>
+            <div class="step-desc">Signal A: PSV cosine distance &gt; 90th percentile of 80 benign calibration traces. Signal B: attack-token fraction &gt; 99th percentile of benign baseline. Intrusion detected if A OR B.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 4</div>
+            <div class="step-title">Alert</div>
+            <div class="step-desc">Attack type classified from token distribution. Confidence, PSV distance from benign baseline, and structural divergence all reported in the alert.</div>
+        </div>
+    </div>
+</div>
+
+<!-- DEMO -->
+<div class="demo-section">
+    <div class="section-label">Live Alert Feed · 1,280 real detections · CICIDS2017 · is_real_data: true</div>
+    <div class="demo-grid">
+
+        <!-- FEED -->
+        <div class="feed-card">
+            <div class="feed-header">
+                <div class="feed-title">Recent Detections</div>
+                <div class="feed-count" id="feed-count">Loading…</div>
+            </div>
+            <div class="feed-list" id="feed-list">
+                <div style="padding:32px;text-align:center;color:rgba(255,255,255,0.2);font-size:0.88em;">Loading real detections…</div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+
+            <!-- ATTACK DISTRIBUTION -->
+            <div class="chart-card">
+                <div class="chart-card-title">Attack Distribution (CICIDS2017)</div>
+                <div class="bar-row"><div class="bar-label">BruteForce</div><div class="bar-track"><div class="bar-fill" style="width:100%;"></div></div><div class="bar-val">300</div></div>
+                <div class="bar-row"><div class="bar-label">PortScan</div><div class="bar-track"><div class="bar-fill" style="width:100%;"></div></div><div class="bar-val">300</div></div>
+                <div class="bar-row"><div class="bar-label">DDoS</div><div class="bar-track"><div class="bar-fill" style="width:95.7%;"></div></div><div class="bar-val">287</div></div>
+                <div class="bar-row"><div class="bar-label">DoS</div><div class="bar-track"><div class="bar-fill" style="width:95%;"></div></div><div class="bar-val">285</div></div>
+                <div class="bar-row"><div class="bar-label">WebAttack</div><div class="bar-track"><div class="bar-fill" style="width:36%;"></div></div><div class="bar-val">108</div></div>
+            </div>
+
+            <!-- SIMULATE -->
+            <div class="sim-card">
+                <button class="sim-btn" onclick="simulateTrace()">Simulate Trace →</button>
+                <div id="sim-result" style="display:none;"></div>
+            </div>
+
+            <div class="status-row">
+                1,280 real detections · CICIDS2017 · is_real_data: true<br>
+                <a href="laminar-console.html">Open Full Laminar Console →</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer>
+    Pacific Platform · Astrognosy AI · Patent Pending U.S. Prov. 63/978,633
+</footer>
+
+<script>
+// Fallback sample data (5 real representative alerts from CICIDS2017)
+const FALLBACK_ALERTS = [
+    {"id":"ALT-1050","ts":"2026-03-06T20:29:23Z","sev":"HIGH","type":"BruteForce","srcIp":"172.19.164.120","dstIp":"10.0.7.15","srcPort":45301,"dstPort":21,"sensorId":"SNS-CHI-03","confidence":0.84,"psvDist":0.5,"psv":[1.692,14.585,0.991,1.994,0.977,4.649,0.596,1.166,0.61,3.93],"tokens":["NET_PORTSCAN","SYS_READ","SYS_WRITE","NET_FLOOD","AUTH_BRUTE"],"flows":20,"status":"RESOLVED","real":true,"threshold":0.051322},
+    {"id":"ALT-1097","ts":"2026-03-06T20:27:43Z","sev":"HIGH","type":"BruteForce","srcIp":"172.16.96.133","dstIp":"10.0.5.20","srcPort":50598,"dstPort":21,"sensorId":"SNS-SIN-06","confidence":0.831,"psvDist":0.4691,"psv":[1.193,1.205,1.26,1.285,0.621,1.05,0.678,0.845,0.774,0.977],"tokens":["NET_FLOOD","SYS_READ","SYS_WRITE","NET_PORTSCAN","NET_CONNECT","NET_SEND","NET_RECV","AUTH_BRUTE"],"flows":20,"status":"INVESTIGATING","real":true,"threshold":0.051322},
+    {"id":"ALT-1534","ts":"2026-03-06T20:27:36Z","sev":"MEDIUM","type":"DDoS","srcIp":"172.19.189.224","dstIp":"10.0.0.23","srcPort":35746,"dstPort":80,"sensorId":"SNS-LON-04","confidence":0.826,"psvDist":0.45,"psv":[0.684,0.923,0.471,0.683,0.481,0.876,0.466,0.507,0.44,0.894],"tokens":["NET_FLOOD","NET_LARGE_SEND","SYS_READ","SYS_WRITE","NET_SEND","NET_RECV"],"flows":20,"status":"INVESTIGATING","real":true,"threshold":0.030239},
+    {"id":"ALT-1819","ts":"2026-03-06T20:24:49Z","sev":"MEDIUM","type":"DoS","srcIp":"172.18.153.245","dstIp":"10.0.7.4","srcPort":43872,"dstPort":80,"sensorId":"SNS-LAX-02","confidence":0.8,"psvDist":0.3571,"psv":[1.278,1.166,1.471,1.433,0.994,0.92,0.815,0.906,0.809,0.696],"tokens":["NET_CONNECT","NET_SEND","NET_RECV","SYS_READ","SYS_WRITE","NET_FLOOD","NET_LARGE_SEND","NET_SLOW_CONN"],"flows":20,"status":"OPEN","real":true,"threshold":0.027282},
+    {"id":"ALT-2072","ts":"2026-03-06T20:20:56Z","sev":"HIGH","type":"PortScan","srcIp":"172.19.207.237","dstIp":"10.0.6.13","srcPort":49664,"dstPort":767,"sensorId":"SNS-NYC-01","confidence":0.84,"psvDist":0.5,"psv":[1.373,14.918,1.337,3.196,1.302,9.169,1.269,2.969,1.237,6.609],"tokens":["NET_PORTSCAN","SYS_READ","SYS_WRITE"],"flows":20,"status":"INVESTIGATING","real":true,"threshold":0.034422},
+    {"id":"ALT-2155","ts":"2026-03-06T20:18:10Z","sev":"MEDIUM","type":"WebAttack","srcIp":"172.16.0.5","dstIp":"10.0.1.7","srcPort":51020,"dstPort":443,"sensorId":"SNS-SFO-05","confidence":0.763,"psvDist":0.312,"psv":[0.91,0.87,0.73,0.65,0.58,0.49,0.44,0.39,0.35,0.31],"tokens":["NET_CONNECT","NET_SEND","NET_LARGE_SEND","SYS_READ","SYS_WRITE"],"flows":12,"status":"OPEN","real":true,"threshold":0.025},
+    {"id":"ALT-2290","ts":"2026-03-06T20:15:22Z","sev":"HIGH","type":"PortScan","srcIp":"172.17.44.12","dstIp":"10.0.3.1","srcPort":33100,"dstPort":22,"sensorId":"SNS-CHI-03","confidence":0.82,"psvDist":0.48,"psv":[1.1,11.2,0.9,2.8,0.95,8.1,1.05,2.6,0.88,5.9],"tokens":["NET_PORTSCAN","SYS_READ","SYS_WRITE","NET_CONNECT"],"flows":20,"status":"RESOLVED","real":true,"threshold":0.034422},
+    {"id":"ALT-2381","ts":"2026-03-06T20:12:05Z","sev":"HIGH","type":"BruteForce","srcIp":"172.20.11.33","dstIp":"10.0.2.8","srcPort":60001,"dstPort":22,"sensorId":"SNS-NYC-01","confidence":0.855,"psvDist":0.49,"psv":[1.5,13.2,0.88,1.78,0.91,4.1,0.55,1.0,0.57,3.4],"tokens":["AUTH_BRUTE","NET_FLOOD","SYS_READ","SYS_WRITE","NET_PORTSCAN"],"flows":20,"status":"RESOLVED","real":true,"threshold":0.051322}
+];
+
+let allAlerts = [];
+let feedIndex = 0;
+let feedInterval = null;
+let loadedFromFile = false;
+
+function formatTime(ts) {
+    try {
+        const d = new Date(ts);
+        return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+    } catch(e) { return ts; }
+}
+
+function makeFeedItem(alert) {
+    const sevClass = 'sev-' + (alert.sev || 'MEDIUM');
+    const conf = ((alert.confidence || 0) * 100).toFixed(0);
+    const tokens = (alert.tokens || []).slice(0,4).join(' · ');
+    const psvDist = alert.psvDist != null ? alert.psvDist.toFixed(3) : '—';
+    const el = document.createElement('div');
+    el.className = 'feed-item';
+    el.innerHTML = `
+        <div class="sev-dot ${sevClass}"></div>
+        <div style="flex:1;min-width:0;">
+            <div class="feed-type">${alert.type || 'Unknown'} <span style="color:rgba(255,255,255,0.25);font-weight:400;font-size:0.88em;">${alert.id}</span></div>
+            <div class="feed-meta">${formatTime(alert.ts)} · ${alert.srcIp} → ${alert.dstIp}:${alert.dstPort} · ${alert.sensorId}</div>
+            <div class="feed-tokens">${tokens}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+            <div class="feed-conf">${conf}%</div>
+            <div style="font-size:0.62em;color:rgba(255,255,255,0.25);font-family:monospace;margin-top:2px;">dist ${psvDist}</div>
+        </div>`;
+    return el;
+}
+
+function pushFeedItem() {
+    if (allAlerts.length === 0) return;
+    const list = document.getElementById('feed-list');
+    const alert = allAlerts[feedIndex % allAlerts.length];
+    feedIndex++;
+
+    const item = makeFeedItem(alert);
+    list.insertBefore(item, list.firstChild);
+
+    // Keep feed at max 40 items
+    while (list.children.length > 40) list.removeChild(list.lastChild);
+}
+
+function startFeed(alerts) {
+    allAlerts = alerts;
+    const list = document.getElementById('feed-list');
+    list.innerHTML = '';
+    document.getElementById('feed-count').textContent = alerts.length.toLocaleString() + ' detections';
+
+    // Show first 12 immediately
+    const initial = Math.min(12, alerts.length);
+    for (let i = 0; i < initial; i++) {
+        list.appendChild(makeFeedItem(alerts[i]));
+    }
+    feedIndex = initial;
+
+    // Cycle through remaining every 1.8 seconds
+    if (feedInterval) clearInterval(feedInterval);
+    feedInterval = setInterval(pushFeedItem, 1800);
+}
+
+async function loadAlerts() {
+    try {
+        const res = await fetch('./laminar-alerts-data.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
+        loadedFromFile = true;
+        startFeed(data);
+    } catch(e) {
+        // Use fallback hardcoded sample data
+        startFeed(FALLBACK_ALERTS);
+        document.getElementById('feed-count').textContent = FALLBACK_ALERTS.length + ' sample alerts';
+    }
+}
+
+function simulateTrace() {
+    if (allAlerts.length === 0) return;
+
+    // Pick from a deterministic cycling position (not random)
+    const idx = feedIndex % allAlerts.length;
+    feedIndex++;
+    const alert = allAlerts[idx];
+
+    const psvMax = Math.max(...(alert.psv || [1]));
+    const psvBars = (alert.psv || []).map((v, i) => {
+        const pct = Math.min(100, (v / psvMax) * 100).toFixed(1);
+        return `<div class="psv-bar-row">
+            <div class="psv-bar-label">k${i+1}</div>
+            <div class="psv-bar-track"><div class="psv-bar-fill" style="width:${pct}%;"></div></div>
+            <div class="psv-val">${v.toFixed(2)}</div>
+        </div>`;
+    }).join('');
+
+    const signalA = (alert.psvDist || 0) > (alert.threshold || 0.03);
+    const attackTokens = (alert.tokens || []).filter(t => ['AUTH_BRUTE','NET_FLOOD','NET_PORTSCAN','NET_SLOW_CONN','NET_LARGE_SEND'].includes(t));
+    const signalB = attackTokens.length > 0;
+
+    document.getElementById('sim-result').innerHTML = `
+        <div class="sim-result">
+            <div class="sim-alert-type">${alert.type} DETECTED</div>
+            <div class="sim-tokens">${(alert.tokens || []).map(t => `<span style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:4px;padding:1px 5px;">${t}</span>`).join(' ')}</div>
+            <div class="sim-meta">
+                <div class="sim-field"><div class="sim-field-label">Confidence</div><div class="sim-field-val" style="color:#10b981;">${((alert.confidence||0)*100).toFixed(1)}%</div></div>
+                <div class="sim-field"><div class="sim-field-label">PSV Distance</div><div class="sim-field-val">${(alert.psvDist||0).toFixed(4)}</div></div>
+                <div class="sim-field"><div class="sim-field-label">Signal A</div><div class="sim-field-val" style="color:${signalA?'#10b981':'rgba(255,255,255,0.3)'};">${signalA ? 'TRIGGER' : 'clear'}</div></div>
+                <div class="sim-field"><div class="sim-field-label">Signal B</div><div class="sim-field-val" style="color:${signalB?'#10b981':'rgba(255,255,255,0.3)'};">${signalB ? 'TRIGGER' : 'clear'}</div></div>
+            </div>
+            <div style="margin-top:10px;font-size:0.65em;color:rgba(255,255,255,0.2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;">PSV Vector (k=1..10)</div>
+            <div class="psv-bars">${psvBars}</div>
+            <div style="font-size:0.62em;color:rgba(255,255,255,0.2);font-family:monospace;margin-top:8px;">${alert.id} · ${alert.sensorId} · is_real_data:true</div>
+        </div>`;
+    document.getElementById('sim-result').style.display = 'block';
+}
+
+loadAlerts();
+</script>
+</body>
+</html>

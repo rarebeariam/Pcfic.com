@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCF Router — Hybrid Inference Routing · Astrognosy AI</title>
+    <meta name="description" content="PCF Router: confidence-based hybrid routing. PCF handles high-confidence claims on CPU at $0.0003/query. Uncertain queries route to GPU/LLM. Patent pending Claims 5, 46.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        /* TOPBAR */
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(3,8,16,0.9); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.88em; font-weight:700; letter-spacing:0.12em; color:#00B4D8; }
+        .live-pill { display:flex; align-items:center; gap:6px; background:rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.3); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#00B4D8; letter-spacing:0.08em; }
+        .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#00B4D8; animation:pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        /* HERO */
+        .hero { padding:56px 28px 48px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(0,180,216,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,216,0.04) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
+        .hero-glow { position:absolute; top:-30%; left:50%; transform:translateX(-50%); width:600px; height:350px; background:radial-gradient(ellipse,rgba(0,180,216,0.12) 0%,transparent 70%); pointer-events:none; }
+        .hero-inner { position:relative; max-width:820px; margin:0 auto; }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#00B4D8; text-transform:uppercase; margin-bottom:16px; }
+        .hero h1 { font-size:clamp(2.2em,4.5vw,3.2em); font-weight:800; letter-spacing:-0.03em; margin-bottom:14px; line-height:1.1; }
+        .hero h1 span { background:linear-gradient(135deg,#00B4D8,#5B6ECC); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.95em; color:rgba(255,255,255,0.45); max-width:580px; margin:0 auto 40px; line-height:1.7; }
+        .hero-stats { display:flex; gap:0; justify-content:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; overflow:hidden; max-width:680px; margin:0 auto 40px; }
+        .hstat { flex:1; padding:18px 10px; text-align:center; border-right:1px solid rgba(255,255,255,0.07); }
+        .hstat:last-child { border-right:none; }
+        .hstat-val { font-size:1.15em; font-weight:800; background:linear-gradient(135deg,#00B4D8,#5B6ECC); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:monospace; }
+        .hstat-label { font-size:0.62em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px; }
+
+        /* ROUTING DIAGRAM */
+        .arch { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; max-width:720px; margin:0 auto; }
+        .arch-box { padding:14px 20px; border-radius:10px; text-align:center; font-size:0.82em; }
+        .arch-input { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.65); }
+        .arch-pcf { background:rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.3); color:#00B4D8; }
+        .arch-cpu { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; }
+        .arch-gpu { background:rgba(118,75,162,0.1); border:1px solid rgba(118,75,162,0.3); color:#a78bfa; }
+        .arch-arrow { font-size:1.4em; color:rgba(255,255,255,0.2); padding:0 6px; }
+        .arch-split { display:flex; flex-direction:column; gap:8px; }
+        .arch-label { font-size:0.6em; font-weight:600; letter-spacing:0.1em; margin-bottom:3px; opacity:0.65; }
+        .arch-val { font-size:0.88em; font-weight:700; }
+
+        /* HOW IT WORKS */
+        .how-section { max-width:900px; margin:0 auto; padding:48px 28px 0; }
+        .section-label { font-size:0.72em; font-weight:700; letter-spacing:0.2em; color:#00B4D8; text-transform:uppercase; margin-bottom:20px; }
+        .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+        .step { background:rgba(0,180,216,0.04); border:1px solid rgba(0,180,216,0.12); border-radius:12px; padding:20px 18px; }
+        .step-num { font-size:0.65em; font-weight:700; letter-spacing:0.15em; color:#00B4D8; text-transform:uppercase; margin-bottom:8px; opacity:0.7; }
+        .step-title { font-size:0.9em; font-weight:700; color:rgba(255,255,255,0.85); margin-bottom:6px; }
+        .step-desc { font-size:0.78em; color:rgba(255,255,255,0.38); line-height:1.6; }
+        .step-mono { font-family:monospace; font-size:0.75em; color:rgba(0,180,216,0.65); margin-top:6px; background:rgba(0,180,216,0.06); border-radius:4px; padding:4px 8px; display:inline-block; }
+
+        /* TABS */
+        .tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.07); max-width:900px; margin:48px auto 0; padding:0 28px; }
+        .tab { padding:14px 24px; font-size:0.88em; font-weight:600; color:rgba(255,255,255,0.35); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; letter-spacing:0.04em; }
+        .tab:hover { color:rgba(255,255,255,0.6); }
+        .tab.active { color:#00B4D8; border-bottom-color:#00B4D8; }
+
+        /* DEMO */
+        .demo-section { max-width:900px; margin:0 auto; padding:28px 28px 64px; }
+        .panel { display:none; }
+        .panel.active { display:block; }
+
+        /* INPUTS */
+        .input-label { font-size:0.7em; font-weight:700; letter-spacing:0.15em; color:rgba(255,255,255,0.28); text-transform:uppercase; margin-bottom:8px; }
+        .pcf-textarea { width:100%; padding:14px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:white; font-size:0.92em; font-family:inherit; resize:vertical; min-height:72px; outline:none; transition:border-color 0.2s; }
+        .pcf-textarea:focus { border-color:rgba(0,180,216,0.4); }
+        .docs-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:12px 0 0; }
+        @media(max-width:640px) { .docs-grid { grid-template-columns:1fr; } .two-col { grid-template-columns:1fr !important; } }
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .run-btn { margin-top:14px; padding:11px 28px; background:linear-gradient(135deg,#00B4D8,#0080aa); color:white; border:none; border-radius:10px; font-size:0.92em; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.2s,transform 0.1s; letter-spacing:0.04em; }
+        .run-btn:hover { opacity:0.88; transform:translateY(-1px); }
+        .run-btn:disabled { opacity:0.4; transform:none; cursor:default; }
+
+        /* CHIPS */
+        .chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+        .chip { padding:5px 13px; border-radius:16px; border:1px solid rgba(0,180,216,0.22); background:rgba(0,180,216,0.05); color:rgba(255,255,255,0.4); font-size:0.77em; cursor:pointer; font-family:inherit; transition:all 0.18s; }
+        .chip:hover { border-color:rgba(0,180,216,0.5); color:rgba(255,255,255,0.75); }
+        .chip.active { border-color:#00B4D8; color:#00B4D8; background:rgba(0,180,216,0.14); font-weight:600; }
+
+        /* RESULT */
+        .result-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:26px; animation:fadeUp 0.3s ease; margin-top:20px; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+        .route-header { display:flex; align-items:center; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
+        .route-badge { padding:8px 20px; border-radius:8px; font-weight:800; font-size:0.92em; letter-spacing:0.06em; }
+        .rb-cpu { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .rb-gpu { background:rgba(118,75,162,0.15); border:1px solid rgba(118,75,162,0.4); color:#a78bfa; }
+        .rb-unsupported { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .verdict-row { display:flex; align-items:center; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+        .verdict-badge { padding:7px 20px; border-radius:8px; font-weight:800; font-size:0.92em; letter-spacing:0.06em; }
+        .v-supported { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .v-contradicted { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .v-uncertain { background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#f59e0b; }
+        .conf-area { flex:1; min-width:200px; }
+        .conf-label { font-size:0.65em; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; }
+        .conf-track { background:rgba(255,255,255,0.07); border-radius:4px; height:6px; overflow:hidden; margin-bottom:5px; }
+        .conf-fill { height:100%; border-radius:4px; transition:width 0.7s ease; }
+        .conf-nums { font-size:0.78em; color:rgba(255,255,255,0.38); }
+        .route-reason { font-family:monospace; font-size:0.78em; color:rgba(255,255,255,0.38); background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:6px; padding:6px 12px; }
+        .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; margin-top:16px; }
+        .metric { background:rgba(255,255,255,0.04); border-radius:8px; padding:14px; }
+        .metric-label { font-size:0.62em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px; }
+        .metric-val { font-size:1.2em; font-weight:700; font-family:monospace; color:white; }
+        .metric-unit { font-size:0.58em; opacity:0.5; }
+        .contra-main { display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+        .contra-badge { padding:8px 20px; border-radius:8px; font-weight:800; font-size:0.92em; letter-spacing:0.05em; }
+        .cb-yes { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:#ef4444; }
+        .cb-no { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#10b981; }
+        .api-note { margin-top:14px; font-size:0.66em; color:rgba(255,255,255,0.18); font-family:monospace; }
+        .api-note a { color:rgba(0,180,216,0.45); text-decoration:none; }
+        .error-box { color:#ef4444; font-family:monospace; font-size:0.85em; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:16px; }
+        .error-box a { color:#00B4D8; }
+
+        footer { text-align:center; padding:32px 24px; border-top:1px solid rgba(255,255,255,0.05); font-size:0.72em; color:rgba(255,255,255,0.2); margin-top:20px; }
+        footer a { color:rgba(0,180,216,0.45); text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">PCF ROUTER</div>
+    <div class="live-pill"><span class="dot"></span>LIVE DEMO</div>
+</div>
+
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="hero-eyebrow">Pacific Platform · Claims 5, 46</div>
+        <h1>Structural Coverage Routing<br><span>CPU First. GPU Only When Needed.</span></h1>
+        <p class="hero-sub">Every query runs through PCF coverage analysis first. Queries within corpus coverage are resolved on CPU at near-zero cost. Queries outside coverage route to GPU inference. The cost ratio is 33×.</p>
+        <div class="hero-stats">
+            <div class="hstat"><div class="hstat-val">$0.0003</div><div class="hstat-label">CPU path/query</div></div>
+            <div class="hstat"><div class="hstat-val">$0.01</div><div class="hstat-label">GPU path/query</div></div>
+            <div class="hstat"><div class="hstat-val">&lt;2ms</div><div class="hstat-label">Routing decision</div></div>
+            <div class="hstat"><div class="hstat-val">33×</div><div class="hstat-label">Cost ratio</div></div>
+        </div>
+
+        <div class="arch">
+            <div class="arch-box arch-input"><div class="arch-label">Input</div><div class="arch-val">Query</div></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-box arch-pcf"><div class="arch-label">Coverage</div><div class="arch-val">PCF Engine</div></div>
+            <div class="arch-arrow">→</div>
+            <div class="arch-split">
+                <div class="arch-box arch-cpu"><div class="arch-label">coverage &lt; 0.30 · free</div><div class="arch-val">CPU · $0.0003</div></div>
+                <div class="arch-box arch-gpu"><div class="arch-label">coverage ≥ 0.30 · cached</div><div class="arch-val">GPU · $0.01</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+    <div class="section-label">How It Works</div>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">Step 1</div>
+            <div class="step-title">Coverage Score</div>
+            <div class="step-desc">Query PSV is computed. Coverage = min distance to corpus centroid / median corpus distance. Low coverage = query is structurally similar to known corpus.</div>
+            <div class="step-mono">coverage(Q) = dist_min / dist_median</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 2</div>
+            <div class="step-title">Route Decision</div>
+            <div class="step-desc">coverage &lt; 0.30 → CPU path (PCF structural convergence, deterministic). coverage ≥ 0.30 → GPU path for queries outside known corpus.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 3</div>
+            <div class="step-title">CPU Path</div>
+            <div class="step-desc">Deterministic structural analysis via PSV convergence. Result cached by SHA-256 of query tokens. Zero marginal cost on cache hit.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">Step 4</div>
+            <div class="step-title">GPU Path</div>
+            <div class="step-desc">LLM inference for queries outside corpus coverage. Results cached deterministically — over time, cost approaches CPU path cost.</div>
+        </div>
+    </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('verify',this)">Verify Claim</div>
+    <div class="tab" onclick="switchTab('contradiction',this)">Detect Contradiction</div>
+</div>
+
+<div class="demo-section">
+
+    <!-- VERIFY PANEL -->
+    <div class="panel active" id="panel-verify">
+        <div class="chips">
+            <button class="chip active" onclick="setVerifyChip(this,'The measles vaccine is safe and effective for children')">Vaccine safety</button>
+            <button class="chip" onclick="setVerifyChip(this,'The Earth is approximately 4.5 billion years old')">Earth age</button>
+            <button class="chip" onclick="setVerifyChip(this,'Carbon dioxide absorbs infrared radiation and contributes to the greenhouse effect')">Greenhouse effect</button>
+            <button class="chip" onclick="setVerifyChip(this,'xkzvqp flurble zorb blargh meeple wofklaz')">Out-of-corpus query</button>
+        </div>
+        <div class="input-label">Claim to Verify</div>
+        <textarea id="verify-claim" class="pcf-textarea" rows="3" placeholder="Enter any factual claim…">The measles vaccine is safe and effective for children</textarea>
+
+        <div class="input-label" style="margin-top:14px;">Reference Documents (3)</div>
+        <div class="docs-grid">
+            <textarea class="pcf-textarea" id="doc1" rows="3" placeholder="Reference document 1…">Vaccines are biological preparations that provide active acquired immunity to a particular infectious disease. Clinical trials demonstrate their safety and efficacy.</textarea>
+            <textarea class="pcf-textarea" id="doc2" rows="3" placeholder="Reference document 2…">The measles vaccine is one of the most effective vaccines ever developed, with over 95% efficacy after two doses in preventing measles infection.</textarea>
+            <textarea class="pcf-textarea" id="doc3" rows="3" placeholder="Reference document 3…">Vaccine safety is monitored through multiple surveillance systems. Serious adverse events are rare and far less common than complications from the diseases vaccines prevent.</textarea>
+        </div>
+
+        <button id="verify-btn" class="run-btn" onclick="runVerify()">Route via PCF →</button>
+        <div id="verify-result" style="display:none;"></div>
+    </div>
+
+    <!-- CONTRADICTION PANEL -->
+    <div class="panel" id="panel-contradiction">
+        <div class="chips">
+            <button class="chip active" onclick="setContraChip(this,'Vaccines cause autism in children','Extensive research shows no link between vaccines and autism')">Vaccines / autism</button>
+            <button class="chip" onclick="setContraChip(this,'Human activity is driving global temperature increase','Global temperatures have not changed due to human actions')">Climate</button>
+            <button class="chip" onclick="setContraChip(this,'The Earth is approximately 4.5 billion years old','The Earth is approximately 6,000 years old')">Earth age</button>
+        </div>
+        <div class="two-col">
+            <div>
+                <div class="input-label">Text A</div>
+                <textarea id="text-a" class="pcf-textarea" rows="4" placeholder="First statement…">Vaccines cause autism in children</textarea>
+            </div>
+            <div>
+                <div class="input-label">Text B</div>
+                <textarea id="text-b" class="pcf-textarea" rows="4" placeholder="Second statement…">Extensive research shows no link between vaccines and autism</textarea>
+            </div>
+        </div>
+        <button id="contra-btn" class="run-btn" onclick="runContradiction()">Detect Contradiction →</button>
+        <div id="contra-result" style="display:none;"></div>
+    </div>
+
+</div>
+
+<footer>
+    Pacific Platform · Astrognosy AI · Patent Pending U.S. Prov. 63/978,633
+</footer>
+
+<script>
+const ROUTER = 'https://pcf-router-production.up.railway.app';
+
+function switchTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+}
+
+function setVerifyChip(btn, claim) {
+    document.querySelectorAll('#panel-verify .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('verify-claim').value = claim;
+}
+
+function setContraChip(btn, a, b) {
+    document.querySelectorAll('#panel-contradiction .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('text-a').value = a;
+    document.getElementById('text-b').value = b;
+}
+
+async function runVerify() {
+    const claim = document.getElementById('verify-claim').value.trim();
+    const doc1 = document.getElementById('doc1').value.trim();
+    const doc2 = document.getElementById('doc2').value.trim();
+    const doc3 = document.getElementById('doc3').value.trim();
+    if (!claim) return;
+
+    const btn = document.getElementById('verify-btn');
+    btn.textContent = 'Routing…';
+    btn.disabled = true;
+    document.getElementById('verify-result').style.display = 'none';
+
+    const documents = [doc1, doc2, doc3].filter(Boolean);
+
+    try {
+        const res = await fetch(ROUTER + '/verify/full', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ claim, documents })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const isLocal = d.served_by === 'pcf' || d.route === 'cpu' || d.routing_decision === 'cpu';
+        const verdict = d.verdict || 'UNCERTAIN';
+        const isS = verdict === 'SUPPORTED';
+        const isC = verdict === 'CONTRADICTED' || verdict === 'REFUTED';
+        const vColor = isS ? '#10b981' : isC ? '#ef4444' : '#f59e0b';
+        const vClass = isS ? 'v-supported' : isC ? 'v-contradicted' : 'v-uncertain';
+        const routeClass = isLocal ? 'rb-cpu' : 'rb-gpu';
+        const routeLabel = isLocal ? 'ROUTED → CPU PATH' : 'ROUTED → GPU PATH';
+        const confPct = Math.round(((d.pcf_confidence || d.confidence || d.truth_score / 10 || 0)) * 100);
+        const coverage = d.coverage != null ? d.coverage.toFixed(3) : (d.psv_distance != null ? d.psv_distance.toFixed(3) : '—');
+        const variance = d.variance != null ? d.variance.toFixed(4) : '—';
+
+        document.getElementById('verify-result').innerHTML = `
+            <div class="result-card">
+                <div class="route-header">
+                    <div class="route-badge ${routeClass}">${routeLabel}</div>
+                    <div class="route-reason">${d.routing_reason || (isLocal ? 'coverage &lt; 0.30 → cpu_path' : 'coverage ≥ 0.30 → gpu_path')}</div>
+                </div>
+                <div class="verdict-row">
+                    <div class="verdict-badge ${vClass}">${verdict.replace(/_/g,' ')}</div>
+                    <div class="conf-area">
+                        <div class="conf-label">PCF Confidence</div>
+                        <div class="conf-track"><div class="conf-fill" style="width:${confPct}%;background:${vColor};"></div></div>
+                        <div class="conf-nums">${confPct}% · threshold: coverage &lt; 0.30</div>
+                    </div>
+                </div>
+                <div class="metrics">
+                    <div class="metric"><div class="metric-label">Coverage</div><div class="metric-val" style="font-size:0.95em;">${coverage}</div></div>
+                    <div class="metric"><div class="metric-label">PSV Variance</div><div class="metric-val" style="font-size:0.9em;">${variance}</div></div>
+                    <div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${(d.pcf_time_ms || d.processing_time_ms || 0).toFixed(1)}<span class="metric-unit">ms</span></div></div>
+                    <div class="metric"><div class="metric-label">Path</div><div class="metric-val" style="font-size:0.88em;color:${isLocal?'#10b981':'#a78bfa'};">${isLocal ? 'CPU' : 'GPU'}</div></div>
+                </div>
+                <div class="api-note">PCF Router · pcf-router-production.up.railway.app · Claims 5, 46 · Patent Pending</div>
+            </div>`;
+        document.getElementById('verify-result').style.display = 'block';
+
+    } catch(e) {
+        const isDown = e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
+        document.getElementById('verify-result').innerHTML = `
+            <div class="result-card">
+                <div class="error-box">
+                    ${isDown
+                        ? `API initializing — check back shortly.<br><br>Endpoint: <a href="${ROUTER}" target="_blank">${ROUTER}</a><br><small style="opacity:0.6;">${e.message}</small>`
+                        : `Error: ${e.message}`
+                    }
+                </div>
+            </div>`;
+        document.getElementById('verify-result').style.display = 'block';
+    }
+
+    btn.textContent = 'Route via PCF →';
+    btn.disabled = false;
+}
+
+async function runContradiction() {
+    const text1 = document.getElementById('text-a').value.trim();
+    const text2 = document.getElementById('text-b').value.trim();
+    if (!text1 || !text2) return;
+
+    const btn = document.getElementById('contra-btn');
+    btn.textContent = 'Analyzing…';
+    btn.disabled = true;
+    document.getElementById('contra-result').style.display = 'none';
+
+    try {
+        const res = await fetch(ROUTER + '/contradiction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text1, text2 })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const contradicted = d.contradicted || d.is_contradiction || false;
+        const score = d.score != null ? d.score : (d.contradiction_score != null ? d.contradiction_score : null);
+        const scorePct = score != null ? Math.round(score * 100) : null;
+
+        document.getElementById('contra-result').innerHTML = `
+            <div class="result-card">
+                <div class="contra-main">
+                    <div class="contra-badge ${contradicted ? 'cb-yes' : 'cb-no'}">${contradicted ? 'CONTRADICTION DETECTED' : 'NO CONTRADICTION'}</div>
+                    ${score != null ? `<div class="conf-area">
+                        <div class="conf-label">Contradiction Score</div>
+                        <div class="conf-track"><div class="conf-fill" style="width:${scorePct}%;background:${contradicted?'#ef4444':'#10b981'};"></div></div>
+                        <div class="conf-nums">${scorePct}% structural divergence</div>
+                    </div>` : ''}
+                </div>
+                <div class="metrics">
+                    ${score != null ? `<div class="metric"><div class="metric-label">Div. Score</div><div class="metric-val" style="font-size:0.95em;">${score.toFixed(3)}</div></div>` : ''}
+                    ${d.psv_distance != null ? `<div class="metric"><div class="metric-label">PSV Distance</div><div class="metric-val" style="font-size:0.9em;">${d.psv_distance.toFixed(4)}</div></div>` : ''}
+                    ${d.processing_time_ms != null ? `<div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${d.processing_time_ms.toFixed(1)}<span class="metric-unit">ms</span></div></div>` : ''}
+                </div>
+                <div class="api-note">PCF Router /contradiction · structural PSV divergence · no LLM · CPU-only</div>
+            </div>`;
+        document.getElementById('contra-result').style.display = 'block';
+
+    } catch(e) {
+        const isDown = e.message.includes('Failed to fetch') || e.message.includes('NetworkError');
+        document.getElementById('contra-result').innerHTML = `
+            <div class="result-card">
+                <div class="error-box">
+                    ${isDown
+                        ? `API initializing — check back shortly.<br><br>Endpoint: <a href="${ROUTER}" target="_blank">${ROUTER}</a><br><small style="opacity:0.6;">${e.message}</small>`
+                        : `Error: ${e.message}`
+                    }
+                </div>
+            </div>`;
+        document.getElementById('contra-result').style.display = 'block';
+    }
+
+    btn.textContent = 'Detect Contradiction →';
+    btn.disabled = false;
+}
+</script>
+</body>
+</html>
