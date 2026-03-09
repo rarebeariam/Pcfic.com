@@ -353,7 +353,7 @@ async function runContradiction() {
         const res = await fetch(ROUTER + '/contradiction', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text1, text2 })
+            body: JSON.stringify({ text_a: text1, text_b: text2 })
         });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const d = await res.json();
