@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratum — Data Center Intelligence · Astrognosy AI</title>
+    <meta name="description" content="Stratum: PCF-powered thermal and power anomaly detection for data centers. CPU-native. No retraining. No thresholds to tune.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#060a0a; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(6,10,10,0.92); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-product { font-size:0.88em; font-weight:700; letter-spacing:0.14em; color:#38bdf8; }
+        .patent-pill { display:flex; align-items:center; gap:6px; background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.22); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#38bdf8; letter-spacing:0.08em; }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+        .hero { padding:64px 28px 56px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.05); position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(56,189,248,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.03) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
+        .hero-glow { position:absolute; top:-20%; left:50%; transform:translateX(-50%); width:700px; height:400px; background:radial-gradient(ellipse,rgba(56,189,248,0.09) 0%,transparent 65%); pointer-events:none; }
+        .hero-inner { position:relative; max-width:820px; margin:0 auto; }
+        .hero-eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#38bdf8; text-transform:uppercase; margin-bottom:16px; opacity:0.65; }
+        .hero h1 { font-size:clamp(2.4em,5vw,3.5em); font-weight:800; letter-spacing:-0.03em; margin-bottom:16px; line-height:1.08; }
+        .hero h1 span { background:linear-gradient(135deg,#38bdf8,#7dd3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:1em; color:rgba(255,255,255,0.4); max-width:600px; margin:0 auto 40px; line-height:1.75; }
+        .hero-stats { display:flex; gap:0; justify-content:center; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.06); border-radius:12px; overflow:hidden; max-width:680px; margin:0 auto; }
+        .hstat { flex:1; padding:20px 12px; text-align:center; border-right:1px solid rgba(255,255,255,0.06); }
+        .hstat:last-child { border-right:none; }
+        .hstat-val { font-size:1.1em; font-weight:800; background:linear-gradient(135deg,#38bdf8,#7dd3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:monospace; }
+        .hstat-label { font-size:0.6em; color:rgba(255,255,255,0.25); text-transform:uppercase; letter-spacing:0.1em; margin-top:5px; }
+
+        /* WHAT IT DETECTS */
+        .section { max-width:900px; margin:0 auto; padding:56px 28px 0; }
+        .section-label { font-size:0.7em; font-weight:700; letter-spacing:0.22em; color:#38bdf8; text-transform:uppercase; margin-bottom:24px; }
+        .detect-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+        .detect-card { background:rgba(56,189,248,0.03); border:1px solid rgba(56,189,248,0.1); border-radius:14px; padding:24px 20px; }
+        .detect-card:hover { border-color:rgba(56,189,248,0.22); }
+        .detect-title { font-size:0.92em; font-weight:700; color:rgba(255,255,255,0.85); margin-bottom:8px; }
+        .detect-desc { font-size:0.78em; color:rgba(255,255,255,0.32); line-height:1.65; margin-bottom:14px; }
+        .tokens { display:flex; flex-wrap:wrap; gap:5px; }
+        .tok { font-size:0.63em; font-family:monospace; background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.14); border-radius:4px; padding:2px 7px; color:rgba(56,189,248,0.65); }
+
+        /* HOW */
+        .how-steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+        .how-step { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:20px 18px; }
+        .step-num { font-size:0.62em; font-weight:700; letter-spacing:0.18em; color:#38bdf8; text-transform:uppercase; margin-bottom:8px; opacity:0.6; }
+        .step-title { font-size:0.88em; font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:6px; }
+        .step-desc { font-size:0.75em; color:rgba(255,255,255,0.3); line-height:1.6; }
+        .step-mono { font-family:monospace; font-size:0.72em; color:rgba(56,189,248,0.6); background:rgba(56,189,248,0.05); border-radius:4px; padding:3px 7px; display:inline-block; margin-top:6px; }
+
+        /* DEMO */
+        .demo-wrap { max-width:900px; margin:0 auto; padding:56px 28px 64px; }
+        .demo-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:16px; overflow:hidden; }
+        .demo-header { padding:16px 24px; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:space-between; }
+        .demo-title { font-size:0.8em; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.4); }
+        .live-dot { display:flex; align-items:center; gap:6px; font-size:0.7em; color:#38bdf8; font-weight:600; letter-spacing:0.08em; }
+        .dot { width:6px; height:6px; border-radius:50%; background:#38bdf8; animation:pulse 1.5s infinite; }
+        .demo-body { padding:24px; }
+        .sensor-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+        .sensor-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px; }
+        .sensor-name { font-size:0.6em; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.28); margin-bottom:6px; }
+        .sensor-val { font-size:1.3em; font-weight:800; font-family:monospace; }
+        .sensor-val.ok { color:#38bdf8; }
+        .sensor-val.warn { color:#f0b429; }
+        .sensor-val.crit { color:#ef4444; }
+        .sensor-bar { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; margin-top:8px; overflow:hidden; }
+        .sensor-fill { height:100%; border-radius:2px; transition:width 0.4s ease; }
+        .sensor-fill.ok { background:#38bdf8; }
+        .sensor-fill.warn { background:#f0b429; }
+        .sensor-fill.crit { background:#ef4444; }
+        .canvas-wrap { border:1px solid rgba(255,255,255,0.06); border-radius:10px; background:rgba(0,0,0,0.25); margin-bottom:16px; }
+        canvas { display:block; width:100%; }
+        .log-label { font-size:0.68em; font-weight:700; letter-spacing:0.18em; color:#38bdf8; text-transform:uppercase; margin-bottom:10px; }
+        .anomaly-log { max-height:140px; overflow-y:auto; }
+        .log-entry { font-size:0.71em; font-family:monospace; padding:6px 10px; border-radius:6px; margin-bottom:5px; display:flex; gap:10px; }
+        .log-entry.info { background:rgba(56,189,248,0.05); color:rgba(56,189,248,0.65); }
+        .log-entry.warn { background:rgba(240,180,41,0.06); color:rgba(240,180,41,0.7); }
+        .log-entry.crit { background:rgba(239,68,68,0.08); color:rgba(239,68,68,0.75); }
+        .log-ts { color:rgba(255,255,255,0.2); flex-shrink:0; }
+
+        .footer { border-top:1px solid rgba(255,255,255,0.05); padding:24px 28px; text-align:center; font-size:0.72em; color:rgba(255,255,255,0.18); }
+        .footer a { color:rgba(56,189,248,0.4); text-decoration:none; }
+        .footer a:hover { color:#38bdf8; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <a href="/" class="back">← pcfic.com</a>
+    <div class="topbar-product">STRATUM</div>
+    <div class="patent-pill">Patent Pending</div>
+</div>
+
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="hero-eyebrow">Pacific Platform · Astrognosy AI</div>
+        <h1>Data Centers Don't Fail<br>Without <span>Leaving a Trace.</span></h1>
+        <p class="hero-sub">
+            Stratum reads thermal, power, and cooling sensor streams as behavioral sequences. PCF detects anomalies before they cascade — no rules to write, no thresholds to tune, no GPU required.
+        </p>
+        <div class="hero-stats">
+            <div class="hstat"><div class="hstat-val">&lt;2ms</div><div class="hstat-label">Detection</div></div>
+            <div class="hstat"><div class="hstat-val">CPU</div><div class="hstat-label">No GPU</div></div>
+            <div class="hstat"><div class="hstat-val">0</div><div class="hstat-label">Rules to Write</div></div>
+            <div class="hstat"><div class="hstat-val">∞</div><div class="hstat-label">Rack Scale</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-label">What Stratum Detects</div>
+    <div class="detect-grid">
+        <div class="detect-card">
+            <div class="detect-title">Thermal Anomalies</div>
+            <div class="detect-desc">Hotspot formation, inlet temperature spikes, airflow disruption from failed fans or blocked vents — detected as behavioral divergence before hardware damage occurs.</div>
+            <div class="tokens"><span class="tok">TEMP_SPIKE</span><span class="tok">RACK_HOTSPOT</span><span class="tok">COOLING_LAG</span><span class="tok">FAN_STALL</span></div>
+        </div>
+        <div class="detect-card">
+            <div class="detect-title">Power Irregularities</div>
+            <div class="detect-desc">PDU load imbalance, unexpected power draw surges, voltage rail instability — caught before they trip breakers or corrupt workloads.</div>
+            <div class="tokens"><span class="tok">POWER_SURGE</span><span class="tok">PDU_IMBALANCE</span><span class="tok">VOLTAGE_SAG</span><span class="tok">UPS_EVENT</span></div>
+        </div>
+        <div class="detect-card">
+            <div class="detect-title">Cooling System Failures</div>
+            <div class="detect-desc">CRAC unit degradation, chilled water flow anomalies, and containment failures surface as PSV pattern shifts before temperatures reach critical thresholds.</div>
+            <div class="tokens"><span class="tok">CRAC_FAULT</span><span class="tok">DELTA_TEMP</span><span class="tok">AIRFLOW_LOW</span><span class="tok">CONTAINMENT</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="section" style="padding-top:48px;">
+    <div class="section-label">How It Works</div>
+    <div class="how-steps">
+        <div class="how-step">
+            <div class="step-num">Step 01</div>
+            <div class="step-title">Tokenize Sensors</div>
+            <div class="step-desc">Raw readings are mapped to semantic tokens. A temperature crossing a band becomes a discrete behavioral signal — like a network packet type.</div>
+            <div class="step-mono">72°C → TEMP_SPIKE</div>
+        </div>
+        <div class="how-step">
+            <div class="step-num">Step 02</div>
+            <div class="step-title">Window Traces</div>
+            <div class="step-desc">Tokens group into sliding time windows — a structural view of the infrastructure's current state across all sensors simultaneously.</div>
+            <div class="step-mono">W = 20 samples</div>
+        </div>
+        <div class="how-step">
+            <div class="step-num">Step 03</div>
+            <div class="step-title">PSV Scoring</div>
+            <div class="step-desc">Positional Scoring Vectors capture how sensor signals co-occur across the window — encoding the behavioral "shape" of the data center's state.</div>
+            <div class="step-mono">σ_k = μ(PMI) / σ(PMI)</div>
+        </div>
+        <div class="how-step">
+            <div class="step-num">Step 04</div>
+            <div class="step-title">Divergence Alert</div>
+            <div class="step-desc">PSV distance above the 90th percentile baseline triggers an alert. No labels, no rules, no retraining required when cooling configurations change.</div>
+            <div class="step-mono">dist > θ₉₀ → ALERT</div>
+        </div>
+    </div>
+</div>
+
+<div class="demo-wrap">
+    <div class="section-label">Live Simulation</div>
+    <div class="demo-card">
+        <div class="demo-header">
+            <div class="demo-title">Data Center Sensor Monitor</div>
+            <div class="live-dot"><span class="dot"></span>Streaming</div>
+        </div>
+        <div class="demo-body">
+            <div class="sensor-row" id="dc-sensors"></div>
+            <div class="canvas-wrap"><canvas id="dc-canvas" height="140"></canvas></div>
+            <div class="log-label">Anomaly Log</div>
+            <div class="anomaly-log" id="dc-log"></div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    Stratum · Pacific Platform · Astrognosy AI · <a href="/">pcfic.com</a> · Patent Pending
+</div>
+
+<script>
+const DC_SENSORS = [
+    { id:'dc-temp',  name:'Inlet Temp',   base:24,  range:6,   unit:'°C', warnAt:30, critAt:35, hiIsBad:true },
+    { id:'dc-power', name:'PDU Draw',     base:42,  range:12,  unit:'kW', warnAt:50, critAt:56, hiIsBad:true },
+    { id:'dc-fan',   name:'Fan Speed',    base:8,   range:2,   unit:'k RPM', warnAt:6, critAt:5, hiIsBad:false },
+    { id:'dc-delta', name:'ΔTemp Rack',   base:8,   range:4,   unit:'°C', warnAt:14, critAt:18, hiIsBad:true },
+];
+
+const el = document.getElementById('dc-sensors');
+DC_SENSORS.forEach(s => {
+    el.innerHTML += `<div class="sensor-card"><div class="sensor-name">${s.name}</div><div class="sensor-val ok" id="${s.id}-val">—</div><div class="sensor-bar"><div class="sensor-fill ok" id="${s.id}-bar" style="width:50%"></div></div></div>`;
+});
+
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function timeStr(){return new Date().toTimeString().slice(0,8);}
+function log(cls,msg){
+    const e=document.createElement('div');e.className=`log-entry ${cls}`;
+    e.innerHTML=`<span class="log-ts">${timeStr()}</span><span>${msg}</span>`;
+    const l=document.getElementById('dc-log');l.prepend(e);
+    while(l.children.length>25)l.removeChild(l.lastChild);
+}
+
+function updateSensor(s,val){
+    const v=document.getElementById(s.id+'-val'),b=document.getElementById(s.id+'-bar');
+    v.textContent=val.toFixed(1)+' '+s.unit;
+    const isBad=s.hiIsBad?val>s.critAt:val<s.critAt;
+    const isWarn=s.hiIsBad?val>s.warnAt:val<s.warnAt;
+    const cls=isBad?'crit':isWarn?'warn':'ok';
+    v.className='sensor-val '+cls; b.className='sensor-fill '+cls;
+    const pct=s.hiIsBad?clamp(((val-(s.base-s.range/2))/(s.range*2))*100,0,100):clamp((1-(val-(s.base-s.range/2))/(s.range*2))*100,0,100);
+    b.style.width=pct+'%';
+    return cls;
+}
+
+const hist=[], alerts=[];
+let anomaly=false, aTick=0;
+
+function drawChart(){
+    const canvas=document.getElementById('dc-canvas');
+    const ctx=canvas.getContext('2d');
+    const W=canvas.offsetWidth*devicePixelRatio, H=canvas.height*devicePixelRatio;
+    canvas.width=W;
+    if(!hist.length)return;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){const y=(H/4)*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    const mn=Math.min(...hist)*0.92, mx=Math.max(...hist)*1.08, rng=mx-mn||1;
+    const px=i=>(i/(hist.length-1))*W, py=v=>H-((v-mn)/rng)*H*0.85-H*0.07;
+    alerts.forEach(ai=>{
+        if(ai<hist.length){const x=px(ai);const g=ctx.createLinearGradient(x-20,0,x+20,0);g.addColorStop(0,'transparent');g.addColorStop(0.5,'rgba(239,68,68,0.12)');g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.fillRect(x-20,0,40,H);}
+    });
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(56,189,248,0.2)');g.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.moveTo(px(0),H);hist.forEach((v,i)=>ctx.lineTo(px(i),py(v)));ctx.lineTo(px(hist.length-1),H);ctx.closePath();ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();hist.forEach((v,i)=>i===0?ctx.moveTo(px(i),py(v)):ctx.lineTo(px(i),py(v)));
+    ctx.strokeStyle='rgba(56,189,248,0.9)';ctx.lineWidth=2*devicePixelRatio;ctx.lineJoin='round';ctx.stroke();
+    alerts.slice(-5).forEach(ai=>{if(ai<hist.length){ctx.beginPath();ctx.arc(px(ai),py(hist[ai]),4*devicePixelRatio,0,Math.PI*2);ctx.fillStyle='#ef4444';ctx.fill();}});
+}
+
+log('info','Stratum monitoring started · PCF baseline calibrated · 80 normal traces loaded');
+
+setInterval(()=>{
+    if(!anomaly&&Math.random()<0.022){anomaly=true;aTick=0;}
+    if(anomaly){aTick++;if(aTick>14)anomaly=false;}
+    const vals=DC_SENSORS.map((s,i)=>{
+        let v=s.base+(Math.random()-0.5)*s.range;
+        if(anomaly){if(i===0)v+=aTick*0.6;if(i===1)v+=aTick*0.5;if(i===2)v-=aTick*0.12;if(i===3)v+=aTick*0.4;}
+        return v;
+    });
+    vals.forEach((v,i)=>updateSensor(DC_SENSORS[i],v));
+    hist.push(vals[0]);if(hist.length>80)hist.shift();
+    if(anomaly&&aTick===3){alerts.push(hist.length-1);
+        if(vals[0]>DC_SENSORS[0].critAt)log('crit',`CRITICAL · Hotspot detected · ${vals[0].toFixed(1)}°C · PSV divergence > θ₉₀ · Check row ${Math.floor(Math.random()*12)+1}`);
+        else log('warn',`WARN · Power anomaly · PDU ${vals[1].toFixed(1)}kW · ΔTemp ${vals[3].toFixed(1)}°C · Investigating`);
+    }else if(!anomaly&&Math.random()<0.04){log('info',`OK · ${vals[0].toFixed(1)}°C · ${vals[1].toFixed(1)}kW · Fan ${vals[2].toFixed(1)}k · Normal`);}
+    drawChart();
+},500);
+</script>
+</body>
+</html>
