@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compass — Hybrid Data Center Architecture · Astrognosy AI</title>
+    <meta name="description" content="What a data center designed around Compass looks like: 70% CPU / 30% GPU routing, 30 MW vs 100 MW, $1.1B vs $2.2B CAPEX. The PCF hybrid infrastructure model.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
+
+        /* TOPBAR */
+        .topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid rgba(255,255,255,0.07); background:rgba(3,8,16,0.93); backdrop-filter:blur(10px); position:sticky; top:0; z-index:100; }
+        .back { color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.82em; font-weight:500; transition:color 0.2s; }
+        .back:hover { color:white; }
+        .topbar-center { display:flex; align-items:center; gap:10px; }
+        .topbar-product { font-size:0.88em; font-weight:700; letter-spacing:0.14em; color:#00B4D8; }
+        .topbar-sub { font-size:0.72em; color:rgba(255,255,255,0.28); letter-spacing:0.06em; }
+        .patent-pill { background:rgba(0,180,216,0.08); border:1px solid rgba(0,180,216,0.22); border-radius:20px; padding:4px 12px; font-size:0.72em; font-weight:600; color:#00B4D8; letter-spacing:0.08em; }
+
+        /* HERO */
+        .hero { padding:64px 28px 56px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.05); position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(0,180,216,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,216,0.04) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
+        .hero-glow { position:absolute; top:-20%; left:50%; transform:translateX(-50%); width:700px; height:400px; background:radial-gradient(ellipse,rgba(0,180,216,0.1) 0%,transparent 65%); pointer-events:none; }
+        .hero-inner { position:relative; max-width:820px; margin:0 auto; }
+        .eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:#00B4D8; text-transform:uppercase; margin-bottom:16px; opacity:0.65; }
+        .hero h1 { font-size:clamp(2em,4.5vw,3.2em); font-weight:800; letter-spacing:-0.03em; margin-bottom:16px; line-height:1.1; }
+        .hero h1 span { background:linear-gradient(135deg,#00B4D8,#7dd3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .hero-sub { font-size:0.98em; color:rgba(255,255,255,0.4); max-width:620px; margin:0 auto 40px; line-height:1.75; }
+
+        /* TOP STATS */
+        .top-stats { display:flex; gap:0; justify-content:center; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.06); border-radius:12px; overflow:hidden; max-width:760px; margin:0 auto; }
+        .ts { flex:1; padding:20px 12px; text-align:center; border-right:1px solid rgba(255,255,255,0.06); }
+        .ts:last-child { border-right:none; }
+        .ts-val { font-size:1.15em; font-weight:800; font-family:monospace; }
+        .ts-val.green { background:linear-gradient(135deg,#10b981,#34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .ts-val.cyan { background:linear-gradient(135deg,#00B4D8,#7dd3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .ts-val.red { background:linear-gradient(135deg,#ef4444,#f87171); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .ts-label { font-size:0.6em; color:rgba(255,255,255,0.25); text-transform:uppercase; letter-spacing:0.1em; margin-top:5px; }
+
+        /* SECTIONS */
+        .section { max-width:960px; margin:0 auto; padding:64px 28px 0; }
+        .section-label { font-size:0.7em; font-weight:700; letter-spacing:0.22em; color:#00B4D8; text-transform:uppercase; margin-bottom:10px; }
+        .section-title { font-size:1.5em; font-weight:700; letter-spacing:-0.02em; margin-bottom:8px; }
+        .section-sub { font-size:0.88em; color:rgba(255,255,255,0.35); line-height:1.7; margin-bottom:32px; }
+
+        /* ROUTING FLOW */
+        .flow-wrap { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:36px; margin-bottom:0; }
+        .flow-row { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+        .flow-box { padding:16px 22px; border-radius:12px; text-align:center; }
+        .fb-input { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); min-width:150px; }
+        .fb-pcf { background:rgba(0,180,216,0.1); border:1px solid rgba(0,180,216,0.3); min-width:160px; }
+        .fb-cpu { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); min-width:150px; }
+        .fb-gpu { background:rgba(118,75,162,0.1); border:1px solid rgba(118,75,162,0.3); min-width:150px; }
+        .fb-label { font-size:0.62em; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; opacity:0.55; margin-bottom:4px; }
+        .fb-title { font-size:0.9em; font-weight:700; }
+        .fb-detail { font-size:0.72em; opacity:0.5; margin-top:3px; }
+        .flow-arrow { font-size:1.5em; color:rgba(255,255,255,0.2); }
+        .flow-split { display:flex; flex-direction:column; gap:8px; align-items:center; }
+        .flow-pct { font-size:0.65em; font-weight:700; letter-spacing:0.1em; }
+        .flow-pct.cpu { color:#10b981; }
+        .flow-pct.gpu { color:#a78bfa; }
+        .flow-note { font-size:0.75em; color:rgba(255,255,255,0.25); text-align:center; margin-top:20px; font-style:italic; }
+
+        /* FLOOR PLAN */
+        .floorplan { background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:32px; position:relative; }
+        .fp-title { font-size:0.75em; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:20px; text-align:center; }
+        .fp-layout { display:flex; flex-direction:column; gap:12px; max-width:680px; margin:0 auto; }
+        .fp-zone { border-radius:12px; padding:20px 24px; position:relative; }
+        .fp-zone-cpu { background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); }
+        .fp-zone-gpu { background:rgba(118,75,162,0.06); border:1px solid rgba(118,75,162,0.2); }
+        .fp-zone-cooling { background:rgba(56,189,248,0.04); border:1px solid rgba(56,189,248,0.12); }
+        .fp-zone-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+        .fp-zone-name { font-size:0.85em; font-weight:700; }
+        .fp-zone-name.cpu { color:#10b981; }
+        .fp-zone-name.gpu { color:#a78bfa; }
+        .fp-zone-name.cooling { color:#38bdf8; }
+        .fp-zone-power { font-size:0.72em; font-family:monospace; font-weight:600; }
+        .fp-servers { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
+        .fp-server { width:16px; height:10px; border-radius:2px; }
+        .fp-server.cpu { background:rgba(16,185,129,0.4); }
+        .fp-server.gpu { background:rgba(118,75,162,0.4); }
+        .fp-zone-stats { display:flex; gap:20px; flex-wrap:wrap; }
+        .fp-stat { font-size:0.72em; color:rgba(255,255,255,0.35); }
+        .fp-stat strong { color:rgba(255,255,255,0.65); }
+        .fp-total { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:6px; }
+        .fp-total-label { font-size:0.75em; color:rgba(255,255,255,0.35); }
+        .fp-total-val { font-size:1em; font-weight:700; font-family:monospace; color:#00B4D8; }
+
+        /* COMPARISON TABLE */
+        .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media(max-width:600px) { .compare-grid { grid-template-columns:1fr; } .flow-row { flex-direction:column; } }
+        .compare-card { border-radius:14px; padding:24px; }
+        .compare-card.bad { background:rgba(239,68,68,0.04); border:1px solid rgba(239,68,68,0.12); }
+        .compare-card.good { background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.18); }
+        .compare-tag { font-size:0.65em; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
+        .compare-tag.bad { color:rgba(239,68,68,0.6); }
+        .compare-tag.good { color:#10b981; }
+        .compare-title { font-size:1em; font-weight:700; margin-bottom:16px; }
+        .compare-row { display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .compare-row:last-child { border-bottom:none; }
+        .cr-key { font-size:0.78em; color:rgba(255,255,255,0.35); }
+        .cr-val { font-size:0.92em; font-weight:700; font-family:monospace; }
+        .cr-val.red { color:#ef4444; }
+        .cr-val.green { color:#10b981; }
+
+        /* ENERGY BARS */
+        .energy-section { }
+        .energy-row { display:flex; align-items:center; gap:16px; margin-bottom:14px; }
+        .energy-label { font-size:0.78em; color:rgba(255,255,255,0.45); width:140px; flex-shrink:0; text-align:right; }
+        .energy-track { flex:1; height:28px; background:rgba(255,255,255,0.04); border-radius:6px; overflow:hidden; position:relative; }
+        .energy-fill { height:100%; border-radius:6px; display:flex; align-items:center; padding-left:10px; font-size:0.72em; font-weight:700; font-family:monospace; white-space:nowrap; }
+        .energy-fill.bad { background:linear-gradient(90deg,rgba(239,68,68,0.5),rgba(239,68,68,0.3)); color:#fca5a5; }
+        .energy-fill.good { background:linear-gradient(90deg,rgba(16,185,129,0.5),rgba(16,185,129,0.3)); color:#6ee7b7; }
+        .energy-savings { text-align:center; margin-top:24px; padding:16px; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.18); border-radius:10px; }
+        .es-num { font-size:2em; font-weight:800; color:#10b981; font-family:monospace; }
+        .es-label { font-size:0.78em; color:rgba(255,255,255,0.35); margin-top:4px; }
+
+        /* ROI */
+        .roi-wrap { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:32px; }
+        .roi-chart { position:relative; height:180px; margin:24px 0; }
+        .roi-bars { display:flex; align-items:flex-end; justify-content:center; gap:48px; height:100%; }
+        .roi-bar-group { display:flex; flex-direction:column; align-items:center; gap:8px; flex:0 0 auto; }
+        .roi-bar { width:80px; border-radius:6px 6px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:10px; }
+        .roi-bar.bad { background:linear-gradient(to bottom,rgba(239,68,68,0.6),rgba(239,68,68,0.3)); }
+        .roi-bar.good { background:linear-gradient(to bottom,rgba(16,185,129,0.6),rgba(16,185,129,0.3)); }
+        .roi-bar-val { font-size:0.75em; font-weight:700; font-family:monospace; color:white; }
+        .roi-bar-label { font-size:0.68em; color:rgba(255,255,255,0.35); text-align:center; width:100px; }
+        .roi-savings-badge { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:10px 20px; text-align:center; }
+        .rsb-num { font-size:1.4em; font-weight:800; color:#10b981; font-family:monospace; }
+        .rsb-label { font-size:0.68em; color:rgba(255,255,255,0.3); margin-top:2px; }
+
+        /* NOTE */
+        .patent-note { background:rgba(0,180,216,0.04); border:1px solid rgba(0,180,216,0.12); border-radius:10px; padding:16px 20px; font-size:0.78em; color:rgba(255,255,255,0.35); line-height:1.7; margin-top:12px; }
+        .patent-note strong { color:rgba(0,180,216,0.7); }
+
+        .cta-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:48px; padding-bottom:64px; }
+        .cta-btn { padding:12px 28px; border-radius:28px; font-size:0.92em; font-weight:700; text-decoration:none; cursor:pointer; display:inline-block; transition:all 0.2s; }
+        .cta-primary { background:linear-gradient(135deg,#00B4D8,#0080aa); color:white; }
+        .cta-primary:hover { opacity:0.88; transform:translateY(-1px); }
+        .cta-ghost { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.15); }
+        .cta-ghost:hover { background:rgba(255,255,255,0.1); }
+
+        .footer { border-top:1px solid rgba(255,255,255,0.05); padding:24px 28px; text-align:center; font-size:0.72em; color:rgba(255,255,255,0.18); }
+        .footer a { color:rgba(0,180,216,0.4); text-decoration:none; }
+        .footer a:hover { color:#00B4D8; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a href="router.html" class="back">← Compass</a>
+    <div class="topbar-center">
+        <div class="topbar-product">COMPASS</div>
+        <div class="topbar-sub">/ Data Center Design</div>
+    </div>
+    <div class="patent-pill">Patent Pending</div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+        <div class="eyebrow">Compass · Infrastructure Design · Pacific Platform</div>
+        <h1>What Your Data Center Looks Like<br><span>When It's Built Around Compass</span></h1>
+        <p class="hero-sub">
+            Compass doesn't just reduce GPU costs at the software layer. At scale, it reshapes the physical infrastructure — smaller GPU clusters, lower facility power, and a fraction of the capital expenditure.
+        </p>
+        <div class="top-stats">
+            <div class="ts"><div class="ts-val green">70%</div><div class="ts-label">Energy Reduction</div></div>
+            <div class="ts"><div class="ts-val cyan">30 MW</div><div class="ts-label">Facility Power (vs 100 MW)</div></div>
+            <div class="ts"><div class="ts-val green">$1.1B</div><div class="ts-label">CAPEX (vs $2.2B)</div></div>
+            <div class="ts"><div class="ts-val cyan">70 / 30</div><div class="ts-label">CPU / GPU Split</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ROUTING ARCHITECTURE -->
+<div class="section">
+    <div class="section-label">System Architecture</div>
+    <div class="section-title">Intelligent Query Routing</div>
+    <div class="section-sub">Compass sits in front of every query. High-confidence queries resolve on CPU — no GPU touched. Only queries that genuinely require generative inference reach the GPU cluster.</div>
+    <div class="flow-wrap">
+        <div class="flow-row">
+            <div class="flow-box fb-input">
+                <div class="fb-label">Input</div>
+                <div class="fb-title">Query Stream</div>
+                <div class="fb-detail">100,000 queries / day</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box fb-pcf">
+                <div class="fb-label">Compass</div>
+                <div class="fb-title">PCF Router</div>
+                <div class="fb-detail">Confidence scoring</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-split">
+                <div>
+                    <div class="flow-pct cpu">70% of queries</div>
+                    <div class="flow-box fb-cpu" style="margin-top:6px;">
+                        <div class="fb-label">CPU Path</div>
+                        <div class="fb-title">PCF Processor</div>
+                        <div class="fb-detail">20W · 15ms · $0.0001</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flow-pct gpu">30% of queries</div>
+                    <div class="flow-box fb-gpu" style="margin-top:6px;">
+                        <div class="fb-label">GPU Path</div>
+                        <div class="fb-title">LLM Cluster</div>
+                        <div class="fb-detail">400W · 50ms · $0.001</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flow-note">Current validated: 25% GPU reduction at corpus_size=720, threshold=0.70 · Scales to 70%+ as corpus matures</div>
+    </div>
+</div>
+
+<!-- FLOOR PLAN -->
+<div class="section" style="padding-top:52px;">
+    <div class="section-label">Figure 4 — Patent Reference</div>
+    <div class="section-title">Hybrid Data Center Floor Plan</div>
+    <div class="section-sub">A facility designed around Compass has two distinct compute zones. The CPU cluster handles the majority of workload at a fraction of the power. The GPU cluster is sized only for what CPU cannot resolve.</div>
+    <div class="floorplan">
+        <div class="fp-title">PCF-Hybrid Data Center · 30 MW Total · Top-Down View</div>
+        <div class="fp-layout">
+
+            <div class="fp-zone fp-zone-cpu">
+                <div class="fp-zone-header">
+                    <div class="fp-zone-name cpu">CPU Cluster — PCF Processing</div>
+                    <div class="fp-zone-power" style="color:#10b981;">15 MW</div>
+                </div>
+                <div class="fp-servers">
+                    <!-- 40 server boxes representing 1000 servers -->
+                    <div id="cpu-servers"></div>
+                </div>
+                <div class="fp-zone-stats">
+                    <div class="fp-stat"><strong>1,000</strong> servers</div>
+                    <div class="fp-stat"><strong>70%</strong> of query workload</div>
+                    <div class="fp-stat"><strong>20W</strong> per server avg</div>
+                    <div class="fp-stat"><strong>15ms</strong> latency</div>
+                </div>
+            </div>
+
+            <div class="fp-zone fp-zone-gpu">
+                <div class="fp-zone-header">
+                    <div class="fp-zone-name gpu">GPU Cluster — LLM Generation</div>
+                    <div class="fp-zone-power" style="color:#a78bfa;">12 MW</div>
+                </div>
+                <div id="gpu-servers" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;"></div>
+                <div class="fp-zone-stats">
+                    <div class="fp-stat"><strong>150</strong> servers · <strong>15,000</strong> GPUs</div>
+                    <div class="fp-stat"><strong>30%</strong> of query workload</div>
+                    <div class="fp-stat"><strong>80kW</strong> per rack avg</div>
+                    <div class="fp-stat"><strong>50ms</strong> latency</div>
+                </div>
+            </div>
+
+            <div class="fp-zone fp-zone-cooling">
+                <div class="fp-zone-header">
+                    <div class="fp-zone-name cooling">Cooling & Infrastructure</div>
+                    <div class="fp-zone-power" style="color:#38bdf8;">3 MW</div>
+                </div>
+                <div class="fp-zone-stats">
+                    <div class="fp-stat">Chillers, cooling towers, power distribution</div>
+                    <div class="fp-stat"><strong>PUE 1.1</strong> target</div>
+                </div>
+            </div>
+
+            <div class="fp-total">
+                <div>
+                    <div class="fp-total-label">Total Facility Power</div>
+                    <div class="fp-total-val">30 MW</div>
+                </div>
+                <div>
+                    <div class="fp-total-label">vs. GPU-Only Equivalent</div>
+                    <div class="fp-total-val" style="color:#ef4444;">100 MW</div>
+                </div>
+                <div>
+                    <div class="fp-total-label">Power Reduction</div>
+                    <div class="fp-total-val" style="color:#10b981;">−70 MW (70%)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COMPARISON -->
+<div class="section" style="padding-top:52px;">
+    <div class="section-label">Infrastructure Comparison</div>
+    <div class="section-title">GPU-Only vs. PCF-Hybrid</div>
+    <div class="section-sub">Same query throughput. Radically different infrastructure requirements.</div>
+    <div class="compare-grid">
+        <div class="compare-card bad">
+            <div class="compare-tag bad">GPU-Only Facility</div>
+            <div class="compare-title">Traditional LLM Infrastructure</div>
+            <div class="compare-row"><span class="cr-key">Facility Power</span><span class="cr-val red">100 MW</span></div>
+            <div class="compare-row"><span class="cr-key">GPU Servers</span><span class="cr-val red">1,000+</span></div>
+            <div class="compare-row"><span class="cr-key">GPU Count</span><span class="cr-val red">~100,000</span></div>
+            <div class="compare-row"><span class="cr-key">CAPEX</span><span class="cr-val red">$2.2B</span></div>
+            <div class="compare-row"><span class="cr-key">Annual OPEX (energy)</span><span class="cr-val red">$112M</span></div>
+            <div class="compare-row"><span class="cr-key">Energy / 10K queries</span><span class="cr-val red">22.2 kWh</span></div>
+            <div class="compare-row"><span class="cr-key">CO₂ / year</span><span class="cr-val red">~40,000 tons</span></div>
+        </div>
+        <div class="compare-card good">
+            <div class="compare-tag good">PCF-Hybrid (Compass)</div>
+            <div class="compare-title">Compass-Optimized Infrastructure</div>
+            <div class="compare-row"><span class="cr-key">Facility Power</span><span class="cr-val green">30 MW</span></div>
+            <div class="compare-row"><span class="cr-key">GPU Servers</span><span class="cr-val green">150</span></div>
+            <div class="compare-row"><span class="cr-key">GPU Count</span><span class="cr-val green">15,000</span></div>
+            <div class="compare-row"><span class="cr-key">CAPEX</span><span class="cr-val green">$1.1B</span></div>
+            <div class="compare-row"><span class="cr-key">Annual OPEX (energy)</span><span class="cr-val green">$37M</span></div>
+            <div class="compare-row"><span class="cr-key">Energy / 10K queries</span><span class="cr-val green">6.7 kWh</span></div>
+            <div class="compare-row"><span class="cr-key">CO₂ / year</span><span class="cr-val green">~12,000 tons</span></div>
+        </div>
+    </div>
+    <div class="patent-note">
+        <strong>Patent reference:</strong> Figure 4 (Hybrid Data Center Floor Plan) and Figure 5 (Energy Comparison) from U.S. Provisional No. 63/978,633. Current validated performance: 25% GPU cost reduction at corpus_size=720, threshold=0.70. Infrastructure figures reflect projected performance at mature corpus scale (70%+ CPU routing). All detection and routing methods patent pending.
+    </div>
+</div>
+
+<!-- ENERGY VISUAL -->
+<div class="section" style="padding-top:52px;">
+    <div class="section-label">Figure 5 — Energy Consumption</div>
+    <div class="section-title">Per 10,000 Queries</div>
+    <div class="section-sub">At the query level, the energy savings are equally clear.</div>
+    <div style="max-width:600px;">
+        <div class="energy-row">
+            <div class="energy-label">GPU-Only</div>
+            <div class="energy-track">
+                <div class="energy-fill bad" style="width:100%;">22.2 kWh</div>
+            </div>
+        </div>
+        <div class="energy-row">
+            <div class="energy-label">PCF-Hybrid</div>
+            <div class="energy-track">
+                <div class="energy-fill good" style="width:30.2%;">6.7 kWh</div>
+            </div>
+        </div>
+        <div class="energy-savings">
+            <div class="es-num">−15.5 kWh</div>
+            <div class="es-label">saved per 10,000 queries · 70% reduction · Scaled to 100M queries/day: saves 4,000 tons CO₂/year</div>
+        </div>
+    </div>
+</div>
+
+<!-- ROI -->
+<div class="section" style="padding-top:52px; padding-bottom:0;">
+    <div class="section-label">Figure 10 — 10-Year ROI</div>
+    <div class="section-title">Cumulative Cost Comparison</div>
+    <div class="section-sub">CAPEX savings begin on day one. OPEX savings compound annually.</div>
+    <div class="roi-wrap">
+        <div class="roi-bars">
+            <div class="roi-bar-group">
+                <div class="roi-bar bad" style="height:160px;">
+                    <div class="roi-bar-val">$3.32B</div>
+                </div>
+                <div class="roi-bar-label">GPU-Only<br><span style="opacity:0.5;font-size:0.85em;">$2.2B CAPEX + $1.12B OPEX</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+                <div class="roi-savings-badge">
+                    <div class="rsb-num">$1.84B</div>
+                    <div class="rsb-label">10-year savings<br>55% total cost reduction</div>
+                </div>
+            </div>
+            <div class="roi-bar-group">
+                <div class="roi-bar good" style="height:71px;">
+                    <div class="roi-bar-val">$1.48B</div>
+                </div>
+                <div class="roi-bar-label">PCF-Hybrid<br><span style="opacity:0.5;font-size:0.85em;">$1.1B CAPEX + $0.37B OPEX</span></div>
+            </div>
+        </div>
+        <div class="patent-note" style="margin-top:20px;">
+            <strong>10-year breakdown:</strong> CAPEX savings $1.084B (day one). OPEX savings $754M (compounding annually). NPV at 10% discount rate: ~$1.95B. IRR: immediate — CAPEX savings alone exceed the cost of Compass integration.
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="cta-row">
+        <a href="router.html" class="cta-btn cta-primary">Try Compass Live →</a>
+        <a href="mailto:jacob@pcfic.com?subject=Data Center Pilot — Compass" class="cta-btn cta-ghost">Discuss a Pilot</a>
+        <a href="about.html" class="cta-btn cta-ghost">About the Technology</a>
+    </div>
+</div>
+
+<div class="footer">
+    Compass · Data Center Design · Pacific Platform · Astrognosy AI · <a href="/">pcfic.com</a> · Patent Pending
+</div>
+
+<script>
+// Render server grids
+function makeServers(containerId, count, cls, size) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    let html = '';
+    for (let i = 0; i < count; i++) {
+        html += `<div style="width:${size[0]}px;height:${size[1]}px;border-radius:2px;background:${cls};display:inline-block;margin:2px;"></div>`;
+    }
+    el.innerHTML = html;
+}
+makeServers('cpu-servers', 50, 'rgba(16,185,129,0.4)', [14, 8]);
+makeServers('gpu-servers', 20, 'rgba(118,75,162,0.5)', [18, 12]);
+</script>
+</body>
+</html>
