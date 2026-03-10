@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Astrognosy AI · Pacific Platform</title>
+    <meta name="description" content="The story behind Astrognosy AI and the Pacific Platform — from 2008 NLP research with Jeff Spetalnick to Positional Correlation Fields and the future of verifiable AI infrastructure.">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#f8f9ff; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; color:#2c3e50; line-height:1.6; }
+
+        :root {
+            --blue: #5B6ECC; --cyan: #00B4D8; --gold: #d4a843;
+            --dark: #1a1f3a; --muted: #6b7280; --border: #e8ecf4;
+        }
+
+        /* TOPBAR */
+        .topbar { background:rgba(255,255,255,0.97); backdrop-filter:blur(12px); padding:0; position:sticky; top:0; z-index:100; box-shadow:0 1px 0 var(--border); }
+        .topbar-inner { display:flex; justify-content:space-between; align-items:center; max-width:1100px; margin:0 auto; padding:14px 24px; }
+        .logo { font-size:1.4em; font-weight:800; letter-spacing:0.04em; text-decoration:none; color:var(--dark); }
+        .logo span { color:var(--blue); }
+        .logo .a { color:var(--cyan); }
+        .back { color:var(--muted); text-decoration:none; font-size:0.88em; font-weight:500; }
+        .back:hover { color:var(--blue); }
+
+        /* HERO */
+        .about-hero { background:#06080f; color:white; padding:72px 24px 64px; text-align:center; position:relative; overflow:hidden; }
+        .about-hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(212,168,67,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(212,168,67,0.03) 1px,transparent 1px); background-size:48px 48px; }
+        .about-hero-glow { position:absolute; top:-20%; left:50%; transform:translateX(-50%); width:600px; height:350px; background:radial-gradient(ellipse,rgba(212,168,67,0.1) 0%,transparent 65%); pointer-events:none; }
+        .hero-inner { position:relative; max-width:780px; margin:0 auto; }
+        .eyebrow { font-size:0.72em; font-weight:700; letter-spacing:0.22em; color:rgba(212,168,67,0.7); text-transform:uppercase; margin-bottom:20px; }
+        .about-hero h1 { font-size:clamp(2.2em,5vw,3.2em); font-weight:800; letter-spacing:-0.03em; margin-bottom:20px; line-height:1.1; }
+        .about-hero h1 span { background:linear-gradient(135deg,#d4a843,#e8c96a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+        .about-hero-sub { font-size:1.05em; color:rgba(255,255,255,0.45); max-width:580px; margin:0 auto; line-height:1.75; }
+
+        /* MAIN CONTENT */
+        .content { max-width:760px; margin:0 auto; padding:64px 24px; }
+
+        /* STORY SECTION */
+        .story-section { margin-bottom:64px; }
+        .story-section h2 { font-size:1.5em; font-weight:800; color:var(--dark); margin-bottom:16px; letter-spacing:-0.02em; }
+        .story-section p { font-size:1.02em; color:#374151; line-height:1.8; margin-bottom:18px; }
+        .story-section p:last-child { margin-bottom:0; }
+        .section-divider { border:none; border-top:1px solid var(--border); margin:48px 0; }
+
+        /* PULL QUOTE */
+        .pull-quote { border-left:3px solid var(--gold); padding:20px 28px; margin:32px 0; background:rgba(212,168,67,0.04); border-radius:0 10px 10px 0; }
+        .pull-quote p { font-size:1.1em; font-style:italic; color:var(--dark); line-height:1.7; }
+
+        /* PATENT TIMELINE */
+        .timeline { position:relative; padding-left:32px; }
+        .timeline::before { content:''; position:absolute; left:8px; top:8px; bottom:8px; width:2px; background:linear-gradient(to bottom, #d4a843, var(--blue), var(--cyan)); }
+        .tl-item { position:relative; margin-bottom:40px; }
+        .tl-item:last-child { margin-bottom:0; }
+        .tl-dot { position:absolute; left:-28px; top:4px; width:14px; height:14px; border-radius:50%; border:2px solid; background:white; }
+        .tl-dot.gold { border-color:#d4a843; background:#d4a843; }
+        .tl-dot.blue { border-color:var(--blue); background:var(--blue); }
+        .tl-dot.cyan { border-color:var(--cyan); background:var(--cyan); }
+        .tl-dot.muted { border-color:var(--muted); background:white; }
+        .tl-year { font-size:0.7em; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+        .tl-title { font-size:0.98em; font-weight:700; color:var(--dark); margin-bottom:6px; }
+        .tl-desc { font-size:0.88em; color:var(--muted); line-height:1.65; margin-bottom:8px; }
+        .tl-link { font-size:0.78em; font-family:monospace; color:var(--blue); text-decoration:none; display:inline-block; }
+        .tl-link:hover { text-decoration:underline; }
+        .tl-num { font-size:0.72em; font-family:monospace; background:rgba(91,110,204,0.08); border:1px solid rgba(91,110,204,0.15); border-radius:4px; padding:2px 8px; color:var(--blue); display:inline-block; margin-top:4px; }
+
+        /* FOUNDER */
+        .founder-card { background:white; border:1px solid var(--border); border-radius:20px; padding:40px; display:flex; gap:36px; align-items:flex-start; margin-bottom:48px; box-shadow:0 2px 16px rgba(0,0,0,0.04); }
+        .founder-avatar { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--cyan)); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:2em; color:white; font-weight:800; }
+        .founder-content h3 { font-size:1.2em; font-weight:800; color:var(--dark); margin-bottom:4px; }
+        .founder-role { font-size:0.82em; color:var(--muted); margin-bottom:14px; letter-spacing:0.04em; }
+        .founder-bio { font-size:0.92em; color:#374151; line-height:1.75; }
+        .founder-links { display:flex; gap:12px; margin-top:14px; flex-wrap:wrap; }
+        .founder-link { font-size:0.78em; font-weight:600; color:var(--blue); text-decoration:none; background:rgba(91,110,204,0.08); border:1px solid rgba(91,110,204,0.15); padding:4px 12px; border-radius:20px; }
+        .founder-link:hover { background:rgba(91,110,204,0.14); }
+
+        /* JEFF MEMORIAL */
+        .jeff-card { background:linear-gradient(135deg,#f8f6f0,#faf8f2); border:1px solid rgba(212,168,67,0.25); border-radius:16px; padding:32px 36px; margin-bottom:48px; }
+        .jeff-card h3 { font-size:1em; font-weight:700; color:#92740a; margin-bottom:10px; letter-spacing:0.04em; }
+        .jeff-card p { font-size:0.92em; color:#5c4a00; line-height:1.75; margin-bottom:10px; }
+        .jeff-card p:last-child { margin-bottom:0; }
+        .jeff-patents { display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+        .jeff-patent { font-size:0.78em; font-family:monospace; color:#92740a; }
+        .jeff-patent a { color:#92740a; }
+        .jeff-patent a:hover { text-decoration:none; opacity:0.8; }
+
+        /* VISION */
+        .vision-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-top:24px; }
+        .vision-card { background:white; border:1px solid var(--border); border-radius:12px; padding:20px; }
+        .vision-card h4 { font-size:0.9em; font-weight:700; color:var(--dark); margin-bottom:6px; }
+        .vision-card p { font-size:0.82em; color:var(--muted); line-height:1.6; }
+
+        /* CONTACT CTA */
+        .cta-block { background:linear-gradient(135deg,var(--dark),#1a1f4a); border-radius:20px; padding:48px 40px; text-align:center; color:white; margin-top:48px; }
+        .cta-block h2 { font-size:1.8em; font-weight:800; margin-bottom:12px; letter-spacing:-0.02em; }
+        .cta-block p { font-size:1em; color:rgba(255,255,255,0.55); margin-bottom:28px; }
+        .cta-buttons { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+        .cta-btn { padding:12px 28px; border-radius:28px; font-size:0.92em; font-weight:600; text-decoration:none; cursor:pointer; display:inline-block; transition:all 0.2s; }
+        .cta-primary { background:linear-gradient(135deg,var(--blue),#764ba2); color:white; }
+        .cta-primary:hover { opacity:0.88; transform:translateY(-1px); }
+        .cta-ghost { background:rgba(255,255,255,0.08); color:white; border:1px solid rgba(255,255,255,0.2); }
+        .cta-ghost:hover { background:rgba(255,255,255,0.14); }
+
+        /* FOOTER */
+        .page-footer { border-top:1px solid var(--border); padding:24px; text-align:center; font-size:0.82em; color:var(--muted); }
+        .page-footer a { color:var(--blue); text-decoration:none; }
+
+        @media(max-width:640px) {
+            .founder-card { flex-direction:column; gap:20px; }
+            .cta-block { padding:32px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-inner">
+        <a href="/" class="logo">PACIFIC <span class="a" style="color:#00B4D8;font-size:0.65em;font-weight:600;letter-spacing:0.1em;margin-left:6px;">by Astrognosy AI</span></a>
+        <a href="/" class="back">← Home</a>
+    </div>
+</div>
+
+<div class="about-hero">
+    <div class="about-hero-glow"></div>
+    <div class="hero-inner">
+        <div class="eyebrow">About · Astrognosy AI</div>
+        <h1>Built on <span>15 Years</span><br>of Foundational Research</h1>
+        <p class="about-hero-sub">
+            Positional Correlation Fields didn't emerge from a weekend hackathon. It's the result of a decade and a half of work on how machines understand language — and what happens when you apply that lens to everything else.
+        </p>
+    </div>
+</div>
+
+<div class="content">
+
+    <!-- ORIGIN STORY -->
+    <div class="story-section">
+        <h2>Where It Started</h2>
+        <p>
+            In 2008, Jake Westerbeck partnered with Jeff Spetalnick to build production NLP systems — practical tools for how machines handle language input, error correction, and statistical prediction from corpora. The research centered on a deceptively simple question: how does the structure of language — the patterns of which words follow which — encode meaning in a way that doesn't require brute-force compute?
+        </p>
+        <p>
+            That work produced two patents focused on frequency-based language efficiency: reducing keyboard input errors, improving OCR accuracy, enabling compression and translation through corpus-learned statistical likelihoods. These weren't academic exercises — they were built to run efficiently on the hardware of the time, without relying on large neural models that didn't yet exist at scale.
+        </p>
+
+        <div class="pull-quote">
+            <p>"The insight wasn't that language is complex. It's that the positional relationships between tokens — across a window of context — encode far more structure than anyone was using efficiently."</p>
+        </div>
+
+        <p>
+            Jeff passed away before seeing where those ideas would lead. The research sat. But the fundamental insight — that positional co-occurrence patterns carry structural meaning that can be scored and compared without training — didn't go away. It waited for the right problem.
+        </p>
+    </div>
+
+    <!-- JEFF MEMORIAL -->
+    <div class="jeff-card">
+        <h3>In Memory — Jeff Spetalnick</h3>
+        <p>
+            Jeff Spetalnick was a researcher and inventor whose work on statistical language modeling laid the groundwork for everything that followed. His approach — practical, efficiency-first, grounded in how real systems behave — is embedded in the DNA of the Pacific platform.
+        </p>
+        <p>The foundational patents co-developed during our collaboration remain a testament to ideas that were ahead of their time:</p>
+        <div class="jeff-patents">
+            <div class="jeff-patent">US20100131900A1 · <a href="https://patents.google.com/patent/US20100131900A1" target="_blank">Frequency-Based Language Analysis — Published 2010 ↗</a></div>
+            <div class="jeff-patent">US9122318B2 · <a href="https://patents.google.com/patent/US9122318B2" target="_blank">Reducing Keyboard Data Entry Errors — Issued 2015 ↗</a></div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- EVOLUTION -->
+    <div class="story-section">
+        <h2>The Evolution to PCF</h2>
+        <p>
+            The leap from frequency-based NLP to Positional Correlation Fields was not a pivot — it was a completion. The 2010 patents worked because positional patterns in token sequences are structurally meaningful. PCF formalizes that intuition into a general-purpose scoring mechanism: compute the mean PMI across positional offsets, normalize by variance, and you have a structural signature — a vector that encodes what a sequence looks like, independent of domain.
+        </p>
+        <p>
+            When applied to network traffic flows in 2025, the same math that once predicted the next word in a sentence detected cyberattacks without a signature database. When applied to LLM query verification, it routed queries to CPU with 25% GPU savings. The engine was always domain-agnostic. It just took years of problems — and 15 years of perspective — to see it clearly.
+        </p>
+        <p>
+            Astrognosy AI was founded to build the products that prove this out: not as research demos, but as real infrastructure that enterprises can deploy today.
+        </p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- FOUNDER -->
+    <div class="story-section">
+        <h2>The Founder</h2>
+        <div class="founder-card">
+            <div class="founder-avatar">JW</div>
+            <div class="founder-content">
+                <h3>Jake Westerbeck</h3>
+                <div class="founder-role">Founder & Inventor · Astrognosy AI / Pacific Platform</div>
+                <div class="founder-bio">
+                    Jake has spent 15+ years working at the intersection of language, statistics, and production systems. Starting with NLP efficiency research in 2008, he developed the frequency-based methods that became the 2010 and 2015 patents, then spent years working toward a more general formulation — one that could handle any sequential token stream, not just text. The result is Positional Correlation Fields, now powering the Pacific platform across LLM routing, cybersecurity, data center intelligence, chip validation, and robotic sensing.
+                </div>
+                <div class="founder-links">
+                    <a href="mailto:jacob@pcfic.com" class="founder-link">jacob@pcfic.com</a>
+                    <a href="https://x.com/bonksanon" class="founder-link" target="_blank">X / Twitter</a>
+                    <a href="mailto:jacob@pcfic.com?subject=Investor Inquiry — Astrognosy AI" class="founder-link">Investor Inquiries</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- PATENT TIMELINE -->
+    <div class="story-section">
+        <h2>Intellectual Property Timeline</h2>
+        <p style="margin-bottom:32px;">From foundational frequency models to domain-agnostic positional fields — a 15-year arc of research, now protected across five product verticals.</p>
+        <div class="timeline">
+            <div class="tl-item">
+                <div class="tl-dot gold"></div>
+                <div class="tl-year">2008–2010</div>
+                <div class="tl-title">Foundational NLP Research</div>
+                <div class="tl-desc">Collaboration with Jeff Spetalnick on production NLP systems — statistical language modeling, corpus-based error reduction, and efficient frequency-driven text analysis.</div>
+                <div class="tl-num">Prior art establishing statistical token co-occurrence as structural signal</div>
+            </div>
+            <div class="tl-item">
+                <div class="tl-dot gold"></div>
+                <div class="tl-year">2010</div>
+                <div class="tl-title">US20100131900A1 — Frequency-Based Language Analysis</div>
+                <div class="tl-desc">Methods and systems for improved data input, compression, recognition, correction, and translation through frequency-based language analysis. Predictive text input, OCR enhancement, and corpus-driven statistical likelihoods.</div>
+                <a href="https://patents.google.com/patent/US20100131900A1" target="_blank" class="tl-link">View on Google Patents ↗</a>
+            </div>
+            <div class="tl-item">
+                <div class="tl-dot gold"></div>
+                <div class="tl-year">2015</div>
+                <div class="tl-title">US9122318B2 — Reducing Keyboard Data Entry Errors</div>
+                <div class="tl-desc">Dynamic visual distinction of likely next keys using corpus-learned statistical likelihoods — error minimization at the input layer through positional probability scoring.</div>
+                <a href="https://patents.google.com/patent/US9122318B2" target="_blank" class="tl-link">View on Google Patents ↗</a>
+            </div>
+            <div class="tl-item">
+                <div class="tl-dot blue"></div>
+                <div class="tl-year">February 2026</div>
+                <div class="tl-title">Patent 1 — PCF Core Framework (Non-Provisional)</div>
+                <div class="tl-desc">Positional Correlation Fields for domain-agnostic verification. CPU-native inference, PSV computation, dual-signal anomaly detection, deterministic caching, and hybrid routing. 42 claims.</div>
+                <div class="tl-num">U.S. Prov. No. 63/978,633 · Filed Feb 9, 2026</div>
+            </div>
+            <div class="tl-item">
+                <div class="tl-dot cyan"></div>
+                <div class="tl-year">March 2026</div>
+                <div class="tl-title">Patent 2 — Domain-Agnostic PCF + VASE Agent</div>
+                <div class="tl-desc">Extends PCF to sequential token streams across NLP, cybersecurity, hardware telemetry, robotics, and industrial IoT. Adds autonomous RL corpus agent (VASE) and edge deployment. 66 claims.</div>
+                <div class="tl-num">U.S. Provisional · Filed March 2026</div>
+            </div>
+            <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-year">2026 — In Preparation</div>
+                <div class="tl-title">Patent 3 — Marketplace Protocol</div>
+                <div class="tl-desc">Multi-agent competitive verification marketplace using PCF as objective structural arbitration. Cryptographically auditable agent competition for query resolution.</div>
+                <div class="tl-num">In preparation</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- VISION -->
+    <div class="story-section">
+        <h2>Where This Goes</h2>
+        <p>
+            The Pacific platform exists to prove a single thesis: that a domain-agnostic structural scoring engine — one that runs on CPU, requires no training data, and improves automatically as it processes more queries — is the right foundation for AI infrastructure at scale.
+        </p>
+        <p>
+            Every product on the platform is a domain-specific proof of that thesis. Compass proves it in LLM routing. Laminar proves it in network security. Stratum, Forge, and Beacon are proving it in physical infrastructure. The Marketplace will prove it in multi-agent coordination.
+        </p>
+        <div class="vision-grid">
+            <div class="vision-card">
+                <h4>CPU-Native</h4>
+                <p>Every product runs without a GPU. Lower cost, lower power, edge-deployable — from day one.</p>
+            </div>
+            <div class="vision-card">
+                <h4>Zero Training</h4>
+                <p>No labeled data required to start. The engine calibrates on normal behavior and detects divergence.</p>
+            </div>
+            <div class="vision-card">
+                <h4>Corpus Flywheel</h4>
+                <p>More usage means a better corpus, means better detection — a structural moat that compounds.</p>
+            </div>
+            <div class="vision-card">
+                <h4>Domain-Agnostic</h4>
+                <p>One engine. Language, networks, silicon, sensors, agents — the math doesn't change between domains.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+        <h2>Let's Build Together</h2>
+        <p>Pilots, partnerships, and investor conversations welcome. Based in San Antonio, Texas — open to remote and on-site collaboration.</p>
+        <div class="cta-buttons">
+            <a href="mailto:jacob@pcfic.com?subject=Pilot Inquiry" class="cta-btn cta-primary">Request a Pilot →</a>
+            <a href="mailto:jacob@pcfic.com?subject=Investor Inquiry — Astrognosy AI" class="cta-btn cta-ghost">Investor Inquiry</a>
+            <a href="/" class="cta-btn cta-ghost">View Products</a>
+        </div>
+    </div>
+
+</div>
+
+<div class="page-footer">
+    Astrognosy AI · <a href="/">pcfic.com</a> · Patent Pending · San Antonio, TX
+</div>
+
+</body>
+</html>

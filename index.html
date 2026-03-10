@@ -505,35 +505,31 @@
         }
 
         /* ── PATENTS ── */
-        .patents-bg { background: linear-gradient(160deg, #0a0e2a, #1a1f4a); color: white; }
-        .patents-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .patent-card {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            padding: 28px;
-        }
-        .patent-card h4 {
-            font-size: 1em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #a0b0ff;
-        }
-        .patent-card p {
-            font-size: 0.88em;
-            color: rgba(255,255,255,0.6);
-            line-height: 1.6;
-        }
-        .patent-number {
-            font-family: monospace;
-            font-size: 0.78em;
-            color: #00B4D8;
-            margin-top: 10px;
-        }
+        .patents-bg { background: linear-gradient(160deg, #06080f, #0f1220); color: white; }
+        .ip-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; margin-bottom: 48px; }
+        @media(max-width:700px) { .ip-intro { grid-template-columns: 1fr; gap: 24px; } }
+        .ip-story { font-size: 0.95em; color: rgba(255,255,255,0.5); line-height: 1.8; }
+        .ip-story strong { color: rgba(255,255,255,0.8); }
+        .ip-stats { display: flex; flex-direction: column; gap: 12px; }
+        .ip-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 16px 20px; }
+        .ip-stat-num { font-size: 1.6em; font-weight: 800; background: linear-gradient(135deg, #d4a843, #e8c96a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-family: monospace; }
+        .ip-stat-label { font-size: 0.7em; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+        /* timeline */
+        .ip-timeline { position: relative; padding-left: 28px; }
+        .ip-timeline::before { content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(to bottom, #d4a843 0%, #d4a843 38%, #5B6ECC 62%, #00B4D8 100%); }
+        .tl-row { position: relative; margin-bottom: 28px; }
+        .tl-row:last-child { margin-bottom: 0; }
+        .tl-dot { position: absolute; left: -24px; top: 5px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid; }
+        .tl-dot-gold { border-color: #d4a843; background: #d4a843; }
+        .tl-dot-blue { border-color: #5B6ECC; background: #5B6ECC; }
+        .tl-dot-cyan { border-color: #00B4D8; background: #00B4D8; }
+        .tl-dot-muted { border-color: rgba(255,255,255,0.2); background: transparent; }
+        .tl-yr { font-size: 0.65em; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 2px; }
+        .tl-t { font-size: 0.9em; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 4px; }
+        .tl-d { font-size: 0.78em; color: rgba(255,255,255,0.38); line-height: 1.6; }
+        .tl-link { font-size: 0.72em; font-family: monospace; color: #d4a843; text-decoration: none; }
+        .tl-link:hover { text-decoration: underline; }
+        .tl-num { font-size: 0.68em; font-family: monospace; color: #00B4D8; display: block; margin-top: 4px; }
 
         /* ── CONTACT ── */
         .contact-bg { background: white; border-top: 1px solid var(--border); }
@@ -749,8 +745,8 @@
         </a>
         <nav>
             <a href="#products" class="hide-mobile">Products</a>
-            <a href="router.html" class="hide-mobile">Compass</a>
-            <a href="laminar.html" class="hide-mobile">Laminar</a>
+            <a href="#patents" class="hide-mobile">IP</a>
+            <a href="about.html" class="hide-mobile">About</a>
             <a href="#contact" class="hide-mobile">Contact</a>
             <a href="laminar-console.html" class="nav-demo">Laminar Console</a>
             <a href="mailto:jacob@pcfic.com" class="nav-cta">Schedule a Pilot</a>
@@ -1081,24 +1077,65 @@
 <!-- ── PATENTS ── -->
 <div class="patents-bg" id="patents">
 <div class="section">
-    <div class="section-label" style="color:#00B4D8;">Intellectual Property</div>
-    <h2 class="section-title" style="color:white;">Two Provisionals Filed.<br>Non-Provisional In Process.</h2>
+    <div class="section-label" style="color:#d4a843;">Intellectual Property</div>
+    <h2 class="section-title" style="color:white;">15 Years of Research.<br>Now Protected.</h2>
 
-    <div class="patents-grid" style="margin-top:40px;">
-        <div class="patent-card">
-            <h4>Patent 1 — PCF Core Framework</h4>
-            <p>Energy-efficient NLP using Positional Correlation Fields. Original provisional establishing the PCF mathematical framework, CPU-based verification, deterministic caching, hybrid routing, and cryptographic audit.</p>
-            <div class="patent-number">U.S. Provisional No. 63/978,633 · Filed Feb 9, 2026</div>
+    <div class="ip-intro">
+        <p class="ip-story">
+            The Pacific platform is built on a <strong>15-year arc of research</strong> — from frequency-based NLP systems developed in 2008 with Jeff Spetalnick, to the Positional Correlation Fields engine protecting five product verticals today. Two foundational patents from 2010 established the statistical token-correlation principles. Two provisionals filed in 2026 formalize PCF as the domain-agnostic engine it has become.
+            <br><br>
+            <a href="about.html" style="color:#d4a843;font-size:0.9em;">Read the full origin story →</a>
+        </p>
+        <div class="ip-stats">
+            <div class="ip-stat">
+                <div class="ip-stat-num">4</div>
+                <div class="ip-stat-label">Patents Filed (2010–2026)</div>
+            </div>
+            <div class="ip-stat">
+                <div class="ip-stat-num">15+</div>
+                <div class="ip-stat-label">Years of Prior Art</div>
+            </div>
+            <div class="ip-stat">
+                <div class="ip-stat-num">5</div>
+                <div class="ip-stat-label">Protected Product Verticals</div>
+            </div>
         </div>
-        <div class="patent-card">
-            <h4>Patent 2 — Domain-Agnostic PCF + VASE</h4>
-            <p>Expands PCF to domain-agnostic sequential token streams across NLP, CPU hardware, robotics, cybersecurity, and industrial IoT. Adds autonomous RL corpus agent and edge deployment claims.</p>
-            <div class="patent-number">U.S. Provisional No. 2 · Filed March 2026</div>
+    </div>
+
+    <div class="ip-timeline">
+        <div class="tl-row">
+            <div class="tl-dot tl-dot-gold"></div>
+            <div class="tl-yr">2010</div>
+            <div class="tl-t">US20100131900A1 — Frequency-Based Language Analysis</div>
+            <div class="tl-d">Predictive input, OCR enhancement, compression and translation via corpus frequency analysis. Foundational statistical token co-occurrence prior art.</div>
+            <a href="https://patents.google.com/patent/US20100131900A1" target="_blank" class="tl-link">View on Google Patents ↗</a>
         </div>
-        <div class="patent-card">
-            <h4>Patent 3 — Marketplace Protocol</h4>
-            <p>Multi-agent competitive verification marketplace using PCF as objective arbitration. Agents bid to answer queries; PCF structural convergence scores determine winners. In preparation.</p>
-            <div class="patent-number">In preparation · 2026</div>
+        <div class="tl-row">
+            <div class="tl-dot tl-dot-gold"></div>
+            <div class="tl-yr">2015</div>
+            <div class="tl-t">US9122318B2 — Reducing Keyboard Data Entry Errors</div>
+            <div class="tl-d">Dynamic statistical key prediction and visual distinction using corpus-learned positional likelihoods. Error minimization via structural next-token scoring.</div>
+            <a href="https://patents.google.com/patent/US9122318B2" target="_blank" class="tl-link">View on Google Patents ↗</a>
+        </div>
+        <div class="tl-row">
+            <div class="tl-dot tl-dot-blue"></div>
+            <div class="tl-yr">February 2026</div>
+            <div class="tl-t">Patent 1 — PCF Core Framework (Non-Provisional)</div>
+            <div class="tl-d">Positional Correlation Fields for CPU-native verification. PSV computation, dual-signal anomaly detection, hybrid routing, deterministic caching. 42 claims.</div>
+            <span class="tl-num">U.S. Prov. No. 63/978,633 · Filed Feb 9, 2026</span>
+        </div>
+        <div class="tl-row">
+            <div class="tl-dot tl-dot-cyan"></div>
+            <div class="tl-yr">March 2026</div>
+            <div class="tl-t">Patent 2 — Domain-Agnostic PCF + VASE Agent</div>
+            <div class="tl-d">Extends PCF to NLP, cybersecurity, hardware telemetry, robotics, and IoT. Autonomous RL corpus agent (VASE) and edge deployment. 66 claims.</div>
+            <span class="tl-num">U.S. Provisional · Filed March 2026</span>
+        </div>
+        <div class="tl-row">
+            <div class="tl-dot tl-dot-muted"></div>
+            <div class="tl-yr">2026 — In Preparation</div>
+            <div class="tl-t">Patent 3 — Marketplace Protocol</div>
+            <div class="tl-d">Multi-agent competitive verification using PCF structural convergence as objective arbitration. Cryptographically auditable agent competition.</div>
         </div>
     </div>
 
@@ -1155,11 +1192,17 @@
     <div class="footer-links">
         <a href="router.html">Compass</a>
         <a href="laminar.html">Laminar</a>
+        <a href="stratum.html">Stratum</a>
+        <a href="forge.html">Forge</a>
+        <a href="beacon.html">Beacon</a>
+        <a href="about.html">About</a>
+        <a href="#patents">IP</a>
+        <a href="https://x.com/bonksanon" target="_blank">X / Twitter</a>
         <a href="mailto:jacob@pcfic.com">Contact</a>
     </div>
-    <p>© 2026 Astrognosy AI. All rights reserved. &nbsp;·&nbsp; Pacific is a platform of Astrognosy AI.</p>
+    <p>© 2026 Astrognosy AI. All rights reserved. &nbsp;·&nbsp; Pacific is a platform of Astrognosy AI. &nbsp;·&nbsp; San Antonio, TX</p>
     <p style="margin-top:6px;font-size:0.85em;opacity:0.6;">
-        Patent Pending · All detection methods protected.
+        Patent Pending · 4 patents filed 2010–2026 · All methods protected.
     </p>
 </footer>
 
