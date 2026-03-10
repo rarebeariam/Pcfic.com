@@ -99,9 +99,9 @@
 
         /* ── HERO ── */
         .hero {
-            background: linear-gradient(160deg, #0a0e2a 0%, #1a1f4a 50%, #0d1635 100%);
+            background: #06080f;
             color: white;
-            padding: 100px 24px 80px;
+            padding: 80px 24px 80px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -110,18 +110,18 @@
             content: '';
             position: absolute;
             inset: 0;
-            background-image: linear-gradient(rgba(91,110,204,0.08) 1px,transparent 1px),
-                              linear-gradient(90deg,rgba(91,110,204,0.08) 1px,transparent 1px);
+            background-image: linear-gradient(rgba(255,200,80,0.03) 1px,transparent 1px),
+                              linear-gradient(90deg,rgba(255,200,80,0.03) 1px,transparent 1px);
             background-size: 48px 48px;
         }
         .hero-glow {
             position: absolute;
-            top: -20%;
+            top: -10%;
             left: 50%;
             transform: translateX(-50%);
-            width: 700px;
+            width: 600px;
             height: 400px;
-            background: radial-gradient(ellipse, rgba(91,110,204,0.18) 0%, transparent 70%);
+            background: radial-gradient(ellipse, rgba(200,160,60,0.12) 0%, transparent 65%);
             pointer-events: none;
         }
         .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
@@ -166,7 +166,7 @@
             letter-spacing: -0.02em;
         }
         .hero h1 span {
-            background: linear-gradient(135deg, #00B4D8, #5B6ECC);
+            background: linear-gradient(135deg, #d4a843, #e8c96a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -760,16 +760,18 @@
 
 <!-- ── HERO ── -->
 <section class="hero">
-    <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.18;pointer-events:none;z-index:0;" poster="pacific-logo.jpg"><source src="astrognosy.mp4" type="video/mp4"></video>
     <div class="hero-glow"></div>
     <div class="hero-inner">
+        <div style="margin-bottom:32px;">
+            <img src="pacific-logo.jpg" alt="Pacific by Astrognosy AI" style="width:240px;height:auto;opacity:0.92;filter:drop-shadow(0 0 32px rgba(200,160,60,0.4));">
+        </div>
         <div class="hero-badges">
             <span class="badge badge-patent">2 Patents Pending</span>
             <span class="badge badge-live"><span class="dot"></span>Compass Live</span>
             <span class="badge badge-live"><span class="dot"></span>Laminar Live</span>
         </div>
 
-        <p style="font-size:0.85em;font-weight:700;letter-spacing:0.2em;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:12px;">Astrognosy AI</p>
+        <p style="font-size:0.85em;font-weight:700;letter-spacing:0.2em;color:rgba(200,160,60,0.5);text-transform:uppercase;margin-bottom:12px;">Astrognosy AI</p>
         <h1>The Infrastructure Layer<br>for <span>Verifiable AI</span></h1>
 
         <p class="hero-sub">

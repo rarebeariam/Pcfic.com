@@ -18,6 +18,9 @@
         .live-pill .dot { width:6px; height:6px; border-radius:50%; background:#00B4D8; animation:pulse 1.5s infinite; }
         @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
 
+        /* BANNER */
+        .hero-banner { width:100%; max-height:320px; object-fit:cover; object-position:center 30%; display:block; }
+
         /* HERO */
         .hero { padding:56px 28px 48px; text-align:center; border-bottom:1px solid rgba(255,255,255,0.06); position:relative; overflow:hidden; }
         .hero::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(0,180,216,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,216,0.04) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
@@ -127,13 +130,11 @@
     <div class="topbar-product">COMPASS</div>
     <div class="live-pill"><span class="dot"></span>LIVE DEMO</div>
 </div>
+<img src="compass.webp" alt="Compass" class="hero-banner">
 
 <div class="hero">
     <div class="hero-glow"></div>
     <div class="hero-inner">
-        <div style="display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
-            <img src="compass.webp" alt="Compass" style="width:160px;height:160px;object-fit:cover;border-radius:24px;box-shadow:0 0 48px rgba(0,180,216,0.35),0 0 80px rgba(0,180,216,0.12);">
-        </div>
         <div class="hero-eyebrow">Pacific Platform · Astrognosy AI</div>
         <h1>Compass<br><span>Route Smarter. Pay Less.</span></h1>
         <p class="hero-sub">Every query is scored for confidence against a growing corpus. High-confidence queries resolve on CPU. Everything else routes to GPU. The corpus builds itself — your cost floor drops automatically over time.</p>
