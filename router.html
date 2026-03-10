@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PCF Router — Hybrid Inference Routing · Astrognosy AI</title>
-    <meta name="description" content="PCF Router: confidence-based hybrid routing. PCF handles high-confidence claims on CPU at $0.0003/query. Uncertain queries route to GPU/LLM. Patent pending Claims 5, 46.">
+    <title>Compass — Smart Query Routing · Astrognosy AI</title>
+    <meta name="description" content="Compass: confidence-gated LLM routing. High-confidence queries resolve on CPU. Uncertain queries route to GPU. Self-building corpus — the more you use it, the cheaper it gets.">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { background:#030810; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
@@ -124,16 +124,16 @@
 
 <div class="topbar">
     <a href="/" class="back">← pcfic.com</a>
-    <div class="topbar-product">PCF ROUTER</div>
+    <div class="topbar-product">COMPASS</div>
     <div class="live-pill"><span class="dot"></span>LIVE DEMO</div>
 </div>
 
 <div class="hero">
     <div class="hero-glow"></div>
     <div class="hero-inner">
-        <div class="hero-eyebrow">Pacific Platform · Claims 5, 46</div>
-        <h1>Structural Coverage Routing<br><span>CPU First. GPU Only When Needed.</span></h1>
-        <p class="hero-sub">Every query runs through PCF coverage analysis first. Queries within corpus coverage are resolved on CPU at near-zero cost. Queries outside coverage route to GPU inference. The cost ratio is 33×.</p>
+        <div class="hero-eyebrow">Pacific Platform · Astrognosy AI</div>
+        <h1>Compass<br><span>Route Smarter. Pay Less.</span></h1>
+        <p class="hero-sub">Every query is scored for confidence against a growing corpus. High-confidence queries resolve on CPU. Everything else routes to GPU. The corpus builds itself — your cost floor drops automatically over time.</p>
         <div class="hero-stats">
             <div class="hstat"><div class="hstat-val">$0.0003</div><div class="hstat-label">CPU path/query</div></div>
             <div class="hstat"><div class="hstat-val">$0.01</div><div class="hstat-label">GPU path/query</div></div>
@@ -147,8 +147,8 @@
             <div class="arch-box arch-pcf"><div class="arch-label">Coverage</div><div class="arch-val">PCF Engine</div></div>
             <div class="arch-arrow">→</div>
             <div class="arch-split">
-                <div class="arch-box arch-cpu"><div class="arch-label">coverage &lt; 0.30 · free</div><div class="arch-val">CPU · $0.0003</div></div>
-                <div class="arch-box arch-gpu"><div class="arch-label">coverage ≥ 0.30 · cached</div><div class="arch-val">GPU · $0.01</div></div>
+                <div class="arch-box arch-cpu"><div class="arch-label">confidence ≥ 0.70 · serve</div><div class="arch-val">CPU · $0.0003</div></div>
+                <div class="arch-box arch-gpu"><div class="arch-label">confidence &lt; 0.70 · infer</div><div class="arch-val">GPU · $0.01</div></div>
             </div>
         </div>
     </div>
@@ -160,24 +160,23 @@
     <div class="steps">
         <div class="step">
             <div class="step-num">Step 1</div>
-            <div class="step-title">Coverage Score</div>
-            <div class="step-desc">Query PSV is computed. Coverage = min distance to corpus centroid / median corpus distance. Low coverage = query is structurally similar to known corpus.</div>
-            <div class="step-mono">coverage(Q) = dist_min / dist_median</div>
+            <div class="step-title">Confidence Scoring</div>
+            <div class="step-desc">The query is scored against the current corpus. High score = the answer is already well-covered. Low score = the system isn't confident enough to answer alone.</div>
         </div>
         <div class="step">
             <div class="step-num">Step 2</div>
             <div class="step-title">Route Decision</div>
-            <div class="step-desc">coverage &lt; 0.30 → CPU path (PCF structural convergence, deterministic). coverage ≥ 0.30 → GPU path for queries outside known corpus.</div>
+            <div class="step-desc">Confidence ≥ 0.70 → CPU path. Served locally in under 2ms at a fraction of GPU cost. Below threshold → routes to GPU for accurate inference.</div>
         </div>
         <div class="step">
             <div class="step-num">Step 3</div>
             <div class="step-title">CPU Path</div>
-            <div class="step-desc">Deterministic structural analysis via PSV convergence. Result cached by SHA-256 of query tokens. Zero marginal cost on cache hit.</div>
+            <div class="step-desc">Answer served directly from the corpus. Deterministic, auditable, and cached — repeat queries cost nothing. No LLM call made.</div>
         </div>
         <div class="step">
             <div class="step-num">Step 4</div>
-            <div class="step-title">GPU Path</div>
-            <div class="step-desc">LLM inference for queries outside corpus coverage. Results cached deterministically — over time, cost approaches CPU path cost.</div>
+            <div class="step-title">Corpus Grows</div>
+            <div class="step-desc">GPU responses feed back into the corpus automatically. The next similar query routes to CPU. Cost floor drops over time without any manual labeling.</div>
         </div>
     </div>
 </div>
@@ -214,29 +213,30 @@
 
     <!-- CONTRADICTION PANEL -->
     <div class="panel" id="panel-contradiction">
+        <p style="font-size:0.78em;color:rgba(255,255,255,0.3);margin-bottom:14px;line-height:1.6;">Detects <strong style="color:rgba(255,255,255,0.5);">structural divergence</strong> between two passages — works best on texts with meaningfully different vocabulary and flow, not just different numbers in the same sentence structure.</p>
         <div class="chips">
-            <button class="chip active" onclick="setContraChip(this,'Vaccines cause autism in children','Extensive research shows no link between vaccines and autism')">Vaccines / autism</button>
-            <button class="chip" onclick="setContraChip(this,'Human activity is driving global temperature increase','Global temperatures have not changed due to human actions')">Climate</button>
-            <button class="chip" onclick="setContraChip(this,'The Earth is approximately 4.5 billion years old','The Earth is approximately 6,000 years old')">Earth age</button>
+            <button class="chip active" onclick="setContraChip(this,'Vaccines cause autism in children based on a widely-cited study from 1998 by Andrew Wakefield.','Extensive epidemiological research involving millions of children shows no causal link between vaccines and autism. The original 1998 study was retracted due to ethical violations and data manipulation.')">Vaccines / autism</button>
+            <button class="chip" onclick="setContraChip(this,'Human industrial activity since 1850 has released billions of tons of CO2, trapping infrared radiation and causing measurable global temperature rise confirmed by satellite records, ocean heat content, and ice cores.','Global temperature trends are driven entirely by natural solar cycles and volcanic activity. Human CO2 output is negligible compared to natural sources. No warming trend exists in the satellite data.')">Climate</button>
+            <button class="chip" onclick="setContraChip(this,'Radiometric dating of meteorites, combined with uranium-lead dating of zircon crystals and lunar samples, consistently dates the solar system formation at approximately 4.567 billion years ago.','According to a strict literal reading of biblical genealogies, creation occurred approximately 6,000 years ago. Modern dating methods rely on unverifiable assumptions about initial conditions and decay rates.')">Earth age</button>
         </div>
         <div class="two-col">
             <div>
                 <div class="input-label">Text A</div>
-                <textarea id="text-a" class="pcf-textarea" rows="4" placeholder="First statement…">Vaccines cause autism in children</textarea>
+                <textarea id="text-a" class="pcf-textarea" rows="5" placeholder="First passage…">Vaccines cause autism in children based on a widely-cited study from 1998 by Andrew Wakefield.</textarea>
             </div>
             <div>
                 <div class="input-label">Text B</div>
-                <textarea id="text-b" class="pcf-textarea" rows="4" placeholder="Second statement…">Extensive research shows no link between vaccines and autism</textarea>
+                <textarea id="text-b" class="pcf-textarea" rows="5" placeholder="Second passage…">Extensive epidemiological research involving millions of children shows no causal link between vaccines and autism. The original 1998 study was retracted due to ethical violations and data manipulation.</textarea>
             </div>
         </div>
-        <button id="contra-btn" class="run-btn" onclick="runContradiction()">Detect Contradiction →</button>
+        <button id="contra-btn" class="run-btn" onclick="runContradiction()">Detect Structural Divergence →</button>
         <div id="contra-result" style="display:none;"></div>
     </div>
 
 </div>
 
 <footer>
-    Pacific Platform · Astrognosy AI · Patent Pending U.S. Prov. 63/978,633
+    Compass · Pacific Platform · Astrognosy AI · Patent Pending · <a href="/">pcfic.com</a>
 </footer>
 
 <script>
@@ -317,7 +317,7 @@ async function runVerify() {
                     <div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${(d.pcf_time_ms || d.processing_time_ms || 0).toFixed(1)}<span class="metric-unit">ms</span></div></div>
                     <div class="metric"><div class="metric-label">Path</div><div class="metric-val" style="font-size:0.88em;color:${isLocal?'#10b981':'#a78bfa'};">${isLocal ? 'CPU' : 'GPU'}</div></div>
                 </div>
-                <div class="api-note">PCF Router · pcf-router-production.up.railway.app · Claims 5, 46 · Patent Pending</div>
+                <div class="api-note">Compass · Astrognosy AI · Patent Pending</div>
             </div>`;
         document.getElementById('verify-result').style.display = 'block';
 
@@ -377,7 +377,7 @@ async function runContradiction() {
                     ${d.psv_distance != null ? `<div class="metric"><div class="metric-label">PSV Distance</div><div class="metric-val" style="font-size:0.9em;">${d.psv_distance.toFixed(4)}</div></div>` : ''}
                     ${d.processing_time_ms != null ? `<div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${d.processing_time_ms.toFixed(1)}<span class="metric-unit">ms</span></div></div>` : ''}
                 </div>
-                <div class="api-note">PCF Router /contradiction · structural PSV divergence · no LLM · CPU-only</div>
+                <div class="api-note">Compass /contradiction · structural divergence scoring · no LLM · CPU-only</div>
             </div>`;
         document.getElementById('contra-result').style.display = 'block';
 
