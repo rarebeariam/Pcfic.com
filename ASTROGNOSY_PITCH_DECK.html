@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astrognosy AI — Investor Deck</title>
+<style>
+  /* ─── RESET & BASE ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-deep:      #050810;
+    --bg-slide:     #080d1a;
+    --bg-card:      #0d1425;
+    --bg-card-alt:  #0a1020;
+    --border:       #1a2540;
+    --border-bright:#1e3060;
+    --blue-electric:#3b82f6;
+    --blue-bright:  #60a5fa;
+    --cyan:         #22d3ee;
+    --cyan-dim:     #0891b2;
+    --white:        #f8fafc;
+    --white-dim:    #cbd5e1;
+    --white-muted:  #64748b;
+    --accent-glow:  rgba(59,130,246,0.15);
+    --accent-glow2: rgba(34,211,238,0.08);
+    --font-head: 'Georgia', 'Times New Roman', serif;
+    --font-body: 'Helvetica Neue', 'Arial', sans-serif;
+    --font-mono: 'Courier New', 'Courier', monospace;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg-deep);
+    color: var(--white);
+    font-family: var(--font-body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── DECK CONTAINER ─── */
+  #deck {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ─── SLIDES ─── */
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--bg-slide);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(12px);
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+
+  /* inner alignment wrappers */
+  .slide-inner {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ─── GRID OVERLAY (subtle) ─── */
+  #deck::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .slide > * { position: relative; z-index: 1; }
+
+  /* ─── CORNER RULE ─── */
+  .slide::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--blue-electric) 0%, var(--cyan) 100%);
+    opacity: 0.6;
+  }
+
+  /* ─── TOP BAR ─── */
+  .top-bar {
+    position: absolute;
+    top: 28px; left: 80px; right: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--white-muted);
+    text-transform: uppercase;
+  }
+
+  .top-bar .brand { color: var(--blue-electric); }
+
+  /* ─── SLIDE NUMBER ─── */
+  #slide-counter {
+    position: fixed;
+    bottom: 36px;
+    right: 80px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--white-muted);
+    z-index: 100;
+  }
+
+  /* ─── NAVIGATION ARROWS ─── */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(13,20,37,0.85);
+    border: 1px solid var(--border-bright);
+    color: var(--blue-bright);
+    width: 44px; height: 44px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    user-select: none;
+  }
+  .nav-btn:hover {
+    background: rgba(59,130,246,0.18);
+    border-color: var(--blue-electric);
+    color: var(--white);
+  }
+  #nav-prev { left: 18px; }
+  #nav-next { right: 18px; }
+
+  /* ─── TYPOGRAPHY ─── */
+  .slide-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 20px;
+  }
+
+  h1.display {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: clamp(42px, 5.5vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--white);
+    margin-bottom: 0;
+  }
+
+  h2.slide-title {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: clamp(28px, 3.5vw, 46px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--white);
+    margin-bottom: 32px;
+  }
+
+  h2.slide-title span.accent {
+    color: var(--blue-bright);
+  }
+
+  p.lead {
+    font-size: clamp(16px, 1.8vw, 20px);
+    line-height: 1.65;
+    color: var(--white-dim);
+    max-width: 820px;
+  }
+
+  p.lead strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .tagline {
+    font-family: var(--font-body);
+    font-size: clamp(18px, 2.2vw, 26px);
+    font-style: italic;
+    color: var(--cyan);
+    margin-top: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .sub-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+    margin-top: 36px;
+  }
+
+  .url-line {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--blue-bright);
+    margin-top: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── BULLET LISTS ─── */
+  ul.deck-list {
+    list-style: none;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  ul.deck-list li {
+    font-size: clamp(14px, 1.6vw, 18px);
+    color: var(--white-dim);
+    line-height: 1.55;
+    padding-left: 22px;
+    position: relative;
+  }
+
+  ul.deck-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--blue-electric);
+    font-weight: 700;
+  }
+
+  ul.deck-list li strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  ul.deck-list li .hl {
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  /* ─── CALLOUT BLOCK ─── */
+  .callout {
+    border-left: 3px solid var(--blue-electric);
+    background: var(--bg-card);
+    padding: 20px 28px;
+    margin-top: 28px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .callout p {
+    font-size: clamp(14px, 1.6vw, 17px);
+    color: var(--white-dim);
+    line-height: 1.6;
+  }
+
+  .callout p strong { color: var(--white); }
+  .callout p em { color: var(--cyan); font-style: normal; }
+
+  /* ─── TABLES ─── */
+  .deck-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 28px;
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 1.3vw, 14px);
+  }
+
+  .deck-table thead tr {
+    border-bottom: 1px solid var(--blue-electric);
+  }
+
+  .deck-table th {
+    text-align: left;
+    padding: 10px 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blue-bright);
+    font-weight: 600;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .deck-table td {
+    padding: 12px 16px;
+    color: var(--white-dim);
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+    vertical-align: top;
+  }
+
+  .deck-table td:first-child {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .deck-table td .result {
+    color: var(--cyan);
+    font-weight: 700;
+  }
+
+  .deck-table tbody tr:hover td {
+    background: var(--accent-glow);
+  }
+
+  /* ─── TWO-COLUMN LAYOUT ─── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 28px;
+    align-items: start;
+  }
+
+  /* ─── FORMULA BLOCK ─── */
+  .formula-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 28px 36px;
+    margin-top: 28px;
+    display: inline-block;
+    min-width: 420px;
+  }
+
+  .formula-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+    margin-bottom: 14px;
+  }
+
+  .formula-display {
+    font-family: var(--font-mono);
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--cyan);
+    letter-spacing: 0.04em;
+    line-height: 1.7;
+  }
+
+  .formula-display .sigma { font-size: 1.2em; color: var(--blue-bright); }
+  .formula-display .sub  { font-size: 0.65em; vertical-align: sub; line-height: 0; }
+  .formula-display .fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 6px; }
+  .formula-display .fraction .num { border-bottom: 1px solid var(--cyan); padding: 0 4px 3px; }
+  .formula-display .fraction .den { padding: 3px 4px 0; }
+
+  /* ─── STAT BOXES ─── */
+  .stat-row {
+    display: flex;
+    gap: 20px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 18px 24px;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .stat-box .stat-num {
+    font-family: var(--font-mono);
+    font-size: clamp(22px, 2.8vw, 34px);
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-box .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+    margin-top: 6px;
+  }
+
+  /* ─── PROTOCOL STACK TABLE ─── */
+  .stack-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 24px;
+  }
+
+  .stack-table th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-bright);
+    padding: 10px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--blue-electric);
+  }
+
+  .stack-table td {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 1.4vw, 15px);
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    color: var(--white-dim);
+    vertical-align: middle;
+  }
+
+  .stack-table td:first-child { color: var(--white-muted); }
+  .stack-table td:nth-child(2) { color: var(--white); font-weight: 600; }
+  .stack-table td .arrow {
+    color: var(--blue-electric);
+    margin: 0 10px;
+    font-size: 14px;
+  }
+
+  /* ─── NUMBERED LIST ─── */
+  ol.deck-ol {
+    list-style: none;
+    counter-reset: deck-counter;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  ol.deck-ol li {
+    counter-increment: deck-counter;
+    font-size: clamp(13px, 1.5vw, 17px);
+    color: var(--white-dim);
+    line-height: 1.55;
+    padding-left: 40px;
+    position: relative;
+  }
+
+  ol.deck-ol li::before {
+    content: counter(deck-counter, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--blue-electric);
+    font-weight: 700;
+    top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  ol.deck-ol li strong { color: var(--white); }
+
+  /* ─── PATENT ROWS ─── */
+  .patent-list {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .patent-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 20px;
+  }
+
+  .patent-item:hover { border-color: var(--border-bright); }
+
+  .patent-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--blue-electric);
+    white-space: nowrap;
+    padding-top: 2px;
+    min-width: 90px;
+  }
+
+  .patent-desc {
+    font-size: clamp(12px, 1.4vw, 15px);
+    color: var(--white-dim);
+    line-height: 1.5;
+  }
+
+  .patent-desc strong { color: var(--white); }
+
+  /* ─── QUOTE BLOCK ─── */
+  .pull-quote {
+    border-left: 4px solid var(--cyan);
+    padding: 24px 36px;
+    margin-top: 20px;
+    background: linear-gradient(90deg, rgba(34,211,238,0.06) 0%, transparent 100%);
+  }
+
+  .pull-quote p {
+    font-family: var(--font-body);
+    font-size: clamp(16px, 2vw, 22px);
+    font-style: italic;
+    color: var(--white);
+    line-height: 1.65;
+  }
+
+  /* ─── COVER SLIDE SPECIFICS ─── */
+  #slide-1 {
+    background: var(--bg-deep);
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .cover-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--blue-electric);
+    margin-bottom: 32px;
+  }
+
+  .cover-rule {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue-electric), var(--cyan));
+    margin: 28px 0;
+  }
+
+  .cover-platform {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+    margin-top: 40px;
+    margin-bottom: 8px;
+  }
+
+  .cover-urls {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--blue-bright);
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+  }
+
+  /* ─── SECTION: PROBLEM ─── */
+  .tension-line {
+    font-size: clamp(20px, 2.8vw, 32px);
+    font-weight: 700;
+    color: var(--white);
+    margin-top: 32px;
+    line-height: 1.2;
+  }
+
+  /* ─── TRANSITION SLIDE: TWO-STACK ─── */
+  .stack-compare {
+    display: grid;
+    grid-template-columns: 1fr 56px 1fr;
+    gap: 0;
+    margin-top: 32px;
+    align-items: start;
+  }
+
+  .stack-col {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+  }
+
+  .stack-col.new {
+    border-color: var(--blue-electric);
+    background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, var(--bg-card) 100%);
+  }
+
+  .stack-col-head {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stack-col-head.old { color: var(--white-muted); }
+  .stack-col-head.new { color: var(--cyan); }
+
+  .stack-item {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 1.3vw, 14px);
+    color: var(--white-dim);
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .stack-item:last-child { border-bottom: none; }
+  .stack-item .layer { color: var(--white-muted); font-size: 10px; }
+  .stack-item .val { color: var(--white); }
+  .stack-item.new .val { color: var(--cyan); }
+
+  .arrow-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--blue-electric);
+    padding-top: 60px;
+  }
+
+  /* ─── REVENUE FLOW ─── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 32px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .flow-node {
+    background: var(--bg-card);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 14px 20px;
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 1.2vw, 13px);
+    color: var(--white);
+    text-align: center;
+    min-width: 130px;
+  }
+
+  .flow-node .node-label {
+    color: var(--white-muted);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .flow-node.highlight {
+    border-color: var(--cyan);
+    background: linear-gradient(135deg, rgba(34,211,238,0.08), var(--bg-card));
+  }
+
+  .flow-arrow {
+    color: var(--blue-electric);
+    font-size: 18px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  /* ─── CLOSE SLIDE ─── */
+  #slide-12 {
+    background: var(--bg-deep);
+  }
+
+  .founder-block {
+    margin-top: 44px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .founder-name {
+    font-weight: 700;
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .founder-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+  }
+
+  .founder-contact {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--blue-bright);
+    margin-top: 6px;
+  }
+
+  /* ─── PRINT STYLES ─── */
+  @media print {
+    html, body { overflow: visible; height: auto; }
+    #deck { overflow: visible; height: auto; }
+    .slide {
+      position: relative !important;
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: all !important;
+      page-break-after: always;
+      height: 100vh;
+      display: flex;
+    }
+    .nav-btn { display: none; }
+    #slide-counter { display: none; }
+    .top-bar { display: flex; }
+  }
+
+  /* ─── HOVER STATE FOR INTERACTIVE ELEMENTS ─── */
+  .deck-table tbody tr { transition: background 0.15s; }
+
+  /* ─── WIDE TABLE FONT SCALING ─── */
+  @media (max-width: 900px) {
+    .slide { padding: 48px 36px; }
+    .top-bar { left: 36px; right: 36px; }
+    #slide-counter { right: 36px; }
+    .formula-block { min-width: auto; width: 100%; }
+    .stack-compare { grid-template-columns: 1fr; }
+    .arrow-divider { display: none; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* ─── SUBTLE RADIAL GLOW (cover + close slides) ─── */
+  .glow-bg::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 60%;
+    height: 80%;
+    background: radial-gradient(ellipse at center,
+      rgba(59,130,246,0.07) 0%,
+      rgba(34,211,238,0.04) 40%,
+      transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 1 — COVER                         -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide glow-bg" id="slide-1">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Confidential — March 2026</span>
+    </div>
+    <div class="slide-inner" style="padding-top: 20px;">
+      <div class="cover-eyebrow">Investor Brief — AI Fund Application</div>
+
+      <h1 class="display">Astrognosy AI</h1>
+
+      <div class="tagline">The Context Layer for the Agentic Internet</div>
+
+      <div class="cover-rule"></div>
+
+      <p class="lead" style="max-width:680px; font-size: clamp(14px,1.6vw,18px);">
+        Pacific is infrastructure for how AI agents share, verify, and exchange
+        learned context across organizational and architectural boundaries —
+        without moving raw data.
+      </p>
+
+      <div class="cover-platform">Pacific Platform &nbsp;·&nbsp; Four Filed Patents &nbsp;·&nbsp; Five Domains</div>
+      <div class="cover-urls">astrognosy.ai &nbsp;/&nbsp; pcfic.com</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 2 — THE PROBLEM                   -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-2">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>The Problem</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">02 / Problem</div>
+      <h2 class="slide-title">Every AI agent has two<br><span class="accent">knowledge states.</span></h2>
+
+      <ul class="deck-list">
+        <li><strong>Training weights</strong> — static, months-old, expensive to update</li>
+        <li><strong>Context window</strong> — ephemeral, dies with the session, never shared</li>
+      </ul>
+
+      <div class="tension-line" style="margin-top: 36px; font-size: clamp(18px,2.4vw,28px);">
+        Nothing in between.
+      </div>
+
+      <ul class="deck-list" style="margin-top: 20px;">
+        <li>No persistent, shareable, cross-agent learned context</li>
+        <li>Every agent is a silo — intelligence does not compound</li>
+        <li>Sharing embeddings or behavioral data violates privacy law at competitive boundaries</li>
+      </ul>
+
+      <div class="callout" style="margin-top: 28px;">
+        <p><strong>This is not a model problem. It is a protocol problem.</strong><br>
+        The web solved information silos in 1991 with HTTP + HTML. The agentic internet needs
+        the same architectural primitive — built for <em>reasoning</em>, not documents.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 3 — THE TRANSITION                -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-3">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>The Transition</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">03 / Context</div>
+      <h2 class="slide-title">The web is <span class="accent">ending.</span><br>Not dying — ending.</h2>
+
+      <p class="lead" style="font-size: clamp(13px,1.5vw,17px); margin-bottom: 0;">
+        Browsers navigate between documents. Agents navigate between reasoning.
+        The infrastructure for that transition does not exist yet.
+      </p>
+
+      <div class="stack-compare" style="margin-top: 24px;">
+        <div class="stack-col">
+          <div class="stack-col-head old">Web Stack (1991–2024)</div>
+          <div class="stack-item">
+            <span class="layer">Addressing</span>
+            <span class="val">DNS / URL</span>
+          </div>
+          <div class="stack-item">
+            <span class="layer">Transport</span>
+            <span class="val">HTTP / HTTPS</span>
+          </div>
+          <div class="stack-item">
+            <span class="layer">Document</span>
+            <span class="val">HTML / CSS / JS</span>
+          </div>
+          <div class="stack-item">
+            <span class="layer">Discovery</span>
+            <span class="val">PageRank / SEO</span>
+          </div>
+          <div class="stack-item">
+            <span class="layer">Security</span>
+            <span class="val">SSL / TLS / Certs</span>
+          </div>
+        </div>
+
+        <div class="arrow-divider">&#8594;</div>
+
+        <div class="stack-col new">
+          <div class="stack-col-head new">Pacific / Agentic Stack</div>
+          <div class="stack-item new">
+            <span class="layer">Addressing</span>
+            <span class="val">reason:// URI namespace</span>
+          </div>
+          <div class="stack-item new">
+            <span class="layer">Transport</span>
+            <span class="val">WARF P2P exchange protocol</span>
+          </div>
+          <div class="stack-item new">
+            <span class="layer">Document</span>
+            <span class="val">PSV + reasoning graph</span>
+          </div>
+          <div class="stack-item new">
+            <span class="layer">Discovery</span>
+            <span class="val">Wharf leaderboard (structural convergence)</span>
+          </div>
+          <div class="stack-item new">
+            <span class="layer">Security</span>
+            <span class="val">HMAC + empirical non-invertibility</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 4 — THE TECHNOLOGY                -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-4">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>The Technology</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">04 / Technology</div>
+      <h2 class="slide-title">Position-Sensitive Vector<br><span class="accent">PCF Engine</span></h2>
+
+      <div class="two-col" style="margin-top: 16px;">
+        <div>
+          <ul class="deck-list">
+            <li><strong>Sequential data</strong> compressed to a structural fingerprint</li>
+            <li>Works on any sequential domain: <span class="hl">network packets, sensor readings, language, CPU instructions</span></li>
+            <li><strong>Zero labeled training data required</strong></li>
+            <li>CPU-only execution — no GPU dependency</li>
+            <li>Edge-deployable, stateless, deterministic</li>
+          </ul>
+
+          <div class="formula-block" style="margin-top: 28px; display: block; min-width: auto;">
+            <div class="formula-label">PSV Core Formula</div>
+            <div class="formula-display">
+              <span class="sigma">&sigma;</span><sub style="font-size:0.6em; color: var(--white-muted);">k</sub>
+              &nbsp;=&nbsp;
+              <span class="fraction">
+                <span class="num">mean(PMI<sub style="font-size:0.65em">k</sub>)</span>
+                <span class="den">std(PMI<sub style="font-size:0.65em">k</sub>) + &epsilon;</span>
+              </span>
+            </div>
+            <div style="margin-top: 12px; font-family: var(--font-mono); font-size: 10px; color: var(--white-muted); letter-spacing: 0.1em;">
+              k = position offset &nbsp;|&nbsp; PMI = pointwise mutual information &nbsp;|&nbsp; &epsilon; = 0.01
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="margin-bottom: 16px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--white-muted);">Key Properties</div>
+
+          <div class="stat-row" style="flex-direction: column; gap: 14px; margin-top: 0;">
+            <div class="stat-box" style="padding: 16px 20px;">
+              <div class="stat-num" style="font-size: clamp(18px,2vw,26px);">r = 0.0149</div>
+              <div class="stat-label">Non-invertibility &nbsp;(threshold 0.05, margin 3.35×)</div>
+            </div>
+            <div class="stat-box" style="padding: 16px 20px;">
+              <div class="stat-num" style="font-size: clamp(18px,2vw,26px);">F1 = 1.0</div>
+              <div class="stat-label">Zero-shot cross-condition transfer (WARF P2P)</div>
+            </div>
+            <div class="stat-box" style="padding: 16px 20px;">
+              <div class="stat-num" style="font-size: clamp(18px,2vw,26px);">5 domains</div>
+              <div class="stat-label">No retraining across cybersecurity, IoT, NLP, silicon, robotics</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 5 — PROVEN ACROSS DOMAINS         -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-5">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Benchmarks</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">05 / Evidence</div>
+      <h2 class="slide-title">Proven across five domains.<br><span class="accent">One engine.</span></h2>
+
+      <p class="lead" style="font-size: clamp(13px,1.5vw,16px); margin-bottom: 0;">
+        All products run on the same PCF engine — covered under Patent 2, Sections 1.1–1.5.
+        No fine-tuning. No domain-specific retraining. No labels.
+      </p>
+
+      <table class="deck-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Domain</th>
+            <th>Benchmark Dataset</th>
+            <th>Result</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Laminar</td>
+            <td>Cybersecurity — NIDS</td>
+            <td>CICIDS2017</td>
+            <td><span class="result">F1 = 0.929</span></td>
+            <td>No labeled training required</td>
+          </tr>
+          <tr>
+            <td>Laminar</td>
+            <td>Network anomaly</td>
+            <td>UNSW-NB15</td>
+            <td><span class="result">F1 = 0.798</span></td>
+            <td>Zero-shot generalization</td>
+          </tr>
+          <tr>
+            <td>Compass</td>
+            <td>LLM routing</td>
+            <td>Internal — 720 corpus</td>
+            <td><span class="result">25% GPU reduction</span></td>
+            <td>Threshold 0.70 validated</td>
+          </tr>
+          <tr>
+            <td>Beacon</td>
+            <td>Industrial IoT / bearing</td>
+            <td>CWRU Bearing</td>
+            <td><span class="result">F1 = 0.832</span></td>
+            <td>3-signal: Ball 0.758, IR 0.911, OR 0.819</td>
+          </tr>
+          <tr>
+            <td>Wharf</td>
+            <td>Multi-agent arbitration</td>
+            <td>WARF P2P Protocol</td>
+            <td><span class="result">F1 = 1.0 (zero-shot)</span></td>
+            <td>B&#8596;A parity, both directions</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout" style="margin-top: 20px; padding: 14px 24px;">
+        <p style="font-size: clamp(12px,1.4vw,15px);">
+          <strong>One engine. Five domains. No retraining. No labels.</strong>
+          The architecture that generalizes this way is not an accident —
+          it is the core IP claim.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 6 — PROTOCOL STACK                -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-6">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Protocol Stack</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">06 / Architecture</div>
+      <h2 class="slide-title">Pacific is <span class="accent">infrastructure,</span><br>not an app.</h2>
+
+      <p class="lead" style="font-size: clamp(13px,1.5vw,16px); margin-bottom: 0;">
+        The correct analogy is not SaaS — it is TCP/IP. The value compounds
+        with every node that joins the network.
+      </p>
+
+      <table class="stack-table">
+        <thead>
+          <tr>
+            <th>Web Layer</th>
+            <th>Pacific Equivalent</th>
+            <th>Strategic Property</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DNS</td>
+            <td>reason:// URI namespace</td>
+            <td>Agent-addressable reasoning graph</td>
+          </tr>
+          <tr>
+            <td>HTTP</td>
+            <td>WARF P2P exchange protocol</td>
+            <td>Transport-agnostic, schema-defined PSV exchange</td>
+          </tr>
+          <tr>
+            <td>HTML</td>
+            <td>PSV + reasoning graph format</td>
+            <td>The document is the compressed signal</td>
+          </tr>
+          <tr>
+            <td>PageRank</td>
+            <td>Wharf leaderboard</td>
+            <td>Structural convergence — math, not social</td>
+          </tr>
+          <tr>
+            <td>SSL / TLS</td>
+            <td>HMAC-signed ads + non-invertibility</td>
+            <td>Privacy is architecturally guaranteed, not policy-based</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout" style="margin-top: 20px; padding: 14px 24px;">
+        <p style="font-size: clamp(12px,1.4vw,15px);">
+          <strong>The network effect is mathematical, not social.</strong>
+          Every agent that joins makes every other agent smarter.
+          The moat does not depend on user acquisition — it depends on protocol adoption.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 7 — THE MOAT                      -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-7">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Defensibility</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">07 / Moat</div>
+      <h2 class="slide-title">Non-invertibility is the<br><span class="accent">architectural prerequisite.</span></h2>
+
+      <div class="two-col" style="margin-top: 12px;">
+        <div>
+          <p class="lead" style="font-size: clamp(13px,1.5vw,16px);">
+            Any competitor sharing learned context with embeddings
+            or behavioral data hits privacy law at competitive boundaries.
+            <strong>We don't — because raw data never moves.</strong>
+          </p>
+          <p class="lead" style="font-size: clamp(13px,1.5vw,16px); margin-top: 16px;">
+            The PSV is the reasoning. The reasoning is the product.
+            <strong>The privacy IS the product.</strong>
+          </p>
+          <p class="lead" style="font-size: clamp(13px,1.5vw,16px); margin-top: 16px;">
+            GDPR and U.S. state privacy laws are an accelerant, not a headwind.
+            Every regulatory tightening raises the cost of every alternative architecture.
+          </p>
+        </div>
+
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--white-muted); margin-bottom: 14px;">Patent Portfolio</div>
+          <div class="patent-list" style="gap: 10px;">
+            <div class="patent-item">
+              <div class="patent-tag">Patent 1<br>Filed Feb 2026</div>
+              <div class="patent-desc">
+                <strong>PCF core math</strong> — U.S. 63/978,633 (42 claims)<br>
+                PSV formula, position-sensitive compression primitive
+              </div>
+            </div>
+            <div class="patent-item">
+              <div class="patent-tag">Patent 2<br>70 claims</div>
+              <div class="patent-desc">
+                <strong>Cross-domain applications</strong> — NLP, cybersecurity, IoT, silicon, robotics.<br>
+                Signal C three-OR architecture, kurtosis bearing detection
+              </div>
+            </div>
+            <div class="patent-item">
+              <div class="patent-tag">Patent 3<br>47 claims</div>
+              <div class="patent-desc">
+                <strong>Wharf arbitration + advertising auction</strong><br>
+                Multi-agent verification, structural ad auction
+              </div>
+            </div>
+            <div class="patent-item">
+              <div class="patent-tag">Patent 4<br>25 claims</div>
+              <div class="patent-desc">
+                <strong>WARF P2P exchange protocol</strong><br>
+                Non-invertible PSV exchange, zero-shot cross-condition transfer
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 8 — REVENUE MODEL                 -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-8">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Revenue Model</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">08 / Business Model</div>
+      <h2 class="slide-title">The advertising model for<br><span class="accent">the agentic internet.</span></h2>
+
+      <p class="lead" style="font-size: clamp(13px,1.5vw,16px); margin-bottom: 8px;">
+        Real-time bidding rebuilt on structural privacy guarantees.
+        Google's auction optimizes for clicks. Ours optimizes for <strong>structural truth.</strong>
+      </p>
+
+      <div class="flow-row" style="margin-top: 24px;">
+        <div class="flow-node">
+          <div class="node-label">User Agent</div>
+          Edge device<br>generates PSV
+        </div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-node highlight">
+          <div class="node-label">PSV Signature</div>
+          Non-invertible<br>Pearson r = 0.0149
+        </div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-node">
+          <div class="node-label">Wharf Auction</div>
+          Competing<br>advertiser agents
+        </div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-node highlight">
+          <div class="node-label">PCF Scores</div>
+          relevance &times;<br>honesty &times; bid
+        </div>
+        <div class="flow-arrow">&#8594;</div>
+        <div class="flow-node">
+          <div class="node-label">Placement</div>
+          Winner serves.<br>Raw data: never transmitted.
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top: 28px;">
+        <p style="font-size: clamp(12px,1.4vw,15px);">
+          <strong>The key architectural property:</strong>
+          User PSV never transmitted to any advertiser.
+          Not policy-gated — <em>architecturally impossible.</em>
+          This is the only ad auction that can operate across competitive AI infrastructure
+          boundaries without violating GDPR.
+        </p>
+      </div>
+
+      <div class="stat-row" style="margin-top: 20px;">
+        <div class="stat-box">
+          <div class="stat-num">RTB</div>
+          <div class="stat-label">Real-time bidding architecture</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Raw behavioral data transmitted</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">PCF</div>
+          <div class="stat-label">Structural truth scoring — the referee</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">Open</div>
+          <div class="stat-label">WARF spec — open standard, Astrognosy owns broker infra</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 9 — PRODUCTS (LIVE)               -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-9">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Products</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">09 / Products</div>
+      <h2 class="slide-title">Pacific Product Suite —<br><span class="accent">Live, Beta, and Designed.</span></h2>
+
+      <table class="deck-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Domain</th>
+            <th>Status</th>
+            <th>Pitch</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Laminar</td>
+            <td>Cybersecurity (NIDS)</td>
+            <td><span style="color: var(--cyan); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Beta</span></td>
+            <td>Enterprise NIDS. F1 = 0.929. No labels. No retraining. 38/38 tests passing.</td>
+          </tr>
+          <tr>
+            <td>Compass</td>
+            <td>LLM Query Routing</td>
+            <td><span style="color: #4ade80; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Live</span></td>
+            <td>Cut LLM inference costs 25% day one. Grows as corpus matures. Never worse than baseline.</td>
+          </tr>
+          <tr>
+            <td>Beacon</td>
+            <td>Industrial IoT / Edge</td>
+            <td><span style="color: var(--white-muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Design</span></td>
+            <td>Predictive maintenance, edge-deployable, multi-sensor anomaly detection.</td>
+          </tr>
+          <tr>
+            <td>Wharf</td>
+            <td>Multi-Agent Arbitration</td>
+            <td><span style="color: var(--blue-bright); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Live (local)</span></td>
+            <td>3 competing Claude Haiku agents. PCF arbitrates. Leaderboard tracks structural accuracy.</td>
+          </tr>
+          <tr>
+            <td>reason://</td>
+            <td>Agent Addressing</td>
+            <td><span style="color: var(--blue-bright); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Built</span></td>
+            <td>Agent URI namespace + PSV reasoning exchange. The DNS of the agentic internet.</td>
+          </tr>
+          <tr>
+            <td>Forge</td>
+            <td>CPU / Silicon Validation</td>
+            <td><span style="color: var(--white-muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;">Roadmap</span></td>
+            <td>Chip behavioral validation, pipeline hazard detection. Patent 2 § 1.2.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sub-label" style="margin-top: 20px;">Live demo available</div>
+      <div class="url-line">pcfic.com</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 10 — WHY NOW                      -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-10">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Timing</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">10 / Why Now</div>
+      <h2 class="slide-title">The window is<br><span class="accent">open right now.</span></h2>
+
+      <ul class="deck-list">
+        <li>
+          <strong>Browser → agent transition is underway.</strong>
+          Every major AI company is building agents.
+          The protocol layer is undefined. First-mover on protocol means
+          network effect compounds from day one.
+        </li>
+        <li>
+          <strong>Andrew Ng's Context Hub (6K+ stars in days)</strong> validates:
+          the agent-to-agent sharing problem is now publicly named.
+          chub solves the documentation layer. We are building the reasoning layer.
+        </li>
+        <li>
+          <strong>The privacy regulatory environment</strong> (GDPR, CCPA, emerging AI governance)
+          makes raw behavioral data sharing increasingly untenable across competitive boundaries.
+          Non-invertible PSV is the only architecture that works.
+        </li>
+        <li>
+          <strong>CPU-native execution</strong> means the product runs on existing enterprise hardware.
+          No GPU procurement cycle. No cloud dependency. Deploys into infrastructure that already exists.
+        </li>
+        <li>
+          <strong>Patent priority dates are being established now.</strong>
+          The core math (Patent 1) was filed February 2026.
+          The protocol stack (Patents 2–4) is filing in March 2026.
+          The window for prior art establishment closes as the space fills.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 11 — THE ASK                      -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide" id="slide-11">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>The Ask</span>
+    </div>
+    <div class="slide-inner">
+      <div class="slide-label">11 / Partnership</div>
+      <h2 class="slide-title">Partnership + capital to<br><span class="accent">build the layer.</span></h2>
+
+      <p class="lead" style="font-size: clamp(13px,1.5vw,16px); margin-bottom: 4px;">
+        We are not asking for money to figure out if this works.
+        The math is done. The benchmarks are real. The IP is filing.
+        We are asking for capital to execute.
+      </p>
+
+      <ol class="deck-ol">
+        <li>
+          <strong>File and prosecute patent portfolio</strong> —
+          Patents 2, 3, and 4 are drafted and ready (70 + 47 + 25 claims).
+          Legal costs are the critical path item right now.
+        </li>
+        <li>
+          <strong>Deploy Laminar to enterprise</strong> —
+          Production-ready, 38/38 tests passing, API built.
+          Needs sales motion and SOC 2 process, not more engineering.
+        </li>
+        <li>
+          <strong>Launch Compass to LLM operators</strong> —
+          Live API, validated GTM numbers (25% GPU reduction at threshold 0.70).
+          Needs operator-tier contracts and integration support.
+        </li>
+        <li>
+          <strong>Build the broker agent + auction infrastructure</strong> —
+          The revenue model requires the Wharf auction node in production.
+          Architecture is designed. Implementation is next.
+        </li>
+        <li>
+          <strong>Establish WARF as an open standard</strong> —
+          Publish the protocol spec, launch the public GitHub repo,
+          and begin standards-body engagement. Astrognosy owns the broker.
+          The moat compounds with every node that joins.
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── -->
+  <!-- SLIDE 12 — CLOSE                        -->
+  <!-- ─────────────────────────────────────── -->
+  <div class="slide glow-bg" id="slide-12">
+    <div class="top-bar">
+      <span class="brand">Astrognosy AI</span>
+      <span>Astrognosy AI — March 2026</span>
+    </div>
+    <div class="slide-inner" style="max-width: 820px;">
+      <div class="slide-label">12 / Close</div>
+
+      <div class="pull-quote">
+        <p>"The web solved information silos. Nobody has solved reasoning silos.
+        We have the math, the IP, and the working infrastructure.
+        The transition is happening with or without the right protocol.
+        We are building the right protocol."</p>
+      </div>
+
+      <div class="founder-block">
+        <div class="founder-name">Jake Westerbeck</div>
+        <div class="founder-title">Founder — Astrognosy AI</div>
+        <div class="founder-contact">jakewesterbeck@gmail.com &nbsp;/&nbsp; pcfic.com</div>
+      </div>
+
+      <div style="margin-top: 36px; display: flex; gap: 32px; flex-wrap: wrap;">
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-muted); margin-bottom: 8px;">Patent 1 Filed</div>
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--white);">U.S. 63/978,633</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--white-muted);">February 2026</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-muted); margin-bottom: 8px;">Patents 2–4</div>
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--white);">142 total claims</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--white-muted);">Filing March 2026</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-muted); margin-bottom: 8px;">Benchmarks</div>
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--white);">CICIDS F1 = 0.929</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--white-muted);">5 domains validated</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-muted); margin-bottom: 8px;">Non-Invertibility</div>
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--white);">Pearson r = 0.0149</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--white-muted);">3.35× margin vs. threshold</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#deck -->
+
+<!-- ─── NAVIGATION UI ─── -->
+<button class="nav-btn" id="nav-prev" aria-label="Previous slide">&#8592;</button>
+<button class="nav-btn" id="nav-next" aria-label="Next slide">&#8594;</button>
+<div id="slide-counter">01 / 12</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var slides   = document.querySelectorAll('.slide');
+  var counter  = document.getElementById('slide-counter');
+  var btnPrev  = document.getElementById('nav-prev');
+  var btnNext  = document.getElementById('nav-next');
+  var total    = slides.length;
+  var current  = 0;
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function show(idx) {
+    slides[current].classList.remove('active');
+    current = (idx + total) % total;
+    slides[current].classList.add('active');
+    counter.textContent = pad(current + 1) + ' / ' + pad(total);
+    btnPrev.style.opacity = current === 0 ? '0.35' : '1';
+    btnNext.style.opacity = current === total - 1 ? '0.35' : '1';
+  }
+
+  // initialise
+  show(0);
+
+  btnPrev.addEventListener('click', function() { show(current - 1); });
+  btnNext.addEventListener('click', function() { show(current + 1); });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      show(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      show(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      show(total - 1);
+    }
+  });
+
+  // touch / swipe support
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      if (dx < 0) { show(current + 1); }
+      else         { show(current - 1); }
+    }
+  }, { passive: true });
+
+})();
+</script>
+
+</body>
+</html>
