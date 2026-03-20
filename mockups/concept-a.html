@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laminar — Astrognosy AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:        #0a0a0f;
+    --bg2:       #0f0f16;
+    --bg3:       #14141e;
+    --teal:      #00d4ff;
+    --teal-dim:  rgba(0, 212, 255, 0.12);
+    --teal-glow: rgba(0, 212, 255, 0.25);
+    --white:     #ffffff;
+    --off:       rgba(255,255,255,0.65);
+    --muted:     rgba(255,255,255,0.38);
+    --border:    rgba(255,255,255,0.07);
+    --glass:     rgba(255,255,255,0.04);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED GRID BACKGROUND ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    animation: gridDrift 40s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes gridDrift {
+    0%   { background-position: 0 0; }
+    100% { background-position: 64px 64px; }
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 40px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+  }
+  .nav-logo-word {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+  .nav-logo-product {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--teal);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    padding: 9px 24px;
+    background: transparent;
+    border: 1px solid var(--teal);
+    color: var(--teal) !important;
+    border-radius: 6px;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
+  }
+  .nav-cta:hover {
+    background: var(--teal-dim) !important;
+    box-shadow: 0 0 24px var(--teal-glow);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 40px 80px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero-orb {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 900px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(0,212,255,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero-orb-2 {
+    position: absolute;
+    bottom: -10%;
+    right: -15%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(91,110,204,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 32px;
+    background: rgba(0,212,255,0.06);
+  }
+  .hero-eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+    animation: blink 1.8s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;box-shadow:0 0 6px var(--teal)} 50%{opacity:0.3;box-shadow:none} }
+
+  .hero h1 {
+    font-size: clamp(3rem, 6.5vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    margin: 0 auto 28px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--teal);
+    text-shadow: 0 0 60px rgba(0,212,255,0.4);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--off);
+    max-width: 580px;
+    margin: 0 auto 52px;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+  .btn-primary {
+    padding: 16px 40px;
+    background: var(--teal);
+    color: #000;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: box-shadow 0.25s, transform 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 40px rgba(0,212,255,0.5), 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    padding: 16px 40px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: var(--off);
+    font-size: 0.95rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+    font-family: inherit;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--white); }
+
+  /* ── BENCHMARK GLOW CARDS ── */
+  .bench-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    max-width: 900px;
+    width: 100%;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .bench-card {
+    background: var(--bg2);
+    padding: 24px 16px;
+    text-align: center;
+    position: relative;
+    transition: background 0.25s;
+  }
+  .bench-card:hover { background: var(--bg3); }
+  .bench-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .bench-card:hover::after { opacity: 1; }
+  .bench-f1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(0,212,255,0.5);
+    margin-bottom: 4px;
+  }
+  .bench-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .bench-type {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--off);
+    margin-bottom: 6px;
+  }
+
+  /* ── SECTION SHELL ── */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+  .section-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .section-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .section-lead {
+    font-size: 1.05rem;
+    color: var(--off);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 120px 0;
+  }
+  .features-header {
+    margin-bottom: 64px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .feat-card {
+    background: var(--bg2);
+    padding: 48px 40px;
+    position: relative;
+    transition: background 0.25s;
+  }
+  .feat-card:hover { background: var(--bg3); }
+  .feat-icon {
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 28px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,255,0.15);
+  }
+  .feat-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .feat-body {
+    font-size: 0.9rem;
+    color: var(--off);
+    line-height: 1.7;
+  }
+  .feat-stat {
+    margin-top: 24px;
+    display: inline-block;
+    padding: 5px 12px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── BENCHMARKS FULL SECTION ── */
+  .benchmarks {
+    padding: 120px 0;
+    background: linear-gradient(to bottom, transparent, rgba(0,212,255,0.02), transparent);
+  }
+  .bench-full-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    margin-top: 64px;
+  }
+  .bench-table {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .bench-table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .bench-table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    align-items: center;
+    transition: background 0.2s;
+  }
+  .bench-table-row:last-child { border-bottom: none; }
+  .bench-table-row:hover { background: rgba(0,212,255,0.04); }
+  .bench-attack { font-weight: 600; color: var(--white); }
+  .bench-f1-val {
+    font-weight: 700;
+    color: var(--teal);
+    font-size: 1rem;
+  }
+  .bench-bar-cell { display: flex; align-items: center; gap: 10px; }
+  .bench-bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bench-bar-fill {
+    height: 100%;
+    background: var(--teal);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--teal-glow);
+  }
+
+  .bench-facts {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .bench-fact-num {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+    text-shadow: 0 0 50px rgba(0,212,255,0.35);
+    letter-spacing: -0.03em;
+  }
+  .bench-fact-label {
+    font-size: 0.95rem;
+    color: var(--off);
+    margin-top: 6px;
+  }
+  .bench-fact-sub {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    padding: 120px 0;
+  }
+  .how-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 64px;
+    background: var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .step {
+    background: var(--bg2);
+    padding: 40px 32px;
+    position: relative;
+  }
+  .step-num {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--teal);
+    margin-bottom: 20px;
+    display: block;
+  }
+  .step-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .step-body {
+    font-size: 0.85rem;
+    color: var(--off);
+    line-height: 1.7;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--teal), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .step:hover::before { opacity: 1; }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 120px 0;
+  }
+  .cta-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 80px 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(0,212,255,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .cta-box h2 {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    line-height: 1.15;
+  }
+  .cta-box h2 em {
+    font-style: normal;
+    color: var(--teal);
+  }
+  .cta-box p {
+    font-size: 1rem;
+    color: var(--off);
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+  .cta-note {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 48px 40px;
+  }
+  .footer-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .footer-brand { display: flex; flex-direction: column; gap: 6px; }
+  .footer-brand-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .footer-brand-stack {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .footer-brand-stack span { color: var(--teal); }
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── GLASS PILL ── */
+  .glass-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 900px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .bench-full-grid { grid-template-columns: 1fr; }
+    .how-steps { grid-template-columns: 1fr 1fr; }
+    .bench-row { grid-template-columns: repeat(3, 1fr); }
+    nav { padding: 0 20px; }
+    .nav-links { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-word">Astrognosy AI</span>
+    <span class="nav-logo-product">Laminar &mdash; by Pacific</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#product">Product</a></li>
+    <li><a href="#technology">Technology</a></li>
+    <li><a href="#benchmarks">Benchmarks</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#contact" class="nav-cta">Request Early Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="product">
+  <div class="hero-orb"></div>
+  <div class="hero-orb-2"></div>
+
+  <div class="hero-eyebrow">
+    <span class="dot"></span>
+    Patent-Pending · PCF Structural Detection · CICIDS2017 Benchmarked
+  </div>
+
+  <h1>Network intrusion detection<br>without <em>retraining</em></h1>
+
+  <p class="hero-sub">
+    Laminar uses Positional Correlation Fields to detect network attacks by
+    structural signature — not learned weights. No 30-day observation window.
+    No retraining when attack patterns shift. CPU-native at 1.5ms per trace.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#contact" class="btn-primary">Request Early Access</a>
+    <a href="#benchmarks" class="btn-ghost">View Benchmarks</a>
+  </div>
+
+  <!-- BENCHMARK PREVIEW ROW -->
+  <div class="bench-row">
+    <div class="bench-card">
+      <div class="bench-type">BruteForce</div>
+      <div class="bench-f1">0.969</div>
+      <div class="bench-label">F1 Score</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-type">DDoS</div>
+      <div class="bench-f1">0.949</div>
+      <div class="bench-label">F1 Score</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-type">DoS</div>
+      <div class="bench-f1">0.910</div>
+      <div class="bench-label">F1 Score</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-type">PortScan</div>
+      <div class="bench-f1">0.932</div>
+      <div class="bench-label">F1 Score</div>
+    </div>
+    <div class="bench-card">
+      <div class="bench-type">WebAttack</div>
+      <div class="bench-f1">0.885</div>
+      <div class="bench-label">F1 Score</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="technology">
+  <div class="section-inner">
+    <div class="features-header">
+      <div class="section-eyebrow">Core Capabilities</div>
+      <h2 class="section-title">Built for the threats<br>you haven't seen yet</h2>
+      <p class="section-lead">PCF detects structural anomalies in network behavior — patterns that emerge regardless of whether the specific attack variant has been observed before.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">&#9678;</div>
+        <h3 class="feat-title">Structural Detection</h3>
+        <p class="feat-body">Positional Signature Vectors capture the statistical geometry of network behavior. Attacks diverge structurally from benign traffic — regardless of specific payload content or variant.</p>
+        <span class="feat-stat">Zero Training Samples</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#10227;</div>
+        <h3 class="feat-title">No Retraining Required</h3>
+        <p class="feat-body">When attack patterns shift, Laminar continues detecting them. Structural divergence is invariant to adversarial mutation — no model updates, no rule updates, no signature feeds.</p>
+        <span class="feat-stat">No 30-Day Window</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#9729;</div>
+        <h3 class="feat-title">CPU-Native Speed</h3>
+        <p class="feat-body">PCF runs entirely on commodity CPUs. No GPU, no inference server, no cloud round-trip. Decision latency of ~1.5ms per trace enables inline deployment at wire speed.</p>
+        <span class="feat-stat">~1.5ms Latency</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARKS FULL -->
+<section class="benchmarks" id="benchmarks">
+  <div class="section-inner">
+    <div class="section-eyebrow">Performance</div>
+    <h2 class="section-title">Real data. Real results.</h2>
+    <p class="section-lead">Benchmarked against CICIDS2017 — the academic standard for network intrusion detection research — using 1,280 real PCF detections.</p>
+
+    <div class="bench-full-grid">
+      <div class="bench-table">
+        <div class="bench-table-header">
+          <span>Attack Class</span>
+          <span>F1 Score</span>
+          <span>Precision</span>
+          <span>Recall</span>
+        </div>
+        <div class="bench-table-row">
+          <span class="bench-attack">BruteForce</span>
+          <span class="bench-f1-val">0.969</span>
+          <div class="bench-bar-cell">
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:94%"></div></div>
+            <span style="font-size:0.8rem;color:var(--muted)">0.940</span>
+          </div>
+          <span style="color:var(--off)">1.000</span>
+        </div>
+        <div class="bench-table-row">
+          <span class="bench-attack">DDoS</span>
+          <span class="bench-f1-val">0.949</span>
+          <div class="bench-bar-cell">
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:90.6%"></div></div>
+            <span style="font-size:0.8rem;color:var(--muted)">0.906</span>
+          </div>
+          <span style="color:var(--off)">0.997</span>
+        </div>
+        <div class="bench-table-row">
+          <span class="bench-attack">DoS</span>
+          <span class="bench-f1-val">0.910</span>
+          <div class="bench-bar-cell">
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:87.9%"></div></div>
+            <span style="font-size:0.8rem;color:var(--muted)">0.879</span>
+          </div>
+          <span style="color:var(--off)">0.943</span>
+        </div>
+        <div class="bench-table-row">
+          <span class="bench-attack">PortScan</span>
+          <span class="bench-f1-val">0.932</span>
+          <div class="bench-bar-cell">
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:87.2%"></div></div>
+            <span style="font-size:0.8rem;color:var(--muted)">0.872</span>
+          </div>
+          <span style="color:var(--off)">1.000</span>
+        </div>
+        <div class="bench-table-row">
+          <span class="bench-attack">WebAttack</span>
+          <span class="bench-f1-val">0.885</span>
+          <div class="bench-bar-cell">
+            <div class="bench-bar-track"><div class="bench-bar-fill" style="width:80%"></div></div>
+            <span style="font-size:0.8rem;color:var(--muted)">0.800</span>
+          </div>
+          <span style="color:var(--off)">0.991</span>
+        </div>
+      </div>
+
+      <div class="bench-facts">
+        <div>
+          <div class="bench-fact-num">~1.5ms</div>
+          <div class="bench-fact-label">Decision latency per network trace</div>
+          <div class="bench-fact-sub">CPU-only · No GPU required · No cloud round-trip</div>
+        </div>
+        <div>
+          <div class="bench-fact-num">1,280</div>
+          <div class="bench-fact-label">Real PCF detections in benchmark</div>
+          <div class="bench-fact-sub">CICIDS2017 dataset · is_real_data: true</div>
+        </div>
+        <div>
+          <div class="bench-fact-num">0</div>
+          <div class="bench-fact-label">Attack training samples required</div>
+          <div class="bench-fact-sub">Detection layer is calibration-free per attack class</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="technology-detail">
+  <div class="section-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">PCF: Positional Correlation Fields</h2>
+    <p class="section-lead">A patent-pending mathematical framework that encodes network behavior as structural geometry rather than learned features.</p>
+
+    <div class="how-steps">
+      <div class="step">
+        <span class="step-num">01 &mdash; TOKENIZE</span>
+        <h3 class="step-title">Network events become behavioral tokens</h3>
+        <p class="step-body">Raw packet flows are mapped to semantic tokens: AUTH_BRUTE, NET_FLOOD, NET_PORTSCAN, NET_SLOW_CONN, and others — capturing the behavioral fingerprint of each connection.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02 &mdash; CORRELATE</span>
+        <h3 class="step-title">Positional Signature Vectors computed</h3>
+        <p class="step-body">PCF applies proprietary structural scoring over token co-occurrence positions — producing a structural fingerprint for each trace. (Patent Pending)</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03 &mdash; COMPARE</span>
+        <h3 class="step-title">Structural divergence measured</h3>
+        <p class="step-body">Attack traces diverge geometrically from the benign PSV centroid. A dual-signal classifier flags anomalies by cosine distance and attack-token density — no learned decision boundary.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">04 &mdash; ALERT</span>
+        <h3 class="step-title">Sub-2ms detection, zero cloud dependency</h3>
+        <p class="step-body">Decisions execute in pure Python on commodity hardware in ~1.5ms. Results surface in the Laminar console with structural provenance — not a black-box score.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="section-inner">
+    <div class="cta-box">
+      <div class="glass-pill" style="margin-bottom:28px">Early Access Program</div>
+      <h2>Ready to see <em>structural detection</em><br>in your environment?</h2>
+      <p>Laminar is available for enterprise evaluation. We work directly with security engineering teams to integrate and validate PCF in production network environments.</p>
+      <a href="mailto:contact@astrognosy.ai" class="btn-primary">Request Early Access</a>
+      <p class="cta-note">Patent-pending technology &nbsp;·&nbsp; U.S. Provisional 63/978,633 &nbsp;·&nbsp; CPU-native deployment</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-brand-name">Astrognosy AI</span>
+      <span class="footer-brand-stack">Pacific Platform &nbsp;&#8212;&nbsp; <span>Laminar</span> Network Detection</span>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">Product</a></li>
+      <li><a href="#">Technology</a></li>
+      <li><a href="#">Benchmarks</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Astrognosy AI. Patent-pending PCF technology.</span>
+  </div>
+</footer>
+
+</body>
+</html>

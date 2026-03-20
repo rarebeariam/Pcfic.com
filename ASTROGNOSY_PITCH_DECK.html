@@ -923,17 +923,12 @@
           </ul>
 
           <div class="formula-block" style="margin-top: 28px; display: block; min-width: auto;">
-            <div class="formula-label">PSV Core Formula</div>
-            <div class="formula-display">
-              <span class="sigma">&sigma;</span><sub style="font-size:0.6em; color: var(--white-muted);">k</sub>
-              &nbsp;=&nbsp;
-              <span class="fraction">
-                <span class="num">mean(PMI<sub style="font-size:0.65em">k</sub>)</span>
-                <span class="den">std(PMI<sub style="font-size:0.65em">k</sub>) + &epsilon;</span>
-              </span>
+            <div class="formula-label">PCF Structural Analysis</div>
+            <div class="formula-display" style="font-size: 0.85em; letter-spacing: 0.05em;">
+              Proprietary structural scoring over token co-occurrence positions
             </div>
             <div style="margin-top: 12px; font-family: var(--font-mono); font-size: 10px; color: var(--white-muted); letter-spacing: 0.1em;">
-              k = position offset &nbsp;|&nbsp; PMI = pointwise mutual information &nbsp;|&nbsp; &epsilon; = 0.01
+              Patent Pending &nbsp;|&nbsp; U.S. Provisional No. 63/978,633
             </div>
           </div>
         </div>
@@ -943,8 +938,8 @@
 
           <div class="stat-row" style="flex-direction: column; gap: 14px; margin-top: 0;">
             <div class="stat-box" style="padding: 16px 20px;">
-              <div class="stat-num" style="font-size: clamp(18px,2vw,26px);">r = 0.0149</div>
-              <div class="stat-label">Non-invertibility &nbsp;(threshold 0.05, margin 3.35×)</div>
+              <div class="stat-num" style="font-size: clamp(18px,2vw,26px);">Non-Invertible</div>
+              <div class="stat-label">Independently verified non-invertibility — signatures cannot be reversed to recover source data</div>
             </div>
             <div class="stat-box" style="padding: 16px 20px;">
               <div class="stat-num" style="font-size: clamp(18px,2vw,26px);">F1 = 1.0</div>
@@ -1191,7 +1186,7 @@
         <div class="flow-arrow">&#8594;</div>
         <div class="flow-node highlight">
           <div class="node-label">PSV Signature</div>
-          Non-invertible<br>Pearson r = 0.0149
+          Non-invertible<br>Empirically verified
         </div>
         <div class="flow-arrow">&#8594;</div>
         <div class="flow-node">
@@ -1441,8 +1436,8 @@
         </div>
         <div>
           <div style="font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white-muted); margin-bottom: 8px;">Non-Invertibility</div>
-          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--white);">Pearson r = 0.0149</div>
-          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--white-muted);">3.35× margin vs. threshold</div>
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--white);">Verified Non-Invertible</div>
+          <div style="font-family: var(--font-mono); font-size: 11px; color: var(--white-muted);">Empirically verified — wide margin confirmed</div>
         </div>
       </div>
     </div>

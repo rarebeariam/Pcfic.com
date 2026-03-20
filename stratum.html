@@ -196,19 +196,19 @@
             <div class="step-num">Step 02</div>
             <div class="step-title">Compute Design PSV</div>
             <div class="step-desc">Positional Scoring Vectors are computed from the token stream — capturing how design choices co-occur structurally. A dense rack zone adjacent to undersized cooling produces a distinctive structural signature.</div>
-            <div class="step-mono">σ_k = μ(PMI_k) / σ(PMI_k)</div>
+            <div class="step-mono">proprietary structural scoring</div>
         </div>
         <div class="how-step">
             <div class="step-num">Step 03</div>
             <div class="step-title">Compare to Reference</div>
             <div class="step-desc">The design's PSV is compared against reference PSVs from TIER-III/IV certified builds and ASHRAE best-practice templates. Structural distance is computed per design layer independently.</div>
-            <div class="step-mono">dist(PSV_design, PSV_ref)</div>
+            <div class="step-mono">structural divergence score</div>
         </div>
         <div class="how-step">
             <div class="step-num">Step 04</div>
             <div class="step-title">Score & Flag</div>
             <div class="step-desc">Each layer receives a structural score. Deviations above threshold are flagged with the specific design co-occurrence that caused them — actionable before construction begins.</div>
-            <div class="step-mono">dist > θ₉₀ → FLAG</div>
+            <div class="step-mono">divergence above threshold → FLAG</div>
         </div>
     </div>
 </div>

@@ -154,13 +154,13 @@
             <div class="step-num">Step 03</div>
             <div class="step-title">PSV vs. Golden Reference</div>
             <div class="step-desc">The current die's PSV is computed and compared against the golden reference signature established from a validated sample. Structural distance is calculated per position.</div>
-            <div class="step-mono">dist(PSV_die, PSV_ref)</div>
+            <div class="step-mono">structural divergence score</div>
         </div>
         <div class="how-step">
             <div class="step-num">Step 04</div>
             <div class="step-title">Anomaly Classification</div>
-            <div class="step-desc">Distance above the 90th percentile flags a behavioral deviation. No defect labels required — the golden reference is the only ground truth needed.</div>
-            <div class="step-mono">dist > θ₉₀ → FLAG</div>
+            <div class="step-desc">Structural divergence above threshold flags a behavioral deviation. No defect labels required — the golden reference is the only ground truth needed.</div>
+            <div class="step-mono">divergence above threshold → FLAG</div>
         </div>
     </div>
 </div>

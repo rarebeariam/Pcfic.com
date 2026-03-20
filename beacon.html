@@ -163,13 +163,13 @@
             <div class="step-num">Step 03</div>
             <div class="step-title">PSV Comparison</div>
             <div class="step-desc">The current window's PSV is compared against the operational baseline. The structural shape of sensor co-occurrence tells the story of whether the environment is behaving normally.</div>
-            <div class="step-mono">dist(PSV_now, PSV_base)</div>
+            <div class="step-mono">structural divergence score</div>
         </div>
         <div class="how-step">
             <div class="step-num">Step 04</div>
             <div class="step-title">Alert & Act</div>
             <div class="step-desc">Divergence above threshold triggers an alert — classified by sensor stream of origin. The robot's safety system receives a structured signal, not just a raw sensor value.</div>
-            <div class="step-mono">dist > θ₉₀ → HALT/WARN</div>
+            <div class="step-mono">divergence above threshold → HALT/WARN</div>
         </div>
     </div>
 </div>

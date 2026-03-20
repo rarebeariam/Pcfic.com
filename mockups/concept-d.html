@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laminar — Astrognosy AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy:    #0b1120;
+    --navy2:   #0f1729;
+    --indigo:  #4f46e5;
+    --indigo2: #6366f1;
+    --violet:  #7c3aed;
+    --glow:    rgba(99,102,241,0.3);
+    --glow2:   rgba(79,70,229,0.15);
+    --white:   #ffffff;
+    --off:     rgba(255,255,255,0.72);
+    --muted:   rgba(255,255,255,0.42);
+    --dim:     rgba(255,255,255,0.18);
+    --border:  rgba(255,255,255,0.08);
+    --border2: rgba(99,102,241,0.25);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 72px;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(11,17,32,0.85);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    gap: 2px;
+  }
+  .nav-logo-top {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+  .nav-logo-top span {
+    background: linear-gradient(90deg, var(--indigo2), #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .nav-logo-sub {
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+  .nav-links a {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    padding: 10px 26px;
+    background: linear-gradient(135deg, var(--indigo), var(--violet)) !important;
+    color: white !important;
+    border-radius: 8px;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 20px rgba(79,70,229,0.4);
+    transition: box-shadow 0.25s, transform 0.2s !important;
+  }
+  .nav-cta:hover {
+    box-shadow: 0 8px 32px rgba(79,70,229,0.6) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 48px 60px;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--navy) 0%, #0d1435 45%, #0f0c35 100%);
+  }
+
+  /* CSS WAVE ANIMATION */
+  .wave-container {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 220px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .wave {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    left: -50%;
+    height: 100%;
+  }
+  .wave svg {
+    width: 100%;
+    height: 100%;
+  }
+  .wave-1 { animation: wave-move 8s ease-in-out infinite; opacity: 0.5; }
+  .wave-2 { animation: wave-move 12s ease-in-out infinite reverse; opacity: 0.3; animation-delay: -2s; }
+  .wave-3 { animation: wave-move 16s ease-in-out infinite; opacity: 0.2; animation-delay: -5s; }
+  @keyframes wave-move {
+    0%   { transform: translateX(0) scaleY(1); }
+    25%  { transform: translateX(-5%) scaleY(1.1); }
+    50%  { transform: translateX(-10%) scaleY(0.9); }
+    75%  { transform: translateX(-5%) scaleY(1.05); }
+    100% { transform: translateX(0) scaleY(1); }
+  }
+
+  /* PULSE RINGS */
+  .pulse-rings {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(99,102,241,0.15);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: ring-pulse 4s ease-out infinite;
+  }
+  .ring:nth-child(1) { width: 300px; height: 300px; animation-delay: 0s; }
+  .ring:nth-child(2) { width: 500px; height: 500px; animation-delay: 1s; }
+  .ring:nth-child(3) { width: 700px; height: 700px; animation-delay: 2s; }
+  .ring:nth-child(4) { width: 900px; height: 900px; animation-delay: 3s; }
+  @keyframes ring-pulse {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    20%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+  }
+
+  /* BACKGROUND GRADIENT ORBS */
+  .orb-1 {
+    position: absolute;
+    top: 20%; left: 15%;
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(79,70,229,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .orb-2 {
+    position: absolute;
+    top: 30%; right: 10%;
+    width: 400px; height: 400px;
+    background: radial-gradient(ellipse, rgba(124,58,237,0.1) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* HERO CONTENT */
+  .hero-content { position: relative; z-index: 2; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 18px;
+    background: rgba(79,70,229,0.18);
+    border: 1px solid rgba(99,102,241,0.35);
+    border-radius: 100px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #a5b4fc;
+    letter-spacing: 0.08em;
+    margin-bottom: 36px;
+  }
+  .hero-badge .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #a5b4fc;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1;box-shadow:0 0 6px #a5b4fc} 50%{opacity:0.4;box-shadow:none} }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+    margin-bottom: 32px;
+    max-width: 1000px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #818cf8, #c4b5fd, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero h1 .line-accent {
+    display: block;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #4f46e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 40px rgba(99,102,241,0.5));
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--off);
+    max-width: 640px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+    font-weight: 400;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 80px;
+  }
+  .btn-primary {
+    padding: 18px 44px;
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    color: white;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    box-shadow: 0 8px 32px rgba(79,70,229,0.45);
+    transition: box-shadow 0.25s, transform 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 12px 48px rgba(79,70,229,0.65);
+    transform: translateY(-3px);
+  }
+  .btn-ghost {
+    padding: 18px 44px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--off);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); }
+
+  /* ANIMATED COUNTER STATS */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 14px;
+    overflow: hidden;
+    max-width: 900px;
+    width: 100%;
+  }
+  .hero-stat {
+    background: rgba(11,17,32,0.8);
+    padding: 28px 16px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+  }
+  .hero-stat:hover { background: rgba(79,70,229,0.12); }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #818cf8, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-attack {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--dim);
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── SECTION SYSTEM ── */
+  section { position: relative; }
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 48px;
+  }
+  .section-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .section-title .grad {
+    background: linear-gradient(135deg, #818cf8, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-lead {
+    font-size: 1rem;
+    color: var(--off);
+    max-width: 560px;
+    line-height: 1.75;
+  }
+  .section-header-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: end;
+    margin-bottom: 64px;
+  }
+
+  /* ── FEATURES ── */
+  .features { background: linear-gradient(to bottom, transparent, rgba(79,70,229,0.04), transparent); }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .feat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 44px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .feat-card:hover {
+    border-color: rgba(99,102,241,0.4);
+    transform: translateY(-4px);
+  }
+  .feat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feat-card:hover::before { opacity: 1; }
+  .feat-icon-wrap {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(79,70,229,0.25), rgba(124,58,237,0.15));
+    border: 1px solid rgba(99,102,241,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 28px;
+  }
+  .feat-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+  .feat-body {
+    font-size: 0.88rem;
+    color: var(--off);
+    line-height: 1.75;
+  }
+  .feat-pill {
+    margin-top: 24px;
+    display: inline-block;
+    padding: 5px 14px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #a5b4fc;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── BENCHMARKS ── */
+  .benchmarks { background: var(--navy2); }
+  .bench-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-top: 0;
+  }
+
+  /* BIG NUMBER COUNTERS */
+  .bench-counters { display: flex; flex-direction: column; gap: 40px; }
+  .bench-counter-item {}
+  .bench-counter-top {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .bench-counter-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 4.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    background: linear-gradient(135deg, #818cf8, #c4b5fd, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bench-counter-unit {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: -0.02em;
+  }
+  .bench-counter-label {
+    font-size: 0.9rem;
+    color: var(--off);
+    font-weight: 500;
+  }
+  .bench-counter-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  /* BENCH TABLE VISUAL */
+  .bench-cards { display: flex; flex-direction: column; gap: 12px; }
+  .bench-bar-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 24px;
+    transition: border-color 0.2s;
+  }
+  .bench-bar-card:hover { border-color: rgba(99,102,241,0.35); }
+  .bench-bar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .bench-bar-attack {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+  .bench-bar-f1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #818cf8, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bench-bar-track {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bench-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--indigo), var(--violet));
+    border-radius: 3px;
+    box-shadow: 0 0 12px rgba(99,102,241,0.4);
+    transition: width 1s ease;
+  }
+  .bench-bar-meta {
+    margin-top: 8px;
+    display: flex;
+    gap: 16px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {}
+  .how-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 64px;
+  }
+  .step {
+    position: relative;
+    padding: 36px 28px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .step:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-4px); }
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #818cf8;
+    margin-bottom: 20px;
+    display: block;
+    text-transform: uppercase;
+  }
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .step-body {
+    font-size: 0.83rem;
+    color: var(--off);
+    line-height: 1.7;
+  }
+  .step-connector {
+    position: absolute;
+    top: 50%;
+    right: -13px;
+    width: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(99,102,241,0.4), transparent);
+    z-index: 2;
+  }
+  .step:last-child .step-connector { display: none; }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: linear-gradient(160deg, #0d1435, #120d38, #0b1120);
+    border-top: 1px solid rgba(99,102,241,0.15);
+  }
+  .cta-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 120px 48px;
+    text-align: center;
+  }
+  .cta-overline {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 28px;
+  }
+  .cta-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+  }
+  .cta-title .grad {
+    background: linear-gradient(135deg, #818cf8, #c4b5fd, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cta-body {
+    font-size: 1.1rem;
+    color: var(--off);
+    max-width: 560px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+  }
+  .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .cta-note {
+    margin-top: 24px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 44px 48px;
+    background: var(--navy);
+  }
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .footer-brand { display: flex; flex-direction: column; gap: 4px; }
+  .footer-brand-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .footer-brand-name span {
+    background: linear-gradient(135deg, #818cf8, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .footer-brand-sub { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; }
+  .footer-links { display: flex; gap: 28px; list-style: none; }
+  .footer-links a {
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy { font-size: 0.76rem; color: var(--dim); }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .hero h1 { font-size: 3rem; }
+    .hero-stats { grid-template-columns: repeat(3, 1fr); }
+    .features-grid { grid-template-columns: 1fr; }
+    .bench-grid { grid-template-columns: 1fr; gap: 48px; }
+    .how-steps { grid-template-columns: 1fr 1fr; }
+    .section-header-grid { grid-template-columns: 1fr; gap: 24px; }
+    nav { padding: 0 24px; }
+    .section-inner { padding: 80px 24px; }
+  }
+
+  /* Counter animation */
+  .count-up { display: inline-block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-top">Astrognosy <span>AI</span></span>
+    <span class="nav-logo-sub">Laminar &nbsp;&mdash;&nbsp; Pacific Platform</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#product">Product</a></li>
+    <li><a href="#technology">Technology</a></li>
+    <li><a href="#benchmarks">Benchmarks</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#contact" class="nav-cta">Request Early Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="product">
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <!-- Pulse rings -->
+  <div class="pulse-rings">
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="live-dot"></span>
+      Patent-Pending &nbsp;&middot;&nbsp; PCF Structural Detection &nbsp;&middot;&nbsp; CICIDS2017 Validated
+    </div>
+
+    <h1>
+      <span class="grad">Network intrusion</span><br>
+      <span class="line-accent">detection reinvented.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Laminar detects attacks by structural signature — not learned patterns.
+      No 30-day observation window. No retraining when adversaries mutate.
+      ~1.5ms per trace, CPU-native.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">Request Early Access</a>
+      <a href="#benchmarks" class="btn-ghost">View Benchmark Results</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="stat-num">0.969</div>
+        <div class="stat-attack">BruteForce</div>
+        <div class="stat-label">F1 Score</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">0.949</div>
+        <div class="stat-attack">DDoS</div>
+        <div class="stat-label">F1 Score</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">0.932</div>
+        <div class="stat-attack">PortScan</div>
+        <div class="stat-label">F1 Score</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">0.910</div>
+        <div class="stat-attack">DoS</div>
+        <div class="stat-label">F1 Score</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-num">0.885</div>
+        <div class="stat-attack">WebAttack</div>
+        <div class="stat-label">F1 Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVE VISUALIZATION -->
+  <div class="wave-container">
+    <div class="wave wave-1">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,60 C120,100 240,20 360,60 C480,100 600,20 720,60 C840,100 960,20 1080,60 C1200,100 1320,20 1440,60 L1440,120 L0,120 Z" fill="rgba(79,70,229,0.15)"/>
+      </svg>
+    </div>
+    <div class="wave wave-2">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,80 C180,20 360,100 540,60 C720,20 900,80 1080,50 C1260,20 1380,70 1440,80 L1440,120 L0,120 Z" fill="rgba(99,102,241,0.1)"/>
+      </svg>
+    </div>
+    <div class="wave wave-3">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,40 C240,90 480,10 720,50 C960,90 1200,20 1440,45 L1440,120 L0,120 Z" fill="rgba(124,58,237,0.08)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="technology">
+  <div class="section-inner">
+    <div class="section-header-grid">
+      <div>
+        <div class="section-eyebrow">Core Capabilities</div>
+        <h2 class="section-title">Why <span class="grad">structural detection</span> changes everything</h2>
+      </div>
+      <p class="section-lead">Every network intrusion detection system built in the last 30 years learned attack signatures. Laminar detects by geometry — the structural divergence that all attacks share.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon-wrap">&#9678;</div>
+        <h3 class="feat-title">Zero Training Samples for Detection</h3>
+        <p class="feat-body">PCF calibrates on benign traffic only. The detection layer requires no attack examples — it flags structural divergence from the benign centroid. When a new attack variant appears, it's already detectable.</p>
+        <span class="feat-pill">Zero training samples</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap">&#10227;</div>
+        <h3 class="feat-title">No Retraining When Attacks Shift</h3>
+        <p class="feat-body">Adversaries can mutate timing, payloads, and patterns. The structural geometry of attack behavior — captured in PSV space — persists across variants. No emergency patches. No model redeployment.</p>
+        <span class="feat-pill">No 30-day observation window</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon-wrap">&#9889;</div>
+        <h3 class="feat-title">~1.5ms CPU-Native Decisions</h3>
+        <p class="feat-body">The PCF pipeline runs entirely on commodity CPUs with sub-2ms decision latency. No GPU. No inference cluster. No cloud. Deploy inline between your network tap and SIEM without infrastructure changes.</p>
+        <span class="feat-pill">~1.5ms &nbsp;&middot;&nbsp; CPU-only</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARKS -->
+<section class="benchmarks" id="benchmarks">
+  <div class="section-inner">
+    <div class="section-header-grid" style="margin-bottom:64px">
+      <div>
+        <div class="section-eyebrow">Benchmark Results</div>
+        <h2 class="section-title">Real data.<br><span class="grad">Real numbers.</span></h2>
+      </div>
+      <p class="section-lead">Tested against CICIDS2017 — the standard academic benchmark for network intrusion detection. 1,280 real PCF detections. No cherry-picked scenarios.</p>
+    </div>
+
+    <div class="bench-grid">
+      <!-- BIG COUNTERS -->
+      <div class="bench-counters">
+        <div class="bench-counter-item">
+          <div class="bench-counter-top">
+            <span class="bench-counter-num" id="counter-latency">1.5</span>
+            <span class="bench-counter-unit">ms</span>
+          </div>
+          <div class="bench-counter-label">Decision latency per network trace</div>
+          <div class="bench-counter-sub">CPU-only &nbsp;&middot;&nbsp; No GPU required &nbsp;&middot;&nbsp; No cloud round-trip</div>
+        </div>
+        <div class="bench-counter-item">
+          <div class="bench-counter-top">
+            <span class="bench-counter-num" id="counter-detections">1,280</span>
+          </div>
+          <div class="bench-counter-label">Real PCF detections in benchmark</div>
+          <div class="bench-counter-sub">CICIDS2017 &nbsp;&middot;&nbsp; is_real_data: true</div>
+        </div>
+        <div class="bench-counter-item">
+          <div class="bench-counter-top">
+            <span class="bench-counter-num" id="counter-training">0</span>
+          </div>
+          <div class="bench-counter-label">Attack training samples required</div>
+          <div class="bench-counter-sub">Detection layer is structurally calibrated</div>
+        </div>
+      </div>
+
+      <!-- BAR CARDS -->
+      <div class="bench-cards">
+        <div class="bench-bar-card">
+          <div class="bench-bar-top">
+            <span class="bench-bar-attack">BruteForce</span>
+            <span class="bench-bar-f1">F1 0.969</span>
+          </div>
+          <div class="bench-bar-track">
+            <div class="bench-bar-fill" style="width:96.9%"></div>
+          </div>
+          <div class="bench-bar-meta">
+            <span>Precision 0.940</span>
+            <span>Recall 1.000</span>
+            <span>300 detections</span>
+          </div>
+        </div>
+        <div class="bench-bar-card">
+          <div class="bench-bar-top">
+            <span class="bench-bar-attack">DDoS</span>
+            <span class="bench-bar-f1">F1 0.949</span>
+          </div>
+          <div class="bench-bar-track">
+            <div class="bench-bar-fill" style="width:94.9%"></div>
+          </div>
+          <div class="bench-bar-meta">
+            <span>Precision 0.906</span>
+            <span>Recall 0.997</span>
+            <span>287 detections</span>
+          </div>
+        </div>
+        <div class="bench-bar-card">
+          <div class="bench-bar-top">
+            <span class="bench-bar-attack">DoS</span>
+            <span class="bench-bar-f1">F1 0.910</span>
+          </div>
+          <div class="bench-bar-track">
+            <div class="bench-bar-fill" style="width:91.0%"></div>
+          </div>
+          <div class="bench-bar-meta">
+            <span>Precision 0.879</span>
+            <span>Recall 0.943</span>
+            <span>285 detections</span>
+          </div>
+        </div>
+        <div class="bench-bar-card">
+          <div class="bench-bar-top">
+            <span class="bench-bar-attack">PortScan</span>
+            <span class="bench-bar-f1">F1 0.932</span>
+          </div>
+          <div class="bench-bar-track">
+            <div class="bench-bar-fill" style="width:93.2%"></div>
+          </div>
+          <div class="bench-bar-meta">
+            <span>Precision 0.872</span>
+            <span>Recall 1.000</span>
+            <span>300 detections</span>
+          </div>
+        </div>
+        <div class="bench-bar-card">
+          <div class="bench-bar-top">
+            <span class="bench-bar-attack">WebAttack</span>
+            <span class="bench-bar-f1">F1 0.885</span>
+          </div>
+          <div class="bench-bar-track">
+            <div class="bench-bar-fill" style="width:88.5%"></div>
+          </div>
+          <div class="bench-bar-meta">
+            <span>Precision 0.800</span>
+            <span>Recall 0.991</span>
+            <span>108 detections</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="technology-detail">
+  <div class="section-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title" style="max-width:600px;margin-bottom:16px">The PCF detection <span class="grad">pipeline</span></h2>
+    <p class="section-lead">Four mathematical steps. No gradient descent. No inference latency budget. Every detection is structurally provable.</p>
+
+    <div class="how-steps">
+      <div class="step">
+        <div class="step-connector"></div>
+        <span class="step-num">01 / Tokenize</span>
+        <h3 class="step-title">Network events to behavioral tokens</h3>
+        <p class="step-body">Raw packet flows become semantic behavioral tokens — AUTH_BRUTE, NET_FLOOD, NET_PORTSCAN, NET_SLOW_CONN — capturing connection intent, not just raw bytes.</p>
+      </div>
+      <div class="step">
+        <div class="step-connector"></div>
+        <span class="step-num">02 / Vectorize</span>
+        <h3 class="step-title">Compute Positional Signature Vector</h3>
+        <p class="step-body">PCF structural analysis applied over token co-occurrence at offset k. A structural fingerprint — not a learned embedding. (Patent Pending)</p>
+      </div>
+      <div class="step">
+        <div class="step-connector"></div>
+        <span class="step-num">03 / Classify</span>
+        <h3 class="step-title">Dual-signal structural comparison</h3>
+        <p class="step-body">Signal A fires if PSV cosine distance from benign centroid exceeds the 90th percentile. Signal B fires if attack-token fraction exceeds the 99th percentile. OR logic — no tuning required.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">04 / Alert</span>
+        <h3 class="step-title">Structured alert with full provenance</h3>
+        <p class="step-body">Every alert surfaces the PSV vector, cosine distance, token sequence, and signal triggers. Security teams see why a trace was flagged — not just a risk score from a black box.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-inner">
+    <span class="cta-overline">Early Access Program</span>
+    <h2 class="cta-title">
+      See <span class="grad">structural detection</span><br>in your environment.
+    </h2>
+    <p class="cta-body">Laminar is available for enterprise evaluation. We integrate directly with your network infrastructure and validate PCF detection against live traffic — not demo data.</p>
+    <div class="cta-actions">
+      <a href="mailto:contact@astrognosy.ai" class="btn-primary">Request Early Access</a>
+      <a href="#benchmarks" class="btn-ghost">Review Benchmarks</a>
+    </div>
+    <p class="cta-note">Patent-pending technology &nbsp;&middot;&nbsp; U.S. Provisional 63/978,633 &nbsp;&middot;&nbsp; Astrognosy AI &nbsp;&middot;&nbsp; Pacific Platform</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-brand-name">Astrognosy <span>AI</span></span>
+      <span class="footer-brand-sub">Pacific Platform &nbsp;&mdash;&nbsp; Laminar Network Intrusion Detection</span>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">Product</a></li>
+      <li><a href="#">Technology</a></li>
+      <li><a href="#">Benchmarks</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Astrognosy AI. Patent-pending PCF technology.</span>
+  </div>
+</footer>
+
+<script>
+// Animated counter: count up to target values on scroll
+function animateCounter(el, target, duration, decimals) {
+  const start = performance.now();
+  const startVal = 0;
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = startVal + (target - startVal) * eased;
+    if (decimals > 0) {
+      el.textContent = current.toFixed(decimals);
+    } else if (target >= 1000) {
+      el.textContent = Math.round(current).toLocaleString();
+    } else {
+      el.textContent = Math.round(current);
+    }
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      if (el.id === 'counter-latency') animateCounter(el, 1.5, 1800, 1);
+      if (el.id === 'counter-detections') animateCounter(el, 1280, 2000, 0);
+      if (el.id === 'counter-training') animateCounter(el, 0, 800, 0);
+      observer.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+['counter-latency', 'counter-detections', 'counter-training'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+</script>
+
+</body>
+</html>

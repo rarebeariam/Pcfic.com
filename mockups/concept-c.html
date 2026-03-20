@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laminar — Astrognosy AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:      #0d0d0d;
+    --bg2:     #111111;
+    --bg3:     #161616;
+    --amber:   #f5a623;
+    --amber-d: rgba(245,166,35,0.12);
+    --amber-b: rgba(245,166,35,0.25);
+    --white:   #e8e8e8;
+    --off:     rgba(232,232,232,0.6);
+    --muted:   rgba(232,232,232,0.35);
+    --dim:     rgba(232,232,232,0.18);
+    --border:  rgba(232,232,232,0.08);
+    --amber-border: rgba(245,166,35,0.2);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* MONO UTILITY */
+  .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 56px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-left { display: flex; align-items: center; gap: 20px; }
+  .nav-prompt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--amber);
+    font-weight: 500;
+  }
+  .nav-logo {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .nav-logo span { color: var(--amber); }
+  .nav-divider { width: 1px; height: 20px; background: var(--border); }
+  .nav-product {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+  }
+  .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+  .nav-links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--amber); }
+  .nav-cta {
+    padding: 7px 18px;
+    border: 1px solid var(--amber-border) !important;
+    color: var(--amber) !important;
+    border-radius: 3px;
+    font-size: 0.7rem !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
+  }
+  .nav-cta:hover {
+    background: var(--amber-d) !important;
+    box-shadow: 0 0 12px rgba(245,166,35,0.15) !important;
+  }
+
+  /* ── HERO / TERMINAL ── */
+  .hero {
+    padding: 100px 40px 80px;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .hero-left {}
+  .hero-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--amber);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-kicker::before {
+    content: '//';
+    color: var(--muted);
+  }
+  .hero h1 {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+    color: var(--white);
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--amber);
+  }
+  .hero-sub {
+    font-size: 0.95rem;
+    color: var(--off);
+    line-height: 1.75;
+    margin-bottom: 36px;
+    max-width: 480px;
+  }
+  .hero-claims {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .hero-claim {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--off);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .hero-claim::before { content: '>'; color: var(--amber); flex-shrink: 0; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-amber {
+    padding: 12px 28px;
+    background: var(--amber);
+    color: #000;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 3px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s, box-shadow 0.2s;
+  }
+  .btn-amber:hover { opacity: 0.9; box-shadow: 0 0 24px rgba(245,166,35,0.3); }
+  .btn-ghost {
+    padding: 12px 28px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--off);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--amber-border); color: var(--amber); }
+
+  /* ── TERMINAL READOUT ── */
+  .terminal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .terminal-bar {
+    background: var(--bg3);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .t-dot-r { background: #ff5f57; }
+  .t-dot-y { background: #febc2e; }
+  .t-dot-g { background: #28c840; }
+  .t-title {
+    margin-left: 8px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .terminal-body {
+    padding: 20px;
+    line-height: 1.7;
+    min-height: 420px;
+  }
+  .t-line { display: block; }
+  .t-comment { color: rgba(245,166,35,0.4); }
+  .t-key { color: #7dd3fc; }
+  .t-val { color: var(--amber); }
+  .t-str { color: #86efac; }
+  .t-num { color: #f9a8d4; }
+  .t-ok { color: #4ade80; font-weight: 600; }
+  .t-warn { color: #fbbf24; }
+  .t-alert { color: #f87171; font-weight: 700; }
+  .t-dim { color: var(--muted); }
+  .t-indent { padding-left: 20px; display: block; }
+  .t-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--amber);
+    vertical-align: -2px;
+    animation: blink-cursor 1s step-end infinite;
+  }
+  @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── SECTION SYSTEM ── */
+  section { border-top: 1px solid var(--border); }
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+  .section-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 48px;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+  }
+  .section-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--white);
+  }
+  .section-lead {
+    font-size: 0.9rem;
+    color: var(--off);
+    max-width: 400px;
+    line-height: 1.7;
+    margin-top: 12px;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .feat-card {
+    background: var(--bg2);
+    padding: 36px 32px;
+    transition: background 0.2s;
+  }
+  .feat-card:hover { background: var(--bg3); }
+  .feat-index {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--amber);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .feat-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .feat-body {
+    font-size: 0.83rem;
+    color: var(--off);
+    line-height: 1.7;
+  }
+  .feat-tag {
+    margin-top: 20px;
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--amber);
+    background: var(--amber-d);
+    border: 1px solid var(--amber-border);
+    padding: 3px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── BENCHMARK TERMINAL TABLE ── */
+  .bench-section { }
+  .bench-terminal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+  .bench-term-header {
+    background: var(--bg3);
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bench-term-title { font-size: 0.68rem; color: var(--muted); margin-left: 8px; letter-spacing: 0.06em; }
+  .bench-term-body { padding: 20px; }
+  .bt-row {
+    display: grid;
+    grid-template-columns: 160px 80px 80px 80px 1fr 60px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(232,232,232,0.04);
+    align-items: center;
+    gap: 12px;
+  }
+  .bt-row:last-child { border-bottom: none; }
+  .bt-head { color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 0 10px 0; border-bottom: 1px solid var(--border); }
+  .bt-attack { color: var(--white); font-weight: 500; }
+  .bt-f1 { color: var(--amber); font-weight: 700; }
+  .bt-num { color: var(--off); }
+  .bt-bar-cell { display: flex; align-items: center; gap: 8px; }
+  .bt-bar { flex: 1; height: 3px; background: rgba(232,232,232,0.07); border-radius: 1px; overflow: hidden; }
+  .bt-fill { height: 100%; background: var(--amber); border-radius: 1px; }
+  .bt-count { color: var(--muted); font-size: 0.7rem; text-align: right; }
+
+  /* bench aside stats */
+  .bench-layout {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 40px;
+    align-items: start;
+  }
+  .bench-aside { display: flex; flex-direction: column; gap: 0; }
+  .bench-aside-stat {
+    padding: 24px 20px;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: var(--bg2);
+  }
+  .bench-aside-stat:last-child { border-bottom: 1px solid var(--border); }
+  .bench-aside-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--amber);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .bench-aside-label {
+    font-size: 0.78rem;
+    color: var(--off);
+    line-height: 1.5;
+  }
+  .bench-aside-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .step {
+    background: var(--bg2);
+    padding: 32px 28px;
+    transition: background 0.2s;
+  }
+  .step:hover { background: var(--bg3); }
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--amber);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .step-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+  .step-body {
+    font-size: 0.78rem;
+    color: var(--off);
+    line-height: 1.7;
+  }
+  .step-code {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--amber);
+    background: var(--amber-d);
+    border: 1px solid var(--amber-border);
+    padding: 6px 10px;
+    border-radius: 3px;
+    line-height: 1.5;
+  }
+
+  /* ── CTA ── */
+  .cta-section { background: var(--bg2); }
+  .cta-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 64px;
+    align-items: center;
+  }
+  .cta-terminal {
+    background: var(--bg);
+    border: 1px solid var(--amber-border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    box-shadow: 0 0 40px rgba(245,166,35,0.08);
+  }
+  .cta-term-bar {
+    background: var(--bg3);
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .cta-term-body { padding: 20px; font-size: 0.75rem; line-height: 1.8; }
+  .cta-right-content { display: flex; flex-direction: column; gap: 20px; }
+  .cta-title {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .cta-title em { font-style: normal; color: var(--amber); }
+  .cta-lead { font-size: 0.88rem; color: var(--off); line-height: 1.7; }
+  .cta-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 40px;
+    background: var(--bg);
+  }
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .footer-brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .footer-brand strong { color: var(--amber); }
+  .footer-links { display: flex; gap: 24px; list-style: none; }
+  .footer-links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--amber); }
+  .footer-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--dim);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; padding: 90px 24px 60px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .bench-layout { grid-template-columns: 1fr; }
+    .how-grid { grid-template-columns: 1fr 1fr; }
+    .cta-inner { grid-template-columns: 1fr; }
+    nav { padding: 0 20px; }
+  }
+
+  /* Typewriter animation for terminal */
+  .t-animate { opacity: 0; animation: fadeIn 0.01s forwards; }
+  .t-animate:nth-child(1)  { animation-delay: 0.0s; }
+  .t-animate:nth-child(2)  { animation-delay: 0.3s; }
+  .t-animate:nth-child(3)  { animation-delay: 0.6s; }
+  .t-animate:nth-child(4)  { animation-delay: 0.9s; }
+  .t-animate:nth-child(5)  { animation-delay: 1.2s; }
+  .t-animate:nth-child(6)  { animation-delay: 1.5s; }
+  .t-animate:nth-child(7)  { animation-delay: 1.8s; }
+  .t-animate:nth-child(8)  { animation-delay: 2.1s; }
+  .t-animate:nth-child(9)  { animation-delay: 2.4s; }
+  .t-animate:nth-child(10) { animation-delay: 2.7s; }
+  .t-animate:nth-child(11) { animation-delay: 3.0s; }
+  .t-animate:nth-child(12) { animation-delay: 3.3s; }
+  .t-animate:nth-child(13) { animation-delay: 3.6s; }
+  .t-animate:nth-child(14) { animation-delay: 3.9s; }
+  .t-animate:nth-child(15) { animation-delay: 4.2s; }
+  .t-animate:nth-child(16) { animation-delay: 4.5s; }
+  .t-animate:nth-child(17) { animation-delay: 4.8s; }
+  .t-animate:nth-child(18) { animation-delay: 5.1s; }
+  .t-animate:nth-child(19) { animation-delay: 5.4s; }
+  .t-animate:nth-child(20) { animation-delay: 5.7s; }
+  @keyframes fadeIn { to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <span class="nav-prompt mono">laminar$</span>
+    <a href="#" class="nav-logo">Astrognosy <span>AI</span></a>
+    <div class="nav-divider"></div>
+    <span class="nav-product mono">pacific / laminar v1.0</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#product">--product</a></li>
+    <li><a href="#technology">--technology</a></li>
+    <li><a href="#benchmarks">--benchmarks</a></li>
+    <li><a href="#contact">--contact</a></li>
+    <li><a href="#contact" class="nav-cta">[request-access]</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section style="border:none; padding-top:56px;">
+  <div class="hero" id="product">
+    <div class="hero-left">
+      <div class="hero-kicker">laminar &nbsp;/&nbsp; network intrusion detection</div>
+      <h1>Detect attacks<br>by <em>structure</em>,<br>not memory.</h1>
+      <p class="hero-sub">
+        Laminar applies Positional Correlation Fields — a patent-pending mathematical framework
+        that measures structural divergence in network behavior. No attack signatures. No retraining.
+        No 30-day observation window.
+      </p>
+      <div class="hero-claims">
+        <span class="hero-claim">No retraining when attack patterns shift</span>
+        <span class="hero-claim">Zero training samples (detection layer)</span>
+        <span class="hero-claim">No 30-day observation window</span>
+        <span class="hero-claim mono" style="color:var(--amber)">~1.5ms per trace &nbsp;·&nbsp; CPU-only &nbsp;·&nbsp; zero cloud dependency</span>
+      </div>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-amber">Request Early Access</a>
+        <a href="#benchmarks" class="btn-ghost">./view-benchmarks</a>
+      </div>
+    </div>
+
+    <!-- ANIMATED TERMINAL -->
+    <div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-dot-r"></div>
+          <div class="t-dot t-dot-y"></div>
+          <div class="t-dot t-dot-g"></div>
+          <span class="t-title">laminar-console &nbsp;—&nbsp; live detection stream</span>
+        </div>
+        <div class="terminal-body mono" style="font-size:0.72rem">
+          <span class="t-line t-animate t-comment"># laminar pcf-engine v1.0 — starting detection</span>
+          <span class="t-line t-animate"><span class="t-dim">[00:00.001]</span> <span class="t-ok">INFO</span> &nbsp;kernel=LEARNED_DECAY max_offset=10</span>
+          <span class="t-line t-animate"><span class="t-dim">[00:00.003]</span> <span class="t-ok">INFO</span> &nbsp;calibration loaded: 80 benign traces</span>
+          <span class="t-line t-animate"><span class="t-dim">[00:00.004]</span> <span class="t-ok">READY</span> listening on eth0:443 ...</span>
+          <span class="t-line t-animate">&nbsp;</span>
+          <span class="t-line t-animate"><span class="t-dim">[00:02.114]</span> <span class="t-ok">TRACE</span> 192.168.1.105 → 10.0.0.1</span>
+          <span class="t-line t-indent t-animate"><span class="t-key">psv_cosine_dist</span> <span class="t-num">0.042</span> &nbsp;<span class="t-ok">✓ benign</span></span>
+          <span class="t-line t-animate">&nbsp;</span>
+          <span class="t-line t-animate"><span class="t-dim">[00:04.882]</span> <span class="t-warn">TRACE</span> 203.0.113.44 → 10.0.0.1</span>
+          <span class="t-line t-indent t-animate"><span class="t-key">tokens</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-val">["AUTH_BRUTE", "AUTH_BRUTE", "AUTH_BRUTE"...]</span></span>
+          <span class="t-line t-indent t-animate"><span class="t-key">psv_cosine_dist</span> <span class="t-num">0.847</span></span>
+          <span class="t-line t-indent t-animate"><span class="t-key">signal_a</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-alert">TRIGGERED</span> <span class="t-dim">(dist &gt; 90th_pct)</span></span>
+          <span class="t-line t-indent t-animate"><span class="t-key">signal_b</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-alert">TRIGGERED</span> <span class="t-dim">(atk_token_frac &gt; 99th_pct)</span></span>
+          <span class="t-line t-animate">&nbsp;</span>
+          <span class="t-line t-animate"><span class="t-dim">[00:04.884]</span> <span class="t-alert">ALERT</span> BruteForce detected</span>
+          <span class="t-line t-indent t-animate"><span class="t-key">src_ip</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">203.0.113.44</span></span>
+          <span class="t-line t-indent t-animate"><span class="t-key">latency</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-val">1.47ms</span></span>
+          <span class="t-line t-indent t-animate"><span class="t-key">pcf_claim</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">Claim 27 (structural divergence)</span></span>
+          <span class="t-line t-animate"><span class="t-cursor"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="technology">
+  <div class="section-inner">
+    <div class="section-top">
+      <div>
+        <div class="section-kicker">// capabilities</div>
+        <h2 class="section-title">What makes PCF different</h2>
+      </div>
+      <p class="section-lead">The industry spent 30 years building detectors that learn what attacks look like. PCF asks a different question: how does attack behavior differ structurally from normal behavior?</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feat-card">
+        <span class="feat-index">// feature_01</span>
+        <h3 class="feat-title">Structural, not statistical learning</h3>
+        <p class="feat-body">PCF computes Positional Signature Vectors using PMI (Pointwise Mutual Information) across behavioral token positions. The result is a geometric fingerprint — deterministic, auditable, reproducible.</p>
+        <span class="feat-tag">zero_training_samples: true</span>
+      </div>
+      <div class="feat-card">
+        <span class="feat-index">// feature_02</span>
+        <h3 class="feat-title">No retraining when attacks mutate</h3>
+        <p class="feat-body">Adversarial mutation changes packet content, timing, and headers. It does not change the structural geometry of attack behavior. PSV divergence persists regardless of variant — no model update required.</p>
+        <span class="feat-tag">observation_window: 0_days</span>
+      </div>
+      <div class="feat-card">
+        <span class="feat-index">// feature_03</span>
+        <h3 class="feat-title">CPU-native, inline-capable</h3>
+        <p class="feat-body">PCF is pure numerical computation. ~1.5ms per trace on commodity hardware. No inference server, no model loading, no GPU cluster. Deploys inline between your network tap and your SIEM.</p>
+        <span class="feat-tag">latency_ms: 1.47 | hardware: cpu</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENCHMARKS -->
+<section id="benchmarks">
+  <div class="section-inner">
+    <div class="section-top">
+      <div>
+        <div class="section-kicker">// benchmark_results</div>
+        <h2 class="section-title">CICIDS2017 results</h2>
+      </div>
+      <p class="section-lead">The Canadian Institute for Cybersecurity dataset is the academic benchmark standard for NIDS evaluation. 1,280 real PCF detections. Reproducible.</p>
+    </div>
+
+    <div class="bench-layout">
+      <div class="bench-terminal">
+        <div class="bench-term-header">
+          <div class="t-dot t-dot-r"></div>
+          <div class="t-dot t-dot-y"></div>
+          <div class="t-dot t-dot-g"></div>
+          <span class="bench-term-title">pcf-benchmark &nbsp;/&nbsp; cicids2017 &nbsp;/&nbsp; is_real_data=true</span>
+        </div>
+        <div class="bench-term-body">
+          <div class="bt-row bt-head">
+            <span>attack_class</span>
+            <span>f1</span>
+            <span>prec</span>
+            <span>rec</span>
+            <span class="bt-bar-cell">f1_bar</span>
+            <span>n</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-attack">BruteForce</span>
+            <span class="bt-f1">0.969</span>
+            <span class="bt-num">0.940</span>
+            <span class="bt-num">1.000</span>
+            <div class="bt-bar-cell">
+              <div class="bt-bar"><div class="bt-fill" style="width:96.9%"></div></div>
+            </div>
+            <span class="bt-count">300</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-attack">DDoS</span>
+            <span class="bt-f1">0.949</span>
+            <span class="bt-num">0.906</span>
+            <span class="bt-num">0.997</span>
+            <div class="bt-bar-cell">
+              <div class="bt-bar"><div class="bt-fill" style="width:94.9%"></div></div>
+            </div>
+            <span class="bt-count">287</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-attack">DoS</span>
+            <span class="bt-f1">0.910</span>
+            <span class="bt-num">0.879</span>
+            <span class="bt-num">0.943</span>
+            <div class="bt-bar-cell">
+              <div class="bt-bar"><div class="bt-fill" style="width:91.0%"></div></div>
+            </div>
+            <span class="bt-count">285</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-attack">PortScan</span>
+            <span class="bt-f1">0.932</span>
+            <span class="bt-num">0.872</span>
+            <span class="bt-num">1.000</span>
+            <div class="bt-bar-cell">
+              <div class="bt-bar"><div class="bt-fill" style="width:93.2%"></div></div>
+            </div>
+            <span class="bt-count">300</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-attack">WebAttack</span>
+            <span class="bt-f1">0.885</span>
+            <span class="bt-num">0.800</span>
+            <span class="bt-num">0.991</span>
+            <div class="bt-bar-cell">
+              <div class="bt-bar"><div class="bt-fill" style="width:88.5%"></div></div>
+            </div>
+            <span class="bt-count">108</span>
+          </div>
+          <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+            <span class="t-comment mono" style="font-size:0.65rem"># source: cicids2017 | detections: 1280 | latency: ~1.5ms | hardware: cpu_only</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bench-aside">
+        <div class="bench-aside-stat">
+          <div class="bench-aside-val">~1.5ms</div>
+          <div class="bench-aside-label">Per-trace decision latency</div>
+          <div class="bench-aside-sub">cpu_only: true</div>
+        </div>
+        <div class="bench-aside-stat">
+          <div class="bench-aside-val">1,280</div>
+          <div class="bench-aside-label">Real detections in benchmark</div>
+          <div class="bench-aside-sub">is_real_data: true</div>
+        </div>
+        <div class="bench-aside-stat">
+          <div class="bench-aside-val">0</div>
+          <div class="bench-aside-label">Attack training samples</div>
+          <div class="bench-aside-sub">detection_layer: structural</div>
+        </div>
+        <div class="bench-aside-stat">
+          <div class="bench-aside-val" style="font-size:1rem">U.S. 63/978,633</div>
+          <div class="bench-aside-label">Provisional patent filing</div>
+          <div class="bench-aside-sub">status: patent_pending</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-inner">
+    <div class="section-top">
+      <div>
+        <div class="section-kicker">// how_it_works</div>
+        <h2 class="section-title">PCF detection pipeline</h2>
+      </div>
+      <p class="section-lead">Four deterministic steps. No black box. Every detection is traceable back to structural measurements in the PSV — auditable by design.</p>
+    </div>
+
+    <div class="how-grid">
+      <div class="step">
+        <span class="step-num">step_01 // tokenize</span>
+        <h3 class="step-title">Network events to behavioral tokens</h3>
+        <p class="step-body">Raw packet flows mapped to semantic tokens: AUTH_BRUTE, NET_FLOOD, NET_PORTSCAN, NET_SLOW_CONN, NET_LARGE_SEND, NET_CONNECT, SYS_READ — capturing behavioral fingerprints.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">step_02 // vectorize</span>
+        <h3 class="step-title">Compute Positional Signature Vector</h3>
+        <p class="step-body">PCF structural analysis applied over token co-occurrence at position offset k. (Patent Pending)</p>
+      </div>
+      <div class="step">
+        <span class="step-num">step_03 // classify</span>
+        <h3 class="step-title">Dual-signal structural comparison</h3>
+        <p class="step-body">Signal A: PSV cosine distance vs benign centroid exceeds 90th percentile threshold. Signal B: attack-token fraction exceeds 99th percentile. OR logic — either fires an alert.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">step_04 // alert</span>
+        <h3 class="step-title">Structured alert with provenance</h3>
+        <p class="step-body">Alert includes token sequence, PSV vector, cosine distance, signal triggers, and latency. No black-box score — full structural provenance included in every detection event.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-inner">
+    <div class="cta-terminal">
+      <div class="cta-term-bar">
+        <div class="t-dot t-dot-r"></div>
+        <div class="t-dot t-dot-y"></div>
+        <div class="t-dot t-dot-g"></div>
+        <span class="bench-term-title" style="color:var(--amber)">enterprise evaluation</span>
+      </div>
+      <div class="cta-term-body mono" style="font-size:0.72rem; line-height:1.9;">
+        <span class="t-line"><span class="t-dim">$</span> laminar --mode=evaluate \</span>
+        <span class="t-line t-indent" style="padding-left:16px">&nbsp;&nbsp;--environment=production \</span>
+        <span class="t-line t-indent" style="padding-left:16px">&nbsp;&nbsp;--interface=eth0 \</span>
+        <span class="t-line t-indent" style="padding-left:16px">&nbsp;&nbsp;--report=full_provenance</span>
+        <span class="t-line">&nbsp;</span>
+        <span class="t-line"><span class="t-ok">Connecting to your network tap...</span></span>
+        <span class="t-line"><span class="t-ok">PCF calibration complete in 0.3s</span></span>
+        <span class="t-line"><span class="t-ok">Laminar ready.</span> Waiting for traffic.</span>
+        <span class="t-line"><span class="t-cursor"></span></span>
+      </div>
+    </div>
+
+    <div class="cta-right-content">
+      <h2 class="cta-title">Deploy in your<br>environment.<br><em>See it work.</em></h2>
+      <p class="cta-lead">We work directly with security engineering teams. Bring your PCAP. Bring your SIEM. We'll show you structural detection against your own traffic.</p>
+      <a href="mailto:contact@astrognosy.ai" class="btn-amber" style="text-align:center">Request Early Access</a>
+      <p class="cta-note">// patent-pending &nbsp;·&nbsp; u.s. provisional 63/978,633<br>// astrognosy_ai &nbsp;·&nbsp; pacific_platform &nbsp;·&nbsp; laminar_v1</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-brand mono"><strong>astrognosy_ai</strong> / pacific / <strong>laminar</strong></span>
+    <ul class="footer-links">
+      <li><a href="#">--product</a></li>
+      <li><a href="#">--technology</a></li>
+      <li><a href="#">--benchmarks</a></li>
+      <li><a href="#">--contact</a></li>
+    </ul>
+    <span class="footer-copy mono">© 2026 astrognosy ai. patent-pending pcf technology.</span>
+  </div>
+</footer>
+
+</body>
+</html>
