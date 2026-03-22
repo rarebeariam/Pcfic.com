@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stratum — Industrial Anomaly Detection Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #3b82f6; }
+  .tagline {
+    font-size: 12px;
+    color: #555;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .meta {
+    font-size: 11px;
+    color: #444;
+    margin-bottom: 32px;
+  }
+  .meta a { color: #3b82f6; text-decoration: none; }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    gap: 24px;
+    padding: 14px 18px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-value { font-size: 16px; color: #fff; font-weight: 600; }
+  .stat-value.green { color: #22c55e; }
+  .stat-value.blue { color: #3b82f6; }
+  .stat-value.yellow { color: #eab308; }
+  .stat-value.red { color: #ef4444; }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .panel-title {
+    font-size: 11px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #555;
+  }
+  .dot.green { background: #22c55e; }
+  .dot.blue { background: #3b82f6; }
+  .dot.yellow { background: #eab308; }
+
+  /* Calibration panel */
+  .cal-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 12px;
+  }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-key { color: #666; }
+  .cal-val { color: #e0e0e0; font-weight: 500; }
+
+  /* Detection stream */
+  .stream {
+    height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+  }
+  .stream::-webkit-scrollbar { width: 4px; }
+  .stream::-webkit-scrollbar-track { background: #0a0a0a; }
+  .stream::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+  .event {
+    display: grid;
+    grid-template-columns: 60px 80px 100px 90px 70px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .verdict-badge {
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .verdict-badge.fault { background: #450a0a; color: #ef4444; border: 1px solid #7f1d1d; }
+  .verdict-badge.normal { background: #052e16; color: #22c55e; border: 1px solid #14532d; }
+
+  .signal-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .signal-dot.on { background: #ef4444; }
+  .signal-dot.off { background: #1f2937; border: 1px solid #374151; }
+  /* Signal C uses yellow to indicate kurtosis */
+  .signal-dot.on-c { background: #eab308; }
+
+  .event-time { color: #444; font-size: 10px; }
+  .event-type { color: #9ca3af; }
+  .event-score { color: #6b7280; font-size: 10px; }
+  .event-lat { color: #374151; font-size: 10px; text-align: right; }
+  .signals-cell { display: flex; gap: 4px; align-items: center; }
+
+  /* Fault waves panel */
+  .waves { display: flex; flex-direction: column; gap: 6px; }
+  .wave-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    transition: all 0.3s ease;
+  }
+  .wave-row.active { border-color: #3b82f6; background: #0c1220; }
+  .wave-row.detected { border-color: #1f2d1f; background: #0a120a; }
+  .wave-name { width: 100px; color: #9ca3af; font-weight: 600; }
+  .wave-f1 { width: 60px; color: #555; font-size: 11px; }
+  .wave-status { margin-left: auto; font-size: 11px; }
+  .wave-status.pending { color: #374151; }
+  .wave-status.running { color: #3b82f6; }
+  .wave-status.hit { color: #22c55e; font-weight: 600; }
+  .wave-status.miss { color: #ef4444; }
+  .progress-bar {
+    height: 3px;
+    background: #1a1a1a;
+    border-radius: 2px;
+    overflow: hidden;
+    flex: 1;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    width: 0%;
+    transition: width 0.1s linear;
+    border-radius: 2px;
+  }
+  .progress-fill.green { background: #22c55e; }
+
+  /* Buttons */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    padding: 9px 18px;
+    border-radius: 5px;
+    border: 1px solid #2d2d2d;
+    background: #161616;
+    color: #e0e0e0;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.3px;
+  }
+  .btn:hover { background: #1f1f1f; border-color: #3b82f6; color: #3b82f6; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary {
+    background: #1d3461;
+    border-color: #3b82f6;
+    color: #93c5fd;
+    font-weight: 600;
+  }
+  .btn.primary:hover { background: #1e40af; color: #bfdbfe; }
+
+  .api-url {
+    font-size: 11px;
+    color: #374151;
+    padding: 8px 12px;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    border-radius: 4px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Benchmark table */
+  .bench-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .bench-table th {
+    text-align: left;
+    color: #4b5563;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-bottom: 1px solid #1a1a1a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  .bench-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #111;
+    color: #9ca3af;
+  }
+  .bench-table td:last-child { text-align: right; }
+  .f1-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .f1-track {
+    flex: 1;
+    height: 4px;
+    background: #1a1a1a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .f1-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+  .f1-fill.high { background: #22c55e; }
+  .f1-num { color: #e0e0e0; font-weight: 600; width: 36px; text-align: right; font-size: 12px; }
+
+  .note {
+    font-size: 11px;
+    color: #374151;
+    margin-top: 16px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: #0d0d0d;
+    border-left: 2px solid #1d3461;
+    border-radius: 0 4px 4px 0;
+  }
+  .note strong { color: #6b7280; }
+
+  /* Sensor legend */
+  .sensor-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-size: 10px;
+    color: #4b5563;
+  }
+  .sensor-tag {
+    padding: 2px 8px;
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    background: #0d0d0d;
+    letter-spacing: 0.3px;
+  }
+
+  /* Loading state */
+  .loading-msg {
+    color: #374151;
+    font-size: 12px;
+    text-align: center;
+    padding: 40px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid #1f2937;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Sim mode badge */
+  .sim-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: #eab308;
+    padding: 3px 8px;
+    border: 1px solid #422006;
+    border-radius: 3px;
+    background: #1c1200;
+    margin-left: auto;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">stra<span>tum</span></div>
+  <div class="tagline">Industrial Anomaly Detection · Live Demo</div>
+</div>
+<div class="meta">
+  Astrognosy AI · PACIFIC Platform · Patent U.S. Provisional 63/978,633 ·
+  <a href="https://pcfic.com">pcfic.com</a>
+</div>
+
+<div class="status-bar">
+  <div class="stat">
+    <div class="stat-label">Overall F1</div>
+    <div class="stat-value blue" id="stat-f1">0.832</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Avg Latency</div>
+    <div class="stat-value green" id="stat-lat">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Detected</div>
+    <div class="stat-value" id="stat-det">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">False Positives</div>
+    <div class="stat-value green" id="stat-fp">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Calibration</div>
+    <div class="stat-value" id="stat-cal">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">GPU Required</div>
+    <div class="stat-value green">NO</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Attack Training</div>
+    <div class="stat-value green">NONE</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn primary" id="btn-run" onclick="runSimulation()">&#9654; Run Simulation</button>
+  <button class="btn" id="btn-reset" onclick="resetDemo()">&#8634; Reset</button>
+  <div class="api-url" id="api-url-display">Simulation mode — Stratum API coming soon</div>
+  <div class="sim-badge">&#9679; SIM</div>
+</div>
+
+<div class="grid">
+  <!-- Detection stream — full width -->
+  <div class="panel" style="grid-column: 1 / -1;">
+    <div class="panel-title">
+      <div class="dot" id="stream-dot"></div>
+      Detection Stream
+      <span style="margin-left:auto;color:#374151;font-size:10px;" id="stream-counter">0 events</span>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 80px 100px 90px 70px 1fr;gap:8px;padding:0 10px 6px;font-size:9px;color:#374151;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #1a1a1a;margin-bottom:6px;">
+      <span>Time</span><span>Verdict</span><span>Fault Type</span><span>Signals</span><span>PCF Score</span><span style="text-align:right;">Latency</span>
+    </div>
+    <div class="stream" id="event-stream">
+      <div class="loading-msg">Press "Run Simulation" to start</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- Fault wave progress -->
+  <div class="panel">
+    <div class="panel-title"><div class="dot blue"></div>Fault Wave Progress</div>
+    <div class="sensor-legend">
+      <span class="sensor-tag">vibration RMS</span>
+      <span class="sensor-tag">kurtosis</span>
+      <span class="sensor-tag">RPM</span>
+      <span class="sensor-tag">temperature</span>
+      <span class="sensor-tag">motor current</span>
+    </div>
+    <div class="waves" id="waves-panel">
+      <div class="wave-row" id="wave-InnerRace">
+        <div class="wave-name">Inner Race</div>
+        <div class="wave-f1">F1 0.911</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-InnerRace"></div></div>
+        <div class="wave-status pending" id="status-InnerRace">PENDING</div>
+      </div>
+      <div class="wave-row" id="wave-OuterRace">
+        <div class="wave-name">Outer Race</div>
+        <div class="wave-f1">F1 0.819</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-OuterRace"></div></div>
+        <div class="wave-status pending" id="status-OuterRace">PENDING</div>
+      </div>
+      <div class="wave-row" id="wave-BallFault">
+        <div class="wave-name">Ball Fault</div>
+        <div class="wave-f1">F1 0.758</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-BallFault"></div></div>
+        <div class="wave-status pending" id="status-BallFault">PENDING</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="panel-title"><div class="dot"></div>Signal Legend</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#555;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="signal-dot on" style="flex-shrink:0;"></span>
+          <span><strong style="color:#6b7280">Signal A</strong> — PSV cosine distance &gt; &theta;<sub>a</sub> (structural deviation)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="signal-dot on" style="flex-shrink:0;"></span>
+          <span><strong style="color:#6b7280">Signal B</strong> — Fault token prevalence &gt; &theta;<sub>b</sub></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="signal-dot on-c" style="flex-shrink:0;"></span>
+          <span><strong style="color:#6b7280">Signal C</strong> — Kurtosis &gt; 95th percentile (early bearing fault)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calibration profile + benchmark -->
+  <div class="panel">
+    <div class="panel-title"><div class="dot yellow"></div>Calibration Profile</div>
+    <div id="cal-panel">
+      <div class="cal-row"><span class="cal-key">Status</span><span class="cal-val" id="cal-status">—</span></div>
+      <div class="cal-row"><span class="cal-key">n_samples</span><span class="cal-val" id="cal-samples">—</span></div>
+      <div class="cal-row"><span class="cal-key">theta_a (Signal A threshold)</span><span class="cal-val" id="cal-theta-a">—</span></div>
+      <div class="cal-row"><span class="cal-key">theta_b (Signal B threshold)</span><span class="cal-val" id="cal-theta-b">—</span></div>
+      <div class="cal-row"><span class="cal-key">kurtosis_threshold (Signal C)</span><span class="cal-val" id="cal-kurtosis">—</span></div>
+      <div class="cal-row"><span class="cal-key">Calibration latency</span><span class="cal-val" id="cal-lat">—</span></div>
+      <div class="cal-row"><span class="cal-key">Fault data used</span><span class="cal-val" style="color:#22c55e">NONE</span></div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="panel-title"><div class="dot blue"></div>CWRU Bearing Benchmark</div>
+      <table class="bench-table">
+        <tr><th>Fault Type</th><th>F1 Score</th></tr>
+        <tr><td>Inner Race</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:91.1%"></div></div><span class="f1-num">0.911</span></div></td></tr>
+        <tr><td>Outer Race</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:81.9%"></div></div><span class="f1-num">0.819</span></div></td></tr>
+        <tr><td>Ball Fault</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill" style="width:75.8%"></div></div><span class="f1-num">0.758</span></div></td></tr>
+        <tr style="border-top:1px solid #222"><td><strong style="color:#e0e0e0">Overall</strong></td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:83.2%"></div></div><span class="f1-num" style="color:#3b82f6">0.832</span></div></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>How Stratum works:</strong> Stratum calibrates on 80 healthy sensor windows — vibration RMS, kurtosis, RPM,
+  temperature, and motor current. No fault samples, no labels, no model retraining required.
+  The PCF engine builds a structural fingerprint of normal machine behavior using Positional Correlation Fields.
+  When a bearing fault develops, three signals fire independently: <strong>Signal A</strong> detects structural
+  deviation in the PSV cosine distance; <strong>Signal B</strong> detects fault token prevalence exceeding the
+  calibrated threshold; <strong>Signal C</strong> detects kurtosis exceeding the 95th percentile — the earliest
+  indicator of bearing fatigue. A fault verdict requires only one signal to fire (three-signal OR).
+  <br><br>
+  <strong>CWRU Bearing Dataset</strong> — Inner Race faults are the strongest signal (F1 0.911) due to sharp
+  kurtosis spikes. Ball faults are the most subtle (F1 0.758) and rely primarily on Signal A structural deviation.
+  <strong>Patent-pending algorithm.</strong> Patent U.S. Provisional No. 63/978,633.
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+let running = false;
+let eventCount = 0;
+
+const WAVES = ['InnerRace', 'OuterRace', 'BallFault'];
+
+// Simulation data — exact numbers from spec
+const SIM_RESULTS = {
+  calibration: {
+    n_samples: 80,
+    theta_a: 0.2341,
+    theta_b: 0.0,
+    kurtosis_threshold: 3.48,
+    latency_ms: 9.8,
+    status: 'calibrated'
+  },
+  detection_waves: [
+    {
+      wave_id: 'InnerRace',
+      fault_type: 'InnerRace',
+      verdict: 'FAULT',
+      confidence: 0.891,
+      pcf_score: 0.712,
+      signal_a: true,
+      signal_b: true,
+      signal_c: true,
+      latency_ms: 1.21
+    },
+    {
+      wave_id: 'OuterRace',
+      fault_type: 'OuterRace',
+      verdict: 'FAULT',
+      confidence: 0.831,
+      pcf_score: 0.634,
+      signal_a: true,
+      signal_b: false,
+      signal_c: true,
+      latency_ms: 1.34
+    },
+    {
+      wave_id: 'BallFault',
+      fault_type: 'BallFault',
+      verdict: 'FAULT',
+      confidence: 0.762,
+      pcf_score: 0.571,
+      signal_a: true,
+      signal_b: false,
+      signal_c: false,
+      latency_ms: 1.47
+    }
+  ],
+  benign_control: {
+    verdict: 'NORMAL',
+    false_positive: false,
+    pcf_score: 0.038
+  }
+};
+
+// ---------------------------------------------------------------------------
+// UI helpers
+// ---------------------------------------------------------------------------
+function resetDemo() {
+  if (running) return;
+  eventCount = 0;
+  document.getElementById('event-stream').innerHTML = '<div class="loading-msg">Press "Run Simulation" to start</div>';
+  document.getElementById('stream-counter').textContent = '0 events';
+  document.getElementById('stream-dot').className = 'dot';
+  document.getElementById('stat-lat').textContent = '—';
+  document.getElementById('stat-lat').className = 'stat-value green';
+  document.getElementById('stat-det').textContent = '—';
+  document.getElementById('stat-det').className = 'stat-value';
+  document.getElementById('stat-fp').textContent = '—';
+  document.getElementById('stat-fp').className = 'stat-value green';
+  document.getElementById('stat-cal').textContent = '—';
+  document.getElementById('stat-cal').className = 'stat-value';
+  document.getElementById('cal-status').textContent = '—';
+  document.getElementById('cal-status').style.color = '';
+  document.getElementById('cal-samples').textContent = '—';
+  document.getElementById('cal-theta-a').textContent = '—';
+  document.getElementById('cal-theta-b').textContent = '—';
+  document.getElementById('cal-kurtosis').textContent = '—';
+  document.getElementById('cal-lat').textContent = '—';
+  WAVES.forEach(function(w) {
+    document.getElementById('wave-' + w).className = 'wave-row';
+    var st = document.getElementById('status-' + w);
+    st.textContent = 'PENDING';
+    st.className = 'wave-status pending';
+    var prog = document.getElementById('prog-' + w);
+    prog.style.width = '0%';
+    prog.className = 'progress-fill';
+  });
+  document.getElementById('btn-run').disabled = false;
+}
+
+function addEvent(ev) {
+  var stream = document.getElementById('event-stream');
+  if (stream.querySelector('.loading-msg')) stream.innerHTML = '';
+
+  eventCount++;
+  document.getElementById('stream-counter').textContent = eventCount + ' event' + (eventCount > 1 ? 's' : '');
+
+  var now = new Date().toISOString().substr(11, 12);
+  var isFault = ev.verdict === 'FAULT';
+
+  // Signal C dot uses yellow class when on
+  var scClass = ev.signal_c ? 'on-c' : 'off';
+
+  var el = document.createElement('div');
+  el.className = 'event';
+  el.innerHTML =
+    '<span class="event-time">' + now + '</span>' +
+    '<span class="verdict-badge ' + (isFault ? 'fault' : 'normal') + '">' + ev.verdict + '</span>' +
+    '<span class="event-type">' + (ev.fault_type || 'Normal') + '</span>' +
+    '<div class="signals-cell">' +
+      '<span class="signal-dot ' + (ev.signal_a ? 'on' : 'off') + '" title="Signal A: PSV deviation"></span>' +
+      '<span class="signal-dot ' + (ev.signal_b ? 'on' : 'off') + '" title="Signal B: fault token prevalence"></span>' +
+      '<span class="signal-dot ' + scClass + '" title="Signal C: kurtosis 95th pct"></span>' +
+      '<span style="font-size:9px;color:#374151;margin-left:2px;">A B C</span>' +
+    '</div>' +
+    '<span class="event-score">' + (ev.pcf_score || 0).toFixed(4) + '</span>' +
+    '<span class="event-lat">' + ((ev.latency_ms || 0).toFixed(2)) + 'ms</span>';
+  stream.insertBefore(el, stream.firstChild);
+}
+
+function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+async function animateWave(waveId, result) {
+  var row = document.getElementById('wave-' + waveId);
+  var statusEl = document.getElementById('status-' + waveId);
+  var progEl = document.getElementById('prog-' + waveId);
+
+  row.className = 'wave-row active';
+  statusEl.textContent = 'SCANNING';
+  statusEl.className = 'wave-status running';
+
+  // Animate progress bar 0 → 100% over ~400ms in 5% steps (20 × 20ms = 400ms)
+  for (var i = 0; i <= 100; i += 5) {
+    progEl.style.width = i + '%';
+    await sleep(20);
+  }
+
+  var hit = result.verdict === 'FAULT';
+  row.className = 'wave-row detected';
+  progEl.className = 'progress-fill green';
+  progEl.style.width = '100%';
+  statusEl.textContent = hit ? '&#10003; DETECTED' : '&#10007; MISSED';
+  statusEl.innerHTML = hit ? '&#10003; DETECTED' : '&#10007; MISSED';
+  statusEl.className = 'wave-status ' + (hit ? 'hit' : 'miss');
+
+  addEvent(result);
+}
+
+// ---------------------------------------------------------------------------
+// Main simulation runner
+// ---------------------------------------------------------------------------
+async function runSimulation() {
+  if (running) return;
+  running = true;
+  document.getElementById('btn-run').disabled = true;
+
+  // Reset visual state (but keep running=true so resetDemo() bails early)
+  eventCount = 0;
+  document.getElementById('event-stream').innerHTML = '<div class="loading-msg">Press "Run Simulation" to start</div>';
+  document.getElementById('stream-counter').textContent = '0 events';
+  document.getElementById('cal-status').textContent = '—';
+  document.getElementById('cal-status').style.color = '';
+  document.getElementById('cal-samples').textContent = '—';
+  document.getElementById('cal-theta-a').textContent = '—';
+  document.getElementById('cal-theta-b').textContent = '—';
+  document.getElementById('cal-kurtosis').textContent = '—';
+  document.getElementById('cal-lat').textContent = '—';
+  WAVES.forEach(function(w) {
+    document.getElementById('wave-' + w).className = 'wave-row';
+    var st = document.getElementById('status-' + w);
+    st.textContent = 'PENDING';
+    st.className = 'wave-status pending';
+    var prog = document.getElementById('prog-' + w);
+    prog.style.width = '0%';
+    prog.className = 'progress-fill';
+  });
+
+  // Step 1 — show calibrating state
+  document.getElementById('stream-dot').className = 'dot green';
+  document.getElementById('stat-cal').textContent = 'Calibrating...';
+  document.getElementById('stat-cal').className = 'stat-value yellow';
+  document.getElementById('event-stream').innerHTML = '<div class="loading-msg"><span class="spinner"></span>Calibrating on 80 healthy sensor windows...</div>';
+
+  await sleep(600);
+
+  // Step 2 — fill calibration panel
+  var cal = SIM_RESULTS.calibration;
+  document.getElementById('cal-status').innerHTML = '&#10003; CALIBRATED';
+  document.getElementById('cal-status').style.color = '#22c55e';
+  document.getElementById('cal-samples').textContent = cal.n_samples + ' healthy windows';
+  document.getElementById('cal-theta-a').textContent = cal.theta_a.toFixed(4);
+  document.getElementById('cal-theta-b').textContent = cal.theta_b.toFixed(4);
+  document.getElementById('cal-kurtosis').textContent = cal.kurtosis_threshold.toFixed(2);
+  document.getElementById('cal-lat').textContent = cal.latency_ms.toFixed(1) + 'ms';
+  document.getElementById('stat-cal').innerHTML = '&#10003; Ready';
+  document.getElementById('stat-cal').className = 'stat-value green';
+
+  document.getElementById('event-stream').innerHTML = '';
+
+  await sleep(400);
+
+  // Step 3 — run each fault wave
+  var totalLat = 0;
+  var detected = 0;
+  for (var i = 0; i < SIM_RESULTS.detection_waves.length; i++) {
+    var wave = SIM_RESULTS.detection_waves[i];
+    await animateWave(wave.wave_id, wave);
+    if (wave.verdict === 'FAULT') detected++;
+    totalLat += wave.latency_ms;
+    await sleep(300);
+  }
+
+  // Step 4 — benign control check
+  await sleep(200);
+  var bc = SIM_RESULTS.benign_control;
+  addEvent({
+    verdict: bc.verdict,
+    fault_type: 'NormalOperation',
+    signal_a: false,
+    signal_b: false,
+    signal_c: false,
+    pcf_score: bc.pcf_score,
+    latency_ms: 1.08
+  });
+
+  // Step 5 — update summary stats
+  var avgLat = totalLat / SIM_RESULTS.detection_waves.length;
+  document.getElementById('stat-lat').textContent = avgLat.toFixed(2) + 'ms';
+  document.getElementById('stat-lat').className = 'stat-value green';
+  document.getElementById('stat-det').textContent = detected + '/' + SIM_RESULTS.detection_waves.length;
+  document.getElementById('stat-det').className = 'stat-value ' + (detected === SIM_RESULTS.detection_waves.length ? 'green' : 'yellow');
+  document.getElementById('stat-fp').textContent = bc.false_positive ? '1' : '0';
+  document.getElementById('stat-fp').className = 'stat-value ' + (bc.false_positive ? 'red' : 'green');
+
+  document.getElementById('stream-dot').className = 'dot green';
+  document.getElementById('btn-run').disabled = false;
+  running = false;
+}
+</script>
+</body>
+</html>
