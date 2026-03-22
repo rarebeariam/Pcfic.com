@@ -363,7 +363,7 @@
 <div class="controls">
   <button class="btn primary" id="btn-run" onclick="runDemo()">▶ Run Live Demo</button>
   <button class="btn" id="btn-reset" onclick="resetDemo()">↺ Reset</button>
-  <div class="api-url" id="api-url-display">Configure API URL below to connect to live endpoint</div>
+  <div class="api-url" id="api-url-display">https://laminar-api-production-b88f.up.railway.app/v1/demo</div>
 </div>
 
 <div class="grid">
@@ -452,6 +452,7 @@
     <input
       type="text"
       id="api-base-url"
+      value="https://laminar-api-production-b88f.up.railway.app"
       placeholder="https://your-laminar.up.railway.app"
       style="flex:1;padding:8px 12px;background:#0d0d0d;border:1px solid #2d2d2d;border-radius:4px;color:#e0e0e0;font-family:inherit;font-size:12px;min-width:200px;"
       oninput="updateApiUrl()"
@@ -478,7 +479,7 @@
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
-let apiBase = '';
+let apiBase = 'https://laminar-api-production-b88f.up.railway.app';
 let running = false;
 let eventCount = 0;
 
