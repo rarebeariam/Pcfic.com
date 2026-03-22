@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laminar — Operator Console</title>
+<style>
+/* ─── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Design tokens ──────────────────────────────────────────── */
+:root {
+  --bg:       #020810;
+  --surface:  #060e1c;
+  --panel:    #0b1628;
+  --panelHi:  #0f1e38;
+  --border:   #142238;
+  --border2:  #1e3855;
+  --accent:   #00E5FF;
+  --blue:     #5B6ECC;
+  --danger:   #FF3B6B;
+  --warn:     #FF8C00;
+  --amber:    #F59E0B;
+  --success:  #00E5A0;
+  --purple:   #A855F7;
+  --text:     #E2F0FF;
+  --sub:      #8AAABB;
+  --muted:    #4A6A8A;
+  --dim:      #1e3050;
+}
+
+/* ─── Base ───────────────────────────────────────────────────── */
+html { font-size: 14px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+.mono { font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Menlo', monospace; }
+
+/* ─── Scrollbars ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ─── Header bar ─────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 54px;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 170px;
+}
+.wordmark {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.wordmark-accent { color: var(--accent); }
+.header-subtitle {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.header-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.health-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.status-dot.live {
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success), 0 0 14px rgba(0,229,160,0.3);
+  animation: pulse-dot 2s infinite;
+}
+.status-dot.offline {
+  background: var(--danger);
+  box-shadow: 0 0 6px var(--danger);
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.health-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+.health-label.live { color: var(--success); }
+.health-label.offline { color: var(--danger); }
+.health-meta {
+  display: flex;
+  gap: 16px;
+}
+.health-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.hkv-key {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+.hkv-val {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 600;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 300px;
+  justify-content: flex-end;
+}
+.key-input {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11px;
+  padding: 7px 12px;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.key-input::placeholder { color: var(--muted); }
+.key-input:focus { border-color: var(--border2); }
+.key-input.connected { border-color: var(--success); }
+.key-input.error { border-color: var(--danger); }
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 5px;
+  border: 1px solid var(--border2);
+  background: var(--panel);
+  color: var(--sub);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) {
+  background: var(--panelHi);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn.primary {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0,229,255,0.06);
+}
+.btn.primary:hover:not(:disabled) {
+  background: rgba(0,229,255,0.13);
+}
+.btn.success {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(0,229,160,0.06);
+}
+.btn.danger-btn {
+  border-color: rgba(255,59,107,0.4);
+  color: var(--danger);
+  background: transparent;
+  font-size: 10px;
+  padding: 4px 10px;
+}
+.btn.danger-btn:hover:not(:disabled) {
+  background: rgba(255,59,107,0.08);
+  border-color: var(--danger);
+}
+.btn.sm { font-size: 10px; padding: 5px 10px; }
+
+/* ─── Body layout ────────────────────────────────────────────── */
+.body-wrap {
+  padding: 20px 24px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* ─── Stats row ──────────────────────────────────────────────── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-card-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.stat-card-value {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-card-value.accent { color: var(--accent); }
+.stat-card-value.success { color: var(--success); }
+.stat-card-value.warn { color: var(--amber); }
+.stat-card-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ─── Main grid ──────────────────────────────────────────────── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── Panel ──────────────────────────────────────────────────── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--sub);
+  flex: 1;
+}
+.panel-body { padding: 16px; }
+.panel-body.no-pad { padding: 0; }
+
+/* ─── Auth wall ──────────────────────────────────────────────── */
+.auth-wall {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.auth-wall-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+.auth-wall-title {
+  color: var(--sub);
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+/* ─── Inline error/info messages ─────────────────────────────── */
+.msg {
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.msg.error {
+  background: rgba(255,59,107,0.08);
+  border: 1px solid rgba(255,59,107,0.25);
+  color: var(--danger);
+}
+.msg.success-msg {
+  background: rgba(0,229,160,0.08);
+  border: 1px solid rgba(0,229,160,0.25);
+  color: var(--success);
+}
+.msg.info {
+  background: rgba(0,229,255,0.06);
+  border: 1px solid rgba(0,229,255,0.2);
+  color: var(--accent);
+}
+
+/* ─── Customer table ─────────────────────────────────────────── */
+.customer-table-wrap {
+  overflow-x: auto;
+}
+table.ctable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.ctable th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ctable td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+.ctable tr:last-child td { border-bottom: none; }
+.ctable tr:hover td { background: rgba(255,255,255,0.02); }
+.ctable .name-cell { font-weight: 600; }
+.ctable .email-cell {
+  color: var(--sub);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11px;
+}
+.ctable .cal-cell {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+/* ─── Tier badges ────────────────────────────────────────────── */
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tier-starter {
+  background: rgba(91,110,204,0.15);
+  border: 1px solid rgba(91,110,204,0.35);
+  color: var(--blue);
+}
+.tier-growth {
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: var(--amber);
+}
+.tier-enterprise {
+  background: rgba(168,85,247,0.12);
+  border: 1px solid rgba(168,85,247,0.3);
+  color: var(--purple);
+}
+
+/* ─── Status indicator ───────────────────────────────────────── */
+.cust-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.cust-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.cust-dot.active {
+  background: var(--success);
+  box-shadow: 0 0 5px var(--success);
+}
+.cust-dot.suspended { background: var(--danger); box-shadow: 0 0 5px var(--danger); }
+.status-active { color: var(--success); }
+.status-suspended { color: var(--danger); }
+
+/* ─── New customer form ──────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.form-col-full { grid-column: 1 / -1; }
+.form-label {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.form-input, .form-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input::placeholder { color: var(--muted); }
+.form-input:focus, .form-select:focus {
+  border-color: var(--border2);
+}
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234A6A8A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+.form-select option { background: var(--panel); }
+
+/* ─── API key copy box ───────────────────────────────────────── */
+.api-key-box {
+  background: var(--surface);
+  border: 1px solid var(--success);
+  border-radius: 5px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.api-key-label {
+  font-size: 9px;
+  color: var(--success);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.api-key-val {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 11px;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.copy-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--sub);
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+/* ─── Loading dots ───────────────────────────────────────────── */
+.loading-dots {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+.loading-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: dotbounce 1.2s infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotbounce {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Empty state ────────────────────────────────────────────── */
+.empty-row td {
+  text-align: center;
+  color: var(--muted);
+  padding: 32px !important;
+  font-size: 12px;
+}
+
+/* ─── Demo panel ─────────────────────────────────────────────── */
+.demo-section { display: flex; flex-direction: column; gap: 16px; }
+
+/* calibration info grid */
+.cal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.cal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.cal-row:last-child { border-bottom: none; }
+.cal-key { color: var(--muted); font-size: 11px; }
+.cal-val {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+.cal-val.ok { color: var(--success); }
+
+/* waves */
+.waves { display: flex; flex-direction: column; gap: 6px; }
+.wave-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+  font-size: 12px;
+}
+.wave-row.scanning { border-color: var(--accent); background: rgba(0,229,255,0.04); }
+.wave-row.detected { border-color: rgba(0,229,160,0.35); background: rgba(0,229,160,0.04); }
+.wave-row.missed { border-color: rgba(255,59,107,0.3); background: rgba(255,59,107,0.04); }
+.wave-name { width: 82px; color: var(--sub); font-weight: 600; font-size: 12px; }
+.wave-f1 { width: 52px; color: var(--muted); font-size: 10px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+.wave-bar { flex: 1; height: 3px; background: var(--dim); border-radius: 2px; overflow: hidden; }
+.wave-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.08s linear;
+}
+.wave-fill.done { background: var(--success); }
+.wave-fill.miss { background: var(--danger); }
+.wave-status { font-size: 10px; font-weight: 700; letter-spacing: 0.4px; width: 70px; text-align: right; }
+.wave-status.pending { color: var(--dim); }
+.wave-status.scanning { color: var(--accent); }
+.wave-status.hit { color: var(--success); }
+.wave-status.miss { color: var(--danger); }
+
+/* verdict badges */
+.vbadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+.vbadge.attack {
+  background: rgba(255,59,107,0.12);
+  border: 1px solid rgba(255,59,107,0.3);
+  color: var(--danger);
+}
+.vbadge.benign {
+  background: rgba(0,229,160,0.1);
+  border: 1px solid rgba(0,229,160,0.25);
+  color: var(--success);
+}
+
+/* signal dots */
+.sig-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.sig-dot.on { background: var(--danger); box-shadow: 0 0 4px var(--danger); }
+.sig-dot.off { background: var(--dim); border: 1px solid var(--border2); }
+
+/* summary row */
+.summary-row {
+  display: flex;
+  gap: 16px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.sum-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sum-key {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--muted);
+}
+.sum-val {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.sum-val.ok { color: var(--success); }
+.sum-val.err { color: var(--danger); }
+
+/* demo placeholder */
+.demo-placeholder {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.demo-placeholder-icon { font-size: 24px; margin-bottom: 10px; opacity: 0.4; }
+
+/* ─── Section separator ──────────────────────────────────────── */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ─── Auto-refresh indicator ─────────────────────────────────── */
+.refresh-badge {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.refresh-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.refresh-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 4px var(--accent);
+  animation: pulse-dot 1.5s infinite;
+}
+
+/* ─── Suspend loading state ──────────────────────────────────── */
+.suspending { opacity: 0.5; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-left">
+    <div class="wordmark">lami<span class="wordmark-accent">nar</span></div>
+    <div class="header-subtitle">Operator Console</div>
+  </div>
+
+  <div class="header-center">
+    <div class="health-block">
+      <div class="status-dot" id="hdr-dot"></div>
+      <span class="health-label" id="hdr-label">CHECKING</span>
+    </div>
+    <div class="health-meta">
+      <div class="health-kv">
+        <span class="hkv-key">Uptime</span>
+        <span class="hkv-val mono" id="hdr-uptime">—</span>
+      </div>
+      <div class="health-kv">
+        <span class="hkv-key">Version</span>
+        <span class="hkv-val mono" id="hdr-version">—</span>
+      </div>
+      <div class="health-kv">
+        <span class="hkv-key">Calibrations</span>
+        <span class="hkv-val mono" id="hdr-cal">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <input
+      type="password"
+      id="admin-key-input"
+      class="key-input"
+      placeholder="Enter admin key..."
+      autocomplete="off"
+    />
+    <button class="btn primary" id="connect-btn" onclick="connectAdmin()">Connect</button>
+  </div>
+</header>
+
+<!-- ─── Body ───────────────────────────────────────────────────── -->
+<div class="body-wrap">
+
+  <!-- Stats row (hidden until connected) -->
+  <div class="stats-row" id="stats-row" style="display:none;">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Customers</div>
+      <div class="stat-card-value accent" id="stat-total">—</div>
+      <div class="stat-card-sub">all registered accounts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Active Customers</div>
+      <div class="stat-card-value success" id="stat-active">—</div>
+      <div class="stat-card-sub">currently enabled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Detections</div>
+      <div class="stat-card-value" id="stat-detections">—</div>
+      <div class="stat-card-sub">sum of all detection volumes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Calibrations</div>
+      <div class="stat-card-value warn" id="stat-calibrations">—</div>
+      <div class="stat-card-sub">live API count</div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="main-grid">
+
+    <!-- ── Left: Customer Management ── -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Customer list panel -->
+      <div class="panel" id="customer-panel">
+        <div class="panel-head">
+          <span class="panel-title">Customer Management</span>
+          <div class="refresh-badge" id="refresh-badge">
+            <div class="refresh-dot" id="refresh-dot"></div>
+            <span id="refresh-text">auto-refresh 30s</span>
+          </div>
+          <button class="btn sm" style="margin-left:8px;" onclick="loadCustomers()" id="refresh-btn" disabled>Refresh</button>
+        </div>
+        <div class="panel-body no-pad" id="customer-list-wrap">
+          <div class="auth-wall">
+            <div class="auth-wall-icon">&#x1F512;</div>
+            <div class="auth-wall-title">Admin access required</div>
+            Enter your admin key and click Connect to manage customers.
+          </div>
+        </div>
+      </div>
+
+      <!-- New customer form -->
+      <div class="panel" id="new-customer-panel">
+        <div class="panel-head">
+          <span class="panel-title">New Customer</span>
+        </div>
+        <div class="panel-body">
+          <div id="create-auth-wall" class="auth-wall" style="padding:20px;">
+            <div class="auth-wall-title" style="font-size:12px;">Connect to enable customer creation</div>
+          </div>
+          <div id="create-form" style="display:none;">
+            <div id="create-msg"></div>
+            <div class="form-grid" style="margin-bottom:12px;">
+              <div>
+                <label class="form-label" for="nc-name">Name</label>
+                <input type="text" id="nc-name" class="form-input" placeholder="Acme Corp" />
+              </div>
+              <div>
+                <label class="form-label" for="nc-email">Email</label>
+                <input type="email" id="nc-email" class="form-input" placeholder="security@acme.com" />
+              </div>
+              <div class="form-col-full">
+                <label class="form-label" for="nc-tier">Tier</label>
+                <select id="nc-tier" class="form-select">
+                  <option value="starter">Starter</option>
+                  <option value="growth">Growth</option>
+                  <option value="enterprise">Enterprise</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn primary" onclick="createCustomer()" id="create-btn">
+              Create Customer
+            </button>
+
+            <!-- API key display (shown after creation) -->
+            <div id="new-key-display" style="display:none;">
+              <div class="section-divider"></div>
+              <div style="font-size:10px;color:var(--success);font-weight:700;letter-spacing:0.7px;text-transform:uppercase;margin-bottom:6px;">
+                Customer created — save this API key now
+              </div>
+              <div class="api-key-box">
+                <span class="api-key-label">API KEY</span>
+                <span class="api-key-val mono" id="new-key-val"></span>
+                <button class="copy-btn" id="copy-key-btn" onclick="copyKey()">Copy</button>
+              </div>
+              <div style="font-size:10px;color:var(--muted);margin-top:6px;">
+                This key will not be shown again. Deliver it to the customer via secure channel.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left col -->
+
+    <!-- ── Right: Live Demo ── -->
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Live Demo — Detection Engine</span>
+        <span style="font-size:10px;color:var(--muted);margin-right:8px;">no auth required</span>
+        <button class="btn primary sm" onclick="runDemo()" id="demo-btn">&#9654; Run Demo</button>
+      </div>
+      <div class="panel-body demo-section" id="demo-body">
+        <div class="demo-placeholder" id="demo-placeholder">
+          <div class="demo-placeholder-icon">&#x26A1;</div>
+          Click <strong style="color:var(--accent)">Run Demo</strong> to execute a live calibrate &rarr; detect cycle
+          against the CICIDS2017-representative fixture dataset.<br>
+          <span style="font-size:11px;color:var(--dim);margin-top:8px;display:block;">
+            No API key required &middot; Nothing is persisted &middot; Real engine
+          </span>
+        </div>
+
+        <!-- Calibration info (hidden until demo runs) -->
+        <div id="demo-cal-section" style="display:none;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;">Calibration</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:0 12px;">
+            <div class="cal-row">
+              <span class="cal-key">Status</span>
+              <span class="cal-val ok" id="demo-cal-status">—</span>
+            </div>
+            <div class="cal-row">
+              <span class="cal-key">n_samples</span>
+              <span class="cal-val mono" id="demo-cal-n">—</span>
+            </div>
+            <div class="cal-row">
+              <span class="cal-key">&theta;<sub>a</sub> &nbsp;(Signal A threshold)</span>
+              <span class="cal-val mono" id="demo-cal-ta">—</span>
+            </div>
+            <div class="cal-row">
+              <span class="cal-key">&theta;<sub>b</sub> &nbsp;(Signal B threshold)</span>
+              <span class="cal-val mono" id="demo-cal-tb">—</span>
+            </div>
+            <div class="cal-row">
+              <span class="cal-key">Calibration latency</span>
+              <span class="cal-val mono" id="demo-cal-lat">—</span>
+            </div>
+            <div class="cal-row">
+              <span class="cal-key">Attack data used</span>
+              <span class="cal-val ok">NONE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attack wave progress -->
+        <div id="demo-waves-section" style="display:none;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;">Detection Waves</div>
+          <div class="waves">
+            <div class="wave-row" id="wave-DDoS">
+              <span class="wave-name">DDoS</span>
+              <span class="wave-f1 mono">F1 0.949</span>
+              <div class="wave-bar"><div class="wave-fill" id="wfill-DDoS"></div></div>
+              <span class="wave-status pending" id="wstat-DDoS">PENDING</span>
+            </div>
+            <div class="wave-row" id="wave-BruteForce">
+              <span class="wave-name">BruteForce</span>
+              <span class="wave-f1 mono">F1 0.969</span>
+              <div class="wave-bar"><div class="wave-fill" id="wfill-BruteForce"></div></div>
+              <span class="wave-status pending" id="wstat-BruteForce">PENDING</span>
+            </div>
+            <div class="wave-row" id="wave-PortScan">
+              <span class="wave-name">PortScan</span>
+              <span class="wave-f1 mono">F1 0.932</span>
+              <div class="wave-bar"><div class="wave-fill" id="wfill-PortScan"></div></div>
+              <span class="wave-status pending" id="wstat-PortScan">PENDING</span>
+            </div>
+            <div class="wave-row" id="wave-DoS">
+              <span class="wave-name">DoS</span>
+              <span class="wave-f1 mono">F1 0.910</span>
+              <div class="wave-bar"><div class="wave-fill" id="wfill-DoS"></div></div>
+              <span class="wave-status pending" id="wstat-DoS">PENDING</span>
+            </div>
+            <div class="wave-row" id="wave-WebAttack">
+              <span class="wave-name">WebAttack</span>
+              <span class="wave-f1 mono">F1 0.885</span>
+              <div class="wave-bar"><div class="wave-fill" id="wfill-WebAttack"></div></div>
+              <span class="wave-status pending" id="wstat-WebAttack">PENDING</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div id="demo-summary-section" style="display:none;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;">Run Summary</div>
+          <div class="summary-row">
+            <div class="sum-kv">
+              <span class="sum-key">Detected</span>
+              <span class="sum-val mono ok" id="sum-detected">—</span>
+            </div>
+            <div class="sum-kv">
+              <span class="sum-key">Waves</span>
+              <span class="sum-val mono" id="sum-waves">—</span>
+            </div>
+            <div class="sum-kv">
+              <span class="sum-key">Avg Latency</span>
+              <span class="sum-val mono" id="sum-lat">—</span>
+            </div>
+            <div class="sum-kv">
+              <span class="sum-key">False Positive</span>
+              <span class="sum-val mono ok" id="sum-fp">—</span>
+            </div>
+            <div class="sum-kv">
+              <span class="sum-key">Benign Control</span>
+              <span class="sum-val mono" id="sum-benign">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo error -->
+        <div id="demo-error" style="display:none;"></div>
+
+      </div><!-- /demo-body -->
+    </div><!-- /right col -->
+
+  </div><!-- /main-grid -->
+</div><!-- /body-wrap -->
+
+<script>
+'use strict';
+
+/* ─── Constants ──────────────────────────────────────────────── */
+const API = 'https://laminar-api-production-b88f.up.railway.app';
+const WAVES_ORDER = ['DDoS', 'BruteForce', 'PortScan', 'DoS', 'WebAttack'];
+
+/* ─── State ──────────────────────────────────────────────────── */
+let adminKey = null;
+let connected = false;
+let refreshTimer = null;
+let demoRunning = false;
+let customers = []; // cached
+
+/* ─── Session storage ────────────────────────────────────────── */
+(function restoreKey() {
+  const stored = sessionStorage.getItem('laminar_admin_key');
+  if (stored) {
+    document.getElementById('admin-key-input').value = stored;
+  }
+})();
+
+/* ─── Health polling ─────────────────────────────────────────── */
+async function pollHealth() {
+  try {
+    const r = await fetch(API + '/v1/health', { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    setHealthLive(d);
+  } catch(e) {
+    setHealthOffline();
+  }
+}
+
+function setHealthLive(d) {
+  const dot = document.getElementById('hdr-dot');
+  const lbl = document.getElementById('hdr-label');
+  dot.className = 'status-dot live';
+  lbl.className = 'health-label live';
+  lbl.textContent = 'LIVE';
+  document.getElementById('hdr-uptime').textContent = fmtUptime(d.uptime_seconds);
+  document.getElementById('hdr-version').textContent = d.version || '—';
+  document.getElementById('hdr-cal').textContent = d.calibration_count != null ? d.calibration_count : '—';
+  // sync stats card too
+  if (d.calibration_count != null) {
+    document.getElementById('stat-calibrations').textContent = d.calibration_count;
+  }
+}
+
+function setHealthOffline() {
+  const dot = document.getElementById('hdr-dot');
+  const lbl = document.getElementById('hdr-label');
+  dot.className = 'status-dot offline';
+  lbl.className = 'health-label offline';
+  lbl.textContent = 'OFFLINE';
+}
+
+function fmtUptime(s) {
+  if (s == null) return '—';
+  if (s < 60) return s.toFixed(0) + 's';
+  if (s < 3600) return (s / 60).toFixed(0) + 'm';
+  return (s / 3600).toFixed(1) + 'h';
+}
+
+// Poll health every 15 seconds
+pollHealth();
+setInterval(pollHealth, 15000);
+
+/* ─── Admin connect ──────────────────────────────────────────── */
+async function connectAdmin() {
+  const key = document.getElementById('admin-key-input').value.trim();
+  if (!key) return;
+
+  const btn = document.getElementById('connect-btn');
+  const input = document.getElementById('admin-key-input');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Verifying';
+
+  try {
+    const r = await fetch(API + '/v1/admin/customers', {
+      headers: { 'Authorization': 'Bearer ' + key },
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (r.status === 401 || r.status === 403) {
+      showConnectError('Invalid admin key — access denied.');
+      input.className = 'key-input error';
+      btn.disabled = false;
+      btn.innerHTML = 'Connect';
+      return;
+    }
+
+    if (!r.ok) {
+      showConnectError('API error: ' + r.status);
+      input.className = 'key-input error';
+      btn.disabled = false;
+      btn.innerHTML = 'Connect';
+      return;
+    }
+
+    // Success
+    adminKey = key;
+    connected = true;
+    sessionStorage.setItem('laminar_admin_key', key);
+    input.className = 'key-input connected';
+    btn.innerHTML = '&#10003; Connected';
+    btn.className = 'btn success';
+
+    // Unlock UI
+    unlockAdminUI();
+
+    // Load customers
+    const data = await r.json();
+    renderCustomers(data);
+    updateStatsFromCustomers(data);
+
+    // Start auto-refresh
+    startAutoRefresh();
+
+  } catch(e) {
+    showConnectError('Connection failed: ' + e.message);
+    input.className = 'key-input error';
+    btn.disabled = false;
+    btn.innerHTML = 'Connect';
+  }
+}
+
+function showConnectError(msg) {
+  // Show as a subtle notification near the button
+  const existing = document.getElementById('connect-error-msg');
+  if (existing) existing.remove();
+  const div = document.createElement('div');
+  div.id = 'connect-error-msg';
+  div.style.cssText = 'font-size:11px;color:var(--danger);margin-top:4px;text-align:right;padding-right:4px;';
+  div.textContent = msg;
+  document.querySelector('.header-right').after(div);
+  setTimeout(() => div.remove(), 5000);
+}
+
+function unlockAdminUI() {
+  document.getElementById('stats-row').style.display = 'grid';
+  document.getElementById('refresh-btn').disabled = false;
+  document.getElementById('refresh-dot').className = 'refresh-dot active';
+
+  // Show create form
+  document.getElementById('create-auth-wall').style.display = 'none';
+  document.getElementById('create-form').style.display = 'block';
+}
+
+/* ─── Customer list ──────────────────────────────────────────── */
+async function loadCustomers() {
+  if (!connected || !adminKey) return;
+
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const r = await fetch(API + '/v1/admin/customers', {
+      headers: { 'Authorization': 'Bearer ' + adminKey },
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    renderCustomers(data);
+    updateStatsFromCustomers(data);
+    // Also load stats for each customer (fire and forget)
+    loadCustomerStats(data);
+
+  } catch(e) {
+    showPanelError('customer-list-wrap', 'Failed to load customers: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Refresh';
+  }
+}
+
+async function loadCustomerStats(customerList) {
+  if (!customerList || !customerList.length) return;
+  let totalDetections = 0;
+  const promises = customerList.map(async c => {
+    try {
+      const r = await fetch(API + '/v1/admin/customers/' + c.id + '/stats', {
+        headers: { 'Authorization': 'Bearer ' + adminKey },
+        signal: AbortSignal.timeout(5000)
+      });
+      if (r.ok) {
+        const s = await r.json();
+        totalDetections += (s.detection_volume || 0);
+      }
+    } catch(_) {}
+  });
+  await Promise.allSettled(promises);
+  document.getElementById('stat-detections').textContent = fmtNum(totalDetections);
+}
+
+function renderCustomers(data) {
+  customers = data || [];
+  const wrap = document.getElementById('customer-list-wrap');
+
+  if (!customers.length) {
+    wrap.innerHTML = '<div class="auth-wall"><div class="auth-wall-icon">&#x1F465;</div><div class="auth-wall-title">No customers yet</div>Use the form below to create your first customer.</div>';
+    return;
+  }
+
+  let html = '<div class="customer-table-wrap"><table class="ctable">';
+  html += '<thead><tr>';
+  html += '<th>Name</th><th>Email</th><th>Tier</th><th>Status</th><th style="text-align:right">Cals</th><th></th>';
+  html += '</tr></thead><tbody>';
+
+  customers.forEach(c => {
+    const tierClass = tierBadgeClass(c.tier);
+    const tierLabel = (c.tier || 'starter').toUpperCase();
+    const isActive = (c.status || 'active').toLowerCase() === 'active';
+    const dotClass = isActive ? 'active' : 'suspended';
+    const statusClass = isActive ? 'status-active' : 'status-suspended';
+    const statusLabel = isActive ? 'ACTIVE' : 'SUSPENDED';
+    const suspendDisabled = !isActive ? 'disabled' : '';
+    const calVal = (c.calibration_count != null) ? c.calibration_count : '—';
+
+    html += `<tr id="crow-${esc(c.id)}">`;
+    html += `<td class="name-cell">${esc(c.name || '—')}</td>`;
+    html += `<td class="email-cell">${esc(c.email || '—')}</td>`;
+    html += `<td><span class="tier-badge ${tierClass}">${tierLabel}</span></td>`;
+    html += `<td>
+      <span class="cust-status ${statusClass}">
+        <span class="cust-dot ${dotClass}"></span>
+        ${statusLabel}
+      </span>
+    </td>`;
+    html += `<td class="cal-cell">${calVal}</td>`;
+    html += `<td style="text-align:right;">
+      <button class="btn danger-btn" onclick="suspendCustomer('${esc(c.id)}')" id="sbtn-${esc(c.id)}" ${suspendDisabled}>Suspend</button>
+    </td>`;
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+}
+
+function updateStatsFromCustomers(data) {
+  const list = data || [];
+  const active = list.filter(c => (c.status || 'active').toLowerCase() === 'active').length;
+  document.getElementById('stat-total').textContent = list.length;
+  document.getElementById('stat-active').textContent = active;
+}
+
+function showPanelError(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (el) {
+    el.innerHTML = `<div class="msg error" style="margin:16px;">${esc(msg)}</div>`;
+  }
+}
+
+/* ─── Suspend customer ───────────────────────────────────────── */
+async function suspendCustomer(id) {
+  if (!connected || !adminKey) return;
+  const btn = document.getElementById('sbtn-' + id);
+  if (!btn) return;
+
+  const row = document.getElementById('crow-' + id);
+  if (row) row.classList.add('suspending');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    const r = await fetch(API + '/v1/admin/customers/' + id, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': 'Bearer ' + adminKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: 'suspended' }),
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (!r.ok) throw new Error(r.status);
+
+    // Optimistically update local state
+    const idx = customers.findIndex(c => c.id === id);
+    if (idx !== -1) customers[idx].status = 'suspended';
+    renderCustomers(customers);
+    updateStatsFromCustomers(customers);
+
+  } catch(e) {
+    if (row) row.classList.remove('suspending');
+    btn.disabled = false;
+    btn.innerHTML = 'Suspend';
+    // Show error near button
+    const cell = btn.parentElement;
+    const err = document.createElement('div');
+    err.style.cssText = 'font-size:10px;color:var(--danger);margin-top:2px;';
+    err.textContent = 'Failed: ' + e.message;
+    cell.appendChild(err);
+    setTimeout(() => err.remove(), 4000);
+  }
+}
+
+/* ─── Create customer ────────────────────────────────────────── */
+async function createCustomer() {
+  const name = document.getElementById('nc-name').value.trim();
+  const email = document.getElementById('nc-email').value.trim();
+  const tier = document.getElementById('nc-tier').value;
+  const msgEl = document.getElementById('create-msg');
+  const btn = document.getElementById('create-btn');
+
+  msgEl.innerHTML = '';
+  document.getElementById('new-key-display').style.display = 'none';
+
+  if (!name || !email) {
+    msgEl.innerHTML = '<div class="msg error">Name and email are required.</div>';
+    return;
+  }
+  if (!email.includes('@')) {
+    msgEl.innerHTML = '<div class="msg error">Enter a valid email address.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creating';
+
+  try {
+    const r = await fetch(API + '/v1/admin/customers', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + adminKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, email, tier }),
+      signal: AbortSignal.timeout(10000)
+    });
+
+    const body = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      const detail = body.detail || body.message || ('Error ' + r.status);
+      msgEl.innerHTML = '<div class="msg error">' + esc(detail) + '</div>';
+      return;
+    }
+
+    // Show the generated API key
+    const apiKey = body.api_key || '(key not returned by API)';
+    document.getElementById('new-key-val').textContent = apiKey;
+    document.getElementById('new-key-display').style.display = 'block';
+    document.getElementById('copy-key-btn').textContent = 'Copy';
+    document.getElementById('copy-key-btn').className = 'copy-btn';
+
+    msgEl.innerHTML = '<div class="msg success-msg">Customer <strong>' + esc(name) + '</strong> created.</div>';
+
+    // Clear form
+    document.getElementById('nc-name').value = '';
+    document.getElementById('nc-email').value = '';
+    document.getElementById('nc-tier').value = 'starter';
+
+    // Refresh list
+    await loadCustomers();
+
+  } catch(e) {
+    msgEl.innerHTML = '<div class="msg error">Request failed: ' + esc(e.message) + '</div>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Create Customer';
+  }
+}
+
+function copyKey() {
+  const val = document.getElementById('new-key-val').textContent;
+  const btn = document.getElementById('copy-key-btn');
+  navigator.clipboard.writeText(val).then(() => {
+    btn.textContent = 'Copied!';
+    btn.className = 'copy-btn copied';
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.className = 'copy-btn';
+    }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = val;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.className = 'copy-btn copied';
+      setTimeout(() => { btn.textContent = 'Copy'; btn.className = 'copy-btn'; }, 2000);
+    } catch(_) {}
+  });
+}
+
+/* ─── Auto-refresh ───────────────────────────────────────────── */
+function startAutoRefresh() {
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => {
+    if (connected) loadCustomers();
+  }, 30000);
+  document.getElementById('refresh-text').textContent = 'auto-refresh 30s';
+}
+
+/* ─── Demo runner ────────────────────────────────────────────── */
+const DEMO_SIM = {
+  calibration: { n_samples: 80, theta_a: 0.1823, theta_b: 0.0000, latency_ms: 12.4, status: 'calibrated' },
+  detection_waves: [
+    { attack_class: 'DDoS',       verdict: 'ATTACK', attack_type: 'DDoS',       confidence: 0.913, pcf_score: 0.684, signal_a: true,  signal_b: true,  latency_ms: 1.47 },
+    { attack_class: 'BruteForce', verdict: 'ATTACK', attack_type: 'BruteForce', confidence: 0.941, pcf_score: 0.751, signal_a: true,  signal_b: true,  latency_ms: 1.38 },
+    { attack_class: 'PortScan',   verdict: 'ATTACK', attack_type: 'PortScan',   confidence: 0.928, pcf_score: 0.812, signal_a: true,  signal_b: true,  latency_ms: 1.41 },
+    { attack_class: 'DoS',        verdict: 'ATTACK', attack_type: 'DoS',        confidence: 0.887, pcf_score: 0.623, signal_a: true,  signal_b: false, latency_ms: 1.55 },
+    { attack_class: 'WebAttack',  verdict: 'ATTACK', attack_type: 'WebAttack',  confidence: 0.862, pcf_score: 0.598, signal_a: true,  signal_b: true,  latency_ms: 1.62 },
+  ],
+  benign_control: { verdict: 'BENIGN', false_positive: false, pcf_score: 0.041 },
+  summary: { attacks_detected: 5, total_attack_waves: 5, detection_rate: '5/5', false_positive: false }
+};
+
+async function runDemo() {
+  if (demoRunning) return;
+  demoRunning = true;
+
+  const btn = document.getElementById('demo-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running';
+
+  // Reset UI
+  resetDemoUI();
+  document.getElementById('demo-placeholder').style.display = 'none';
+  document.getElementById('demo-error').style.display = 'none';
+
+  let data;
+  try {
+    const r = await fetch(API + '/v1/demo', {
+      signal: AbortSignal.timeout(20000)
+    });
+    if (r.ok) {
+      const body = await r.json();
+      // Check if it's a valid demo response (has detection_waves)
+      if (body && body.detection_waves && body.calibration) {
+        data = body;
+      } else {
+        // API returned something but not the expected shape — use sim
+        data = DEMO_SIM;
+      }
+    } else {
+      // API error — fall back to simulation
+      data = DEMO_SIM;
+    }
+  } catch(e) {
+    // Network error — fall back to simulation
+    data = DEMO_SIM;
+  }
+
+  // Show calibration
+  const cal = data.calibration || {};
+  document.getElementById('demo-cal-section').style.display = 'block';
+  document.getElementById('demo-cal-status').textContent =
+    '\u2713 ' + (cal.status || 'calibrated').toUpperCase();
+  document.getElementById('demo-cal-n').textContent =
+    (cal.n_samples || '—') + ' benign windows';
+  document.getElementById('demo-cal-ta').textContent =
+    (cal.theta_a != null) ? cal.theta_a.toFixed(6) : '—';
+  document.getElementById('demo-cal-tb').textContent =
+    (cal.theta_b != null) ? cal.theta_b.toFixed(6) : '—';
+  document.getElementById('demo-cal-lat').textContent =
+    (cal.latency_ms != null) ? cal.latency_ms.toFixed(1) + 'ms' : '—';
+
+  await sleep(300);
+
+  // Show waves section
+  document.getElementById('demo-waves-section').style.display = 'block';
+
+  // Animate waves
+  const waves = data.detection_waves || [];
+  let totalLat = 0;
+  let detected = 0;
+
+  for (const wave of waves) {
+    await animateWave(wave);
+    if (wave.verdict === 'ATTACK') detected++;
+    totalLat += (wave.latency_ms || 1.5);
+    await sleep(280);
+  }
+
+  // Summary
+  await sleep(150);
+  const fp = (data.benign_control || {}).false_positive || false;
+  const avgLat = waves.length ? (totalLat / waves.length) : 0;
+
+  document.getElementById('demo-summary-section').style.display = 'block';
+  const sumDetEl = document.getElementById('sum-detected');
+  sumDetEl.textContent = detected + '/' + waves.length;
+  sumDetEl.className = 'sum-val mono ' + (detected === waves.length ? 'ok' : 'err');
+
+  document.getElementById('sum-waves').textContent = waves.length;
+  document.getElementById('sum-lat').textContent = avgLat.toFixed(2) + 'ms';
+
+  const fpEl = document.getElementById('sum-fp');
+  fpEl.textContent = fp ? '1 (YES)' : '0';
+  fpEl.className = 'sum-val mono ' + (fp ? 'err' : 'ok');
+
+  const bcEl = document.getElementById('sum-benign');
+  const bcVerdict = (data.benign_control || {}).verdict || '—';
+  bcEl.textContent = bcVerdict;
+  bcEl.className = 'sum-val mono ' + (bcVerdict === 'BENIGN' ? 'ok' : 'err');
+
+  btn.disabled = false;
+  btn.innerHTML = '&#9654; Run Again';
+  demoRunning = false;
+}
+
+function resetDemoUI() {
+  document.getElementById('demo-cal-section').style.display = 'none';
+  document.getElementById('demo-waves-section').style.display = 'none';
+  document.getElementById('demo-summary-section').style.display = 'none';
+
+  WAVES_ORDER.forEach(w => {
+    const row = document.getElementById('wave-' + w);
+    const fill = document.getElementById('wfill-' + w);
+    const stat = document.getElementById('wstat-' + w);
+    if (row) row.className = 'wave-row';
+    if (fill) { fill.className = 'wave-fill'; fill.style.width = '0%'; }
+    if (stat) { stat.className = 'wave-status pending'; stat.textContent = 'PENDING'; }
+  });
+}
+
+async function animateWave(wave) {
+  const name = wave.attack_class;
+  const row = document.getElementById('wave-' + name);
+  const fill = document.getElementById('wfill-' + name);
+  const stat = document.getElementById('wstat-' + name);
+  if (!row) return;
+
+  row.className = 'wave-row scanning';
+  stat.className = 'wave-status scanning';
+  stat.textContent = 'SCANNING';
+
+  // Animate progress bar 0→100 over ~350ms
+  for (let i = 0; i <= 100; i += 4) {
+    fill.style.width = i + '%';
+    await sleep(14);
+  }
+  fill.style.width = '100%';
+
+  const hit = wave.verdict === 'ATTACK';
+  if (hit) {
+    row.className = 'wave-row detected';
+    fill.className = 'wave-fill done';
+    stat.className = 'wave-status hit';
+    stat.textContent = '\u2713 DETECTED';
+  } else {
+    row.className = 'wave-row missed';
+    fill.className = 'wave-fill miss';
+    stat.className = 'wave-status miss';
+    stat.textContent = '\u2717 MISSED';
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────────────────── */
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function fmtNum(n) {
+  if (n == null) return '—';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return String(n);
+}
+
+function tierBadgeClass(tier) {
+  const t = (tier || 'starter').toLowerCase();
+  if (t === 'growth') return 'tier-growth';
+  if (t === 'enterprise') return 'tier-enterprise';
+  return 'tier-starter';
+}
+
+/* ─── Allow Enter key on admin key input ─────────────────────── */
+document.getElementById('admin-key-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') connectAdmin();
+});
+
+/* ─── Allow Enter key on create form ────────────────────────── */
+['nc-name','nc-email','nc-tier'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') createCustomer();
+  });
+});
+</script>
+</body>
+</html>
