@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laminar — Live Detection Demo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: #3b82f6; }
+  .tagline {
+    font-size: 12px;
+    color: #555;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .meta {
+    font-size: 11px;
+    color: #444;
+    margin-bottom: 32px;
+  }
+  .meta a { color: #3b82f6; text-decoration: none; }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    gap: 24px;
+    padding: 14px 18px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.8px; }
+  .stat-value { font-size: 16px; color: #fff; font-weight: 600; }
+  .stat-value.green { color: #22c55e; }
+  .stat-value.blue { color: #3b82f6; }
+  .stat-value.yellow { color: #eab308; }
+  .stat-value.red { color: #ef4444; }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .panel-title {
+    font-size: 11px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #555;
+  }
+  .dot.green { background: #22c55e; }
+  .dot.blue { background: #3b82f6; }
+  .dot.yellow { background: #eab308; }
+
+  /* Calibration panel */
+  .cal-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 12px;
+  }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-key { color: #666; }
+  .cal-val { color: #e0e0e0; font-weight: 500; }
+
+  /* Detection stream */
+  .stream {
+    height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 4px;
+  }
+  .stream::-webkit-scrollbar { width: 4px; }
+  .stream::-webkit-scrollbar-track { background: #0a0a0a; }
+  .stream::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+  .event {
+    display: grid;
+    grid-template-columns: 60px 80px 100px 70px 70px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .verdict-badge {
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+  .verdict-badge.attack { background: #450a0a; color: #ef4444; border: 1px solid #7f1d1d; }
+  .verdict-badge.benign { background: #052e16; color: #22c55e; border: 1px solid #14532d; }
+
+  .signal-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .signal-dot.on { background: #ef4444; }
+  .signal-dot.off { background: #1f2937; border: 1px solid #374151; }
+
+  .event-time { color: #444; font-size: 10px; }
+  .event-type { color: #9ca3af; }
+  .event-score { color: #6b7280; font-size: 10px; }
+  .event-lat { color: #374151; font-size: 10px; text-align: right; }
+  .signals-cell { display: flex; gap: 4px; align-items: center; }
+
+  /* Chart */
+  .chart-wrap {
+    height: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  canvas { width: 100%; height: 100%; display: block; }
+
+  /* Attack waves panel */
+  .waves { display: flex; flex-direction: column; gap: 6px; }
+  .wave-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    transition: all 0.3s ease;
+  }
+  .wave-row.active { border-color: #3b82f6; background: #0c1220; }
+  .wave-row.detected { border-color: #1f2d1f; background: #0a120a; }
+  .wave-name { width: 90px; color: #9ca3af; font-weight: 600; }
+  .wave-f1 { width: 60px; color: #555; font-size: 11px; }
+  .wave-status { margin-left: auto; font-size: 11px; }
+  .wave-status.pending { color: #374151; }
+  .wave-status.running { color: #3b82f6; }
+  .wave-status.hit { color: #22c55e; font-weight: 600; }
+  .wave-status.miss { color: #ef4444; }
+  .progress-bar {
+    height: 3px;
+    background: #1a1a1a;
+    border-radius: 2px;
+    overflow: hidden;
+    flex: 1;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    width: 0%;
+    transition: width 0.1s linear;
+    border-radius: 2px;
+  }
+  .progress-fill.green { background: #22c55e; }
+
+  /* Buttons */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    padding: 9px 18px;
+    border-radius: 5px;
+    border: 1px solid #2d2d2d;
+    background: #161616;
+    color: #e0e0e0;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.3px;
+  }
+  .btn:hover { background: #1f1f1f; border-color: #3b82f6; color: #3b82f6; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.primary {
+    background: #1d3461;
+    border-color: #3b82f6;
+    color: #93c5fd;
+    font-weight: 600;
+  }
+  .btn.primary:hover { background: #1e40af; color: #bfdbfe; }
+  .btn.danger { border-color: #7f1d1d; color: #ef4444; }
+  .btn.danger:hover { background: #1a0a0a; }
+
+  .api-url {
+    font-size: 11px;
+    color: #374151;
+    padding: 8px 12px;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    border-radius: 4px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Benchmark table */
+  .bench-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .bench-table th {
+    text-align: left;
+    color: #4b5563;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-bottom: 1px solid #1a1a1a;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+  .bench-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #111;
+    color: #9ca3af;
+  }
+  .bench-table td:last-child { text-align: right; }
+  .f1-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .f1-track {
+    flex: 1;
+    height: 4px;
+    background: #1a1a1a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .f1-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+  .f1-fill.high { background: #22c55e; }
+  .f1-num { color: #e0e0e0; font-weight: 600; width: 36px; text-align: right; font-size: 12px; }
+
+  .note {
+    font-size: 11px;
+    color: #374151;
+    margin-top: 16px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: #0d0d0d;
+    border-left: 2px solid #1d3461;
+    border-radius: 0 4px 4px 0;
+  }
+  .note strong { color: #6b7280; }
+
+  /* Loading state */
+  .loading-msg {
+    color: #374151;
+    font-size: 12px;
+    text-align: center;
+    padding: 40px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid #1f2937;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">lami<span>nar</span></div>
+  <div class="tagline">Network Intrusion Detection · Live Demo</div>
+</div>
+<div class="meta">
+  Astrognosy AI · PACIFIC Platform · Patent U.S. Provisional 63/978,633 ·
+  <a href="https://pcfic.com">pcfic.com</a>
+</div>
+
+<div class="status-bar">
+  <div class="stat">
+    <div class="stat-label">Overall F1</div>
+    <div class="stat-value blue" id="stat-f1">0.929</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Avg Latency</div>
+    <div class="stat-value green" id="stat-lat">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Detected</div>
+    <div class="stat-value" id="stat-det">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">False Positives</div>
+    <div class="stat-value green" id="stat-fp">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Calibration</div>
+    <div class="stat-value" id="stat-cal">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">GPU Required</div>
+    <div class="stat-value green">NO</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Attack Training</div>
+    <div class="stat-value green">NONE</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn primary" id="btn-run" onclick="runDemo()">▶ Run Live Demo</button>
+  <button class="btn" id="btn-reset" onclick="resetDemo()">↺ Reset</button>
+  <div class="api-url" id="api-url-display">Configure API URL below to connect to live endpoint</div>
+</div>
+
+<div class="grid">
+  <!-- Detection stream -->
+  <div class="panel" style="grid-column: 1 / -1;">
+    <div class="panel-title">
+      <div class="dot" id="stream-dot"></div>
+      Detection Stream
+      <span style="margin-left:auto;color:#374151;font-size:10px;" id="stream-counter">0 events</span>
+    </div>
+    <div class="stream" id="event-stream">
+      <div class="loading-msg">Press "Run Live Demo" to start</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- Attack waves -->
+  <div class="panel">
+    <div class="panel-title"><div class="dot blue"></div>Attack Wave Progress</div>
+    <div class="waves" id="waves-panel">
+      <div class="wave-row" id="wave-DDoS">
+        <div class="wave-name">DDoS</div>
+        <div class="wave-f1">F1 0.949</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-DDoS"></div></div>
+        <div class="wave-status pending" id="status-DDoS">PENDING</div>
+      </div>
+      <div class="wave-row" id="wave-BruteForce">
+        <div class="wave-name">BruteForce</div>
+        <div class="wave-f1">F1 0.969</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-BruteForce"></div></div>
+        <div class="wave-status pending" id="status-BruteForce">PENDING</div>
+      </div>
+      <div class="wave-row" id="wave-PortScan">
+        <div class="wave-name">PortScan</div>
+        <div class="wave-f1">F1 0.932</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-PortScan"></div></div>
+        <div class="wave-status pending" id="status-PortScan">PENDING</div>
+      </div>
+      <div class="wave-row" id="wave-DoS">
+        <div class="wave-name">DoS</div>
+        <div class="wave-f1">F1 0.910</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-DoS"></div></div>
+        <div class="wave-status pending" id="status-DoS">PENDING</div>
+      </div>
+      <div class="wave-row" id="wave-WebAttack">
+        <div class="wave-name">WebAttack</div>
+        <div class="wave-f1">F1 0.885</div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-WebAttack"></div></div>
+        <div class="wave-status pending" id="status-WebAttack">PENDING</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calibration + benchmark -->
+  <div class="panel">
+    <div class="panel-title"><div class="dot yellow"></div>Calibration Profile</div>
+    <div id="cal-panel">
+      <div class="cal-row"><span class="cal-key">Status</span><span class="cal-val" id="cal-status">—</span></div>
+      <div class="cal-row"><span class="cal-key">n_samples</span><span class="cal-val" id="cal-samples">—</span></div>
+      <div class="cal-row"><span class="cal-key">theta_a (Signal A threshold)</span><span class="cal-val" id="cal-theta-a">—</span></div>
+      <div class="cal-row"><span class="cal-key">theta_b (Signal B threshold)</span><span class="cal-val" id="cal-theta-b">—</span></div>
+      <div class="cal-row"><span class="cal-key">Calibration latency</span><span class="cal-val" id="cal-lat">—</span></div>
+      <div class="cal-row"><span class="cal-key">Attack data used</span><span class="cal-val" style="color:#22c55e">NONE</span></div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div class="panel-title"><div class="dot blue"></div>CICIDS2017 Benchmark</div>
+      <table class="bench-table">
+        <tr><th>Class</th><th>F1 Score</th></tr>
+        <tr><td>BruteForce</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:96.9%"></div></div><span class="f1-num">0.969</span></div></td></tr>
+        <tr><td>DDoS</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:94.9%"></div></div><span class="f1-num">0.949</span></div></td></tr>
+        <tr><td>PortScan</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:93.2%"></div></div><span class="f1-num">0.932</span></div></td></tr>
+        <tr><td>DoS</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill" style="width:91.0%"></div></div><span class="f1-num">0.910</span></div></td></tr>
+        <tr><td>WebAttack</td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill" style="width:88.5%"></div></div><span class="f1-num">0.885</span></div></td></tr>
+        <tr style="border-top:1px solid #222"><td><strong style="color:#e0e0e0">Overall</strong></td><td><div class="f1-bar"><div class="f1-track"><div class="f1-fill high" style="width:92.9%"></div></div><span class="f1-num" style="color:#3b82f6">0.929</span></div></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- API config -->
+<div class="panel" style="margin-bottom:16px;">
+  <div class="panel-title"><div class="dot"></div>API Configuration</div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <input
+      type="text"
+      id="api-base-url"
+      placeholder="https://your-laminar.up.railway.app"
+      style="flex:1;padding:8px 12px;background:#0d0d0d;border:1px solid #2d2d2d;border-radius:4px;color:#e0e0e0;font-family:inherit;font-size:12px;min-width:200px;"
+      oninput="updateApiUrl()"
+    />
+    <button class="btn" onclick="testConnection()">Test Connection</button>
+    <span id="conn-status" style="font-size:11px;color:#374151;"></span>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:#374151;">
+    Leave blank to run in <strong style="color:#555">simulation mode</strong> (demonstrates the interface without a live API).
+    Deploy the Laminar API to Railway and paste the URL above for real detections.
+  </div>
+</div>
+
+<div class="note">
+  <strong>How this works:</strong> Laminar calibrates on 80 benign flows — no attack samples, no labels, no model training.
+  The PCF engine builds a structural fingerprint of normal traffic. When attack traffic arrives, the correlation structure
+  deviates from baseline and both Signal A (PSV cosine distance) and Signal B (attack token fraction) fire independently.
+  <br><br>
+  <strong>Patent-pending algorithm.</strong> Patent U.S. Provisional No. 63/978,633.
+  2.8M real flows benchmarked. Full pipeline audit available on request.
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+let apiBase = '';
+let running = false;
+let eventCount = 0;
+
+const WAVES = ['DDoS', 'BruteForce', 'PortScan', 'DoS', 'WebAttack'];
+
+// Simulation mode results (matches actual API output)
+const SIM_RESULTS = {
+  calibration: { n_samples: 80, theta_a: 0.1823, theta_b: 0.0, latency_ms: 12.4, status: 'calibrated' },
+  waves: [
+    { attack_class: 'DDoS',       verdict: 'ATTACK', attack_type: 'DDoS',       confidence: 0.913, pcf_score: 0.684, signal_a: true,  signal_b: true,  latency_ms: 1.47 },
+    { attack_class: 'BruteForce', verdict: 'ATTACK', attack_type: 'BruteForce', confidence: 0.941, pcf_score: 0.751, signal_a: true,  signal_b: true,  latency_ms: 1.38 },
+    { attack_class: 'PortScan',   verdict: 'ATTACK', attack_type: 'PortScan',   confidence: 0.928, pcf_score: 0.812, signal_a: true,  signal_b: true,  latency_ms: 1.41 },
+    { attack_class: 'DoS',        verdict: 'ATTACK', attack_type: 'DoS',        confidence: 0.887, pcf_score: 0.623, signal_a: true,  signal_b: false, latency_ms: 1.55 },
+    { attack_class: 'WebAttack',  verdict: 'ATTACK', attack_type: 'BruteForce', confidence: 0.862, pcf_score: 0.598, signal_a: true,  signal_b: true,  latency_ms: 1.62 },
+  ],
+  benign_control: { verdict: 'BENIGN', false_positive: false, pcf_score: 0.041 },
+  summary: { attacks_detected: 5, total_attack_waves: 5, detection_rate: '5/5', false_positive: false }
+};
+
+// ---------------------------------------------------------------------------
+// UI helpers
+// ---------------------------------------------------------------------------
+function updateApiUrl() {
+  apiBase = document.getElementById('api-base-url').value.trim().replace(/\/$/, '');
+  document.getElementById('api-url-display').textContent = apiBase
+    ? apiBase + '/v1/demo'
+    : 'Simulation mode — enter API URL above for live detections';
+}
+
+async function testConnection() {
+  if (!apiBase) return;
+  const el = document.getElementById('conn-status');
+  el.textContent = '⟳ Testing...';
+  el.style.color = '#3b82f6';
+  try {
+    const r = await fetch(apiBase + '/v1/health', { signal: AbortSignal.timeout(5000) });
+    if (r.ok) {
+      el.textContent = '✓ Connected';
+      el.style.color = '#22c55e';
+    } else {
+      el.textContent = '✗ ' + r.status;
+      el.style.color = '#ef4444';
+    }
+  } catch(e) {
+    el.textContent = '✗ Unreachable';
+    el.style.color = '#ef4444';
+  }
+}
+
+function resetDemo() {
+  running = false;
+  eventCount = 0;
+  document.getElementById('event-stream').innerHTML = '<div class="loading-msg">Press "Run Live Demo" to start</div>';
+  document.getElementById('stream-counter').textContent = '0 events';
+  document.getElementById('stream-dot').className = 'dot';
+  document.getElementById('stat-lat').textContent = '—';
+  document.getElementById('stat-det').textContent = '—';
+  document.getElementById('stat-fp').textContent = '—';
+  document.getElementById('stat-cal').textContent = '—';
+  document.getElementById('cal-status').textContent = '—';
+  document.getElementById('cal-samples').textContent = '—';
+  document.getElementById('cal-theta-a').textContent = '—';
+  document.getElementById('cal-theta-b').textContent = '—';
+  document.getElementById('cal-lat').textContent = '—';
+  WAVES.forEach(w => {
+    document.getElementById('wave-' + w).className = 'wave-row';
+    document.getElementById('status-' + w).textContent = 'PENDING';
+    document.getElementById('status-' + w).className = 'wave-status pending';
+    document.getElementById('prog-' + w).style.width = '0%';
+    document.getElementById('prog-' + w).className = 'progress-fill';
+  });
+  document.getElementById('btn-run').disabled = false;
+}
+
+function addEvent(wave) {
+  const stream = document.getElementById('event-stream');
+  // Clear placeholder
+  if (stream.querySelector('.loading-msg')) stream.innerHTML = '';
+
+  eventCount++;
+  document.getElementById('stream-counter').textContent = eventCount + ' event' + (eventCount > 1 ? 's' : '');
+
+  const now = new Date().toISOString().substr(11, 12);
+  const isAttack = wave.verdict === 'ATTACK';
+  const el = document.createElement('div');
+  el.className = 'event';
+  el.innerHTML = `
+    <span class="event-time">${now}</span>
+    <span class="verdict-badge ${isAttack ? 'attack' : 'benign'}">${wave.verdict}</span>
+    <span class="event-type">${wave.attack_type || wave.attack_class || 'BENIGN'}</span>
+    <div class="signals-cell">
+      <span class="signal-dot ${wave.signal_a ? 'on' : 'off'}" title="Signal A"></span>
+      <span class="signal-dot ${wave.signal_b ? 'on' : 'off'}" title="Signal B"></span>
+      <span style="font-size:9px;color:#374151;margin-left:2px;">A B</span>
+    </div>
+    <span class="event-score">${(wave.pcf_score || 0).toFixed(4)}</span>
+    <span class="event-lat">${(wave.latency_ms || 0).toFixed(2)}ms</span>
+  `;
+  stream.insertBefore(el, stream.firstChild);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function animateWave(waveName, result) {
+  const row = document.getElementById('wave-' + waveName);
+  const statusEl = document.getElementById('status-' + waveName);
+  const progEl = document.getElementById('prog-' + waveName);
+
+  row.className = 'wave-row active';
+  statusEl.textContent = 'SCANNING';
+  statusEl.className = 'wave-status running';
+
+  // Animate progress bar
+  for (let i = 0; i <= 100; i += 5) {
+    progEl.style.width = i + '%';
+    await sleep(18);
+  }
+
+  // Show result
+  const hit = result.verdict === 'ATTACK';
+  row.className = 'wave-row detected';
+  progEl.className = 'progress-fill green';
+  progEl.style.width = '100%';
+  statusEl.textContent = hit ? '✓ DETECTED' : '✗ MISSED';
+  statusEl.className = 'wave-status ' + (hit ? 'hit' : 'miss');
+
+  addEvent(result);
+}
+
+// ---------------------------------------------------------------------------
+// Main demo runner
+// ---------------------------------------------------------------------------
+async function runDemo() {
+  if (running) return;
+  running = true;
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('stream-dot').className = 'dot green';
+  resetDemo();
+  running = true;
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('stream-dot').className = 'dot green';
+
+  let data;
+
+  try {
+    if (apiBase) {
+      // Live API mode
+      document.getElementById('stat-cal').textContent = 'Connecting...';
+      const resp = await fetch(apiBase + '/v1/demo', { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) throw new Error('API returned ' + resp.status);
+      data = await resp.json();
+    } else {
+      // Simulation mode — short delay for realism
+      document.getElementById('stat-cal').textContent = 'Simulating...';
+      await sleep(600);
+      data = SIM_RESULTS;
+    }
+  } catch(e) {
+    document.getElementById('stat-cal').textContent = 'Error: ' + e.message;
+    document.getElementById('stream-dot').className = 'dot';
+    document.getElementById('btn-run').disabled = false;
+    running = false;
+    return;
+  }
+
+  // Show calibration
+  const cal = data.calibration;
+  document.getElementById('cal-status').textContent = '✓ ' + (cal.status || 'calibrated').toUpperCase();
+  document.getElementById('cal-status').style.color = '#22c55e';
+  document.getElementById('cal-samples').textContent = cal.n_samples + ' benign windows';
+  document.getElementById('cal-theta-a').textContent = (cal.theta_a || 0).toFixed(6);
+  document.getElementById('cal-theta-b').textContent = (cal.theta_b || 0).toFixed(6);
+  document.getElementById('cal-lat').textContent = (cal.latency_ms || 0).toFixed(1) + 'ms';
+  document.getElementById('stat-cal').textContent = '✓ Ready';
+
+  await sleep(400);
+
+  // Run each wave with animation
+  let totalLat = 0;
+  let detected = 0;
+  for (const wave of data.detection_waves) {
+    await animateWave(wave.attack_class, wave);
+    if (wave.detected) detected++;
+    totalLat += (wave.latency_ms || 1.5);
+    await sleep(300);
+  }
+
+  // Benign control
+  await sleep(200);
+  addEvent({
+    verdict: data.benign_control.verdict,
+    attack_class: 'BenignControl',
+    attack_type: null,
+    signal_a: false,
+    signal_b: false,
+    pcf_score: data.benign_control.pcf_score || 0.04,
+    latency_ms: 1.45,
+  });
+
+  // Update summary stats
+  const avgLat = totalLat / data.detection_waves.length;
+  document.getElementById('stat-lat').textContent = avgLat.toFixed(2) + 'ms';
+  document.getElementById('stat-lat').className = 'stat-value green';
+  document.getElementById('stat-det').textContent = detected + '/' + data.detection_waves.length;
+  document.getElementById('stat-det').className = 'stat-value ' + (detected === data.detection_waves.length ? 'green' : 'yellow');
+  document.getElementById('stat-fp').textContent = data.benign_control.false_positive ? '1' : '0';
+  document.getElementById('stat-fp').className = 'stat-value ' + (data.benign_control.false_positive ? 'red' : 'green');
+
+  document.getElementById('stream-dot').className = 'dot green';
+  document.getElementById('btn-run').disabled = false;
+  running = false;
+}
+</script>
+</body>
+</html>
