@@ -119,7 +119,7 @@
     <div class="hero-inner">
         <div class="hero-eyebrow">Pacific Platform · Claims 27, 28, 62–66</div>
         <h1>Structural Network Intrusion Detection<br>via <span>PCF Signature Vectors</span></h1>
-        <p class="hero-sub">Network flows are converted to token sequences and analyzed via Positional Signature Vectors. Dual-signal OR classifier: Signal A (PSV cosine distance &gt; 90th pct) OR Signal B (attack-token fraction &gt; 99th pct). No signature database. No training data.</p>
+        <p class="hero-sub">Network flows are converted to token sequences and analyzed via structural signatures. Dual-signal OR classifier: Signal A (structural distance exceeds calibrated detection threshold) OR Signal B (attack-token fraction exceeds calibrated detection threshold). No signature database. No training data.</p>
         <div class="hero-stats">
             <div class="hstat"><div class="hstat-val">F1 0.969</div><div class="hstat-label">BruteForce</div></div>
             <div class="hstat"><div class="hstat-val">F1 0.949</div><div class="hstat-label">DDoS</div></div>
@@ -147,12 +147,12 @@
         <div class="step">
             <div class="step-num">Step 3</div>
             <div class="step-title">Dual-Signal OR</div>
-            <div class="step-desc">Signal A: PSV cosine distance &gt; 90th percentile of 80 benign calibration traces. Signal B: attack-token fraction &gt; 99th percentile of benign baseline. Intrusion detected if A OR B.</div>
+            <div class="step-desc">Signal A: structural distance exceeds calibrated detection threshold derived from benign calibration traces. Signal B: attack-token fraction exceeds calibrated detection threshold of benign baseline. Intrusion detected if A OR B.</div>
         </div>
         <div class="step">
             <div class="step-num">Step 4</div>
             <div class="step-title">Alert</div>
-            <div class="step-desc">Attack type classified from token distribution. Confidence, PSV distance from benign baseline, and structural divergence all reported in the alert.</div>
+            <div class="step-desc">Attack type classified from token distribution. Confidence, structural distance from benign baseline, and structural divergence all reported in the alert.</div>
         </div>
     </div>
 </div>
@@ -325,11 +325,11 @@ function simulateTrace() {
             <div class="sim-tokens">${(alert.tokens || []).map(t => `<span style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:4px;padding:1px 5px;">${t}</span>`).join(' ')}</div>
             <div class="sim-meta">
                 <div class="sim-field"><div class="sim-field-label">Confidence</div><div class="sim-field-val" style="color:#10b981;">${((alert.confidence||0)*100).toFixed(1)}%</div></div>
-                <div class="sim-field"><div class="sim-field-label">PSV Distance</div><div class="sim-field-val">${(alert.psvDist||0).toFixed(4)}</div></div>
+                <div class="sim-field"><div class="sim-field-label">Structural Distance</div><div class="sim-field-val">${(alert.psvDist||0).toFixed(4)}</div></div>
                 <div class="sim-field"><div class="sim-field-label">Signal A</div><div class="sim-field-val" style="color:${signalA?'#10b981':'rgba(255,255,255,0.3)'};">${signalA ? 'TRIGGER' : 'clear'}</div></div>
                 <div class="sim-field"><div class="sim-field-label">Signal B</div><div class="sim-field-val" style="color:${signalB?'#10b981':'rgba(255,255,255,0.3)'};">${signalB ? 'TRIGGER' : 'clear'}</div></div>
             </div>
-            <div style="margin-top:10px;font-size:0.65em;color:rgba(255,255,255,0.2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;">PSV Vector (k=1..10)</div>
+            <div style="margin-top:10px;font-size:0.65em;color:rgba(255,255,255,0.2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.1em;">Structural Signature (positions 1..10)</div>
             <div class="psv-bars">${psvBars}</div>
             <div style="font-size:0.62em;color:rgba(255,255,255,0.2);font-family:monospace;margin-top:8px;">${alert.id} · ${alert.sensorId} · is_real_data:true</div>
         </div>`;

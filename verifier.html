@@ -136,15 +136,15 @@
         </div>
         <div class="step">
             <div class="step-num">Step 2</div>
-            <div class="step-title">PMI Tensor</div>
-            <div class="step-desc">Co-occurrence statistics computed at offsets k=1..10 with decay kernel K(k)=1/(k+1). Mutual information aggregated per offset.</div>
-            <div class="step-mono">K(k) = 1/(k+1), k=1..10</div>
+            <div class="step-title">Structural Pattern Analysis</div>
+            <div class="step-desc">Co-occurrence patterns computed across positional offsets with a position-weighted decay kernel. Structural signal aggregated per offset.</div>
+            <div class="step-mono">position-weighted co-occurrence analysis</div>
         </div>
         <div class="step">
             <div class="step-num">Step 3</div>
-            <div class="step-title">PSV Comparison</div>
-            <div class="step-desc">Positional Signature Vector σ_k = mean(PMI_k)/(std(PMI_k)+0.01). Convergence C = 1/(1+σ²) measures structural alignment.</div>
-            <div class="step-mono">C = 1/(1+σ²)</div>
+            <div class="step-title">Structural Signature Comparison</div>
+            <div class="step-desc">Structural signature computed and compared against reference. Convergence score measures structural alignment between claim and evidence.</div>
+            <div class="step-mono">convergence = structural alignment score</div>
         </div>
         <div class="step">
             <div class="step-num">Step 4</div>
@@ -263,7 +263,7 @@ async function verifyClaim() {
                 </div>
                 <div class="metrics">
                     <div class="metric"><div class="metric-label">Latency</div><div class="metric-val">${latency}<span class="metric-unit">ms</span></div></div>
-                    <div class="metric"><div class="metric-label">PSV Distance</div><div class="metric-val" style="font-size:0.95em;">${psvDist}</div></div>
+                    <div class="metric"><div class="metric-label">Structural Distance</div><div class="metric-val" style="font-size:0.95em;">${psvDist}</div></div>
                     <div class="metric"><div class="metric-label">Sources</div><div class="metric-val">${sources}</div></div>
                     <div class="metric"><div class="metric-label">Cache</div><div class="metric-val" style="color:${cacheHit ? '#10b981' : 'rgba(255,255,255,0.4)'};font-size:0.95em;">${cacheHit ? 'HIT' : 'MISS'}</div></div>
                 </div>
