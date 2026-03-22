@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stratum — Data Center Design Intelligence · Astrognosy AI</title>
-    <meta name="description" content="Stratum: PCF-powered data center design validation. Score rack layouts, cooling architectures, and power topologies against certified reference patterns — before a single server is racked.">
+    <title>Stratum — Industrial Anomaly Detection & Data Center Intelligence · Astrognosy AI</title>
+    <meta name="description" content="Stratum: PCF-powered industrial anomaly detection and data center design validation. Detect bearing faults from vibration data with F1=0.832 — no training data required.">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { background:#060a0a; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:rgba(255,255,255,0.85); min-height:100vh; }
@@ -121,6 +121,64 @@
         .footer a:hover { color:#38bdf8; }
 
         @media(max-width:640px) { .score-header { flex-direction:column; } }
+
+        /* APPLICATION TABS */
+        .app-tabs { display:flex; gap:0; max-width:900px; margin:0 auto; padding:32px 28px 0; }
+        .app-tab { flex:1; padding:14px 20px; text-align:center; border:1px solid rgba(255,255,255,0.07); cursor:pointer; font-size:0.82em; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; transition:all 0.2s; color:rgba(255,255,255,0.3); background:transparent; }
+        .app-tab:first-child { border-radius:10px 0 0 10px; }
+        .app-tab:last-child { border-radius:0 10px 10px 0; border-left:none; }
+        .app-tab.active { background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.25); color:#38bdf8; }
+        .app-tab-content { display:none; }
+        .app-tab-content.active { display:block; }
+
+        /* BEARING FAULT SECTION */
+        .fault-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+        .fault-card { border-radius:14px; padding:24px 20px; border:1px solid; transition:border-color 0.25s; }
+        .fault-card:hover { filter:brightness(1.1); }
+        .fault-icon { font-size:1.8em; margin-bottom:10px; }
+        .fault-type { font-size:0.72em; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:6px; }
+        .fault-name { font-size:1em; font-weight:700; margin-bottom:8px; color:rgba(255,255,255,0.85); }
+        .fault-desc { font-size:0.77em; color:rgba(255,255,255,0.35); line-height:1.6; margin-bottom:14px; }
+        .fault-stats { display:flex; gap:16px; }
+        .fault-stat { text-align:center; }
+        .fault-stat-val { font-size:0.9em; font-weight:800; font-family:monospace; }
+        .fault-stat-label { font-size:0.58em; color:rgba(255,255,255,0.25); text-transform:uppercase; letter-spacing:0.08em; }
+
+        /* SIGNAL CLASSIFIER */
+        .signal-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+        .signal-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:22px 20px; }
+        .signal-letter { font-size:2em; font-weight:800; font-family:monospace; margin-bottom:8px; }
+        .signal-name { font-size:0.82em; font-weight:700; margin-bottom:6px; color:rgba(255,255,255,0.7); }
+        .signal-desc { font-size:0.75em; color:rgba(255,255,255,0.32); line-height:1.65; margin-bottom:12px; }
+        .signal-fires { font-size:0.65em; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.25); margin-bottom:6px; }
+        .signal-types { display:flex; flex-wrap:wrap; gap:5px; }
+        .signal-type-tag { font-size:0.65em; padding:2px 8px; border-radius:10px; font-weight:600; }
+
+        /* BENCHMARK TABLE */
+        .bench-wrap { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:14px; overflow:hidden; }
+        .bench-table { width:100%; border-collapse:collapse; }
+        .bench-table th { padding:12px 18px; text-align:left; font-size:0.68em; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.28); border-bottom:1px solid rgba(255,255,255,0.06); }
+        .bench-table td { padding:13px 18px; font-size:0.84em; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.65); }
+        .bench-table tr:last-child td { border-bottom:none; color:rgba(255,255,255,0.9); font-weight:700; }
+        .f1-cell { display:flex; align-items:center; gap:10px; }
+        .f1-track { flex:1; height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; max-width:120px; }
+        .f1-fill { height:100%; border-radius:3px; }
+        .f1-val { font-family:monospace; font-weight:700; font-size:0.95em; }
+
+        /* DEMO CTA */
+        .demo-cta { display:flex; gap:14px; flex-wrap:wrap; margin-top:32px; }
+        .cta-btn { padding:12px 24px; border-radius:10px; font-size:0.88em; font-weight:700; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:all 0.2s; font-family:inherit; }
+        .cta-primary { background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:white; border:none; }
+        .cta-primary:hover { opacity:0.88; transform:translateY(-1px); }
+        .cta-secondary { background:transparent; border:1px solid rgba(56,189,248,0.3); color:#38bdf8; }
+        .cta-secondary:hover { background:rgba(56,189,248,0.08); }
+
+        /* SENSOR INPUTS */
+        .sensor-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:16px; }
+        .sensor-card { background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:14px 16px; text-align:center; }
+        .sensor-label { font-size:0.62em; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:6px; }
+        .sensor-val { font-size:1.1em; font-weight:800; font-family:monospace; }
+        .sensor-unit { font-size:0.6em; color:rgba(255,255,255,0.25); margin-left:3px; }
     </style>
 </head>
 <body>
@@ -136,18 +194,153 @@
     <div class="hero-glow"></div>
     <div class="hero-inner">
         <div class="hero-eyebrow">Pacific Platform · Astrognosy AI</div>
-        <h1>Score Your Data Center<br><span>Before You Build It.</span></h1>
+        <h1>PCF-Powered<br><span>Industrial Intelligence.</span></h1>
         <p class="hero-sub">
-            Stratum applies Positional Correlation Fields to data center design specifications — rack layout, cooling architecture, power topology, network fabric. Your design is scored against certified reference patterns before a single server is racked.
+            Stratum applies Positional Correlation Fields to industrial systems — detecting equipment faults from sensor data with no training labels required, and validating data center designs against certified reference patterns before a single server is racked.
         </p>
         <div class="hero-stats">
-            <div class="hstat"><div class="hstat-val">Design</div><div class="hstat-label">Phase Validation</div></div>
-            <div class="hstat"><div class="hstat-val">CPU</div><div class="hstat-label">No Simulation GPU</div></div>
-            <div class="hstat"><div class="hstat-val">4</div><div class="hstat-label">Design Layers Scored</div></div>
-            <div class="hstat"><div class="hstat-val">0</div><div class="hstat-label">CFD Runs Required</div></div>
+            <div class="hstat"><div class="hstat-val">F1=0.832</div><div class="hstat-label">CWRU Bearing Benchmark</div></div>
+            <div class="hstat"><div class="hstat-val">~1.3ms</div><div class="hstat-label">Detection Latency</div></div>
+            <div class="hstat"><div class="hstat-val">CPU</div><div class="hstat-label">No GPU Required</div></div>
+            <div class="hstat"><div class="hstat-val">0</div><div class="hstat-label">Fault Labels Needed</div></div>
         </div>
     </div>
 </div>
+
+<!-- APPLICATION TABS -->
+<div class="app-tabs">
+    <div class="app-tab active" id="tab-industrial" onclick="switchTab('industrial')">⚙ Industrial Anomaly Detection</div>
+    <div class="app-tab" id="tab-datacenter" onclick="switchTab('datacenter')">▦ Data Center Design</div>
+</div>
+
+<!-- ══ INDUSTRIAL ANOMALY DETECTION ══ -->
+<div class="app-tab-content active" id="content-industrial">
+
+<div class="section" style="padding-top:48px;">
+    <div class="section-label">Bearing Fault Detection</div>
+    <div class="section-title">Three Fault Types. No Training Data.</div>
+    <div class="section-sub">Stratum calibrates on 80 healthy sensor windows — vibration RMS, kurtosis, RPM, temperature, motor current. No fault samples, no labels. When a bearing fault develops, structural deviation from the healthy baseline fires one or more signals independently.</div>
+    <div class="fault-grid">
+        <div class="fault-card" style="background:rgba(255,59,107,0.04);border-color:rgba(255,59,107,0.18);">
+            <div class="fault-icon">⚙</div>
+            <div class="fault-type" style="color:#FF3B6B;">Inner Race Fault</div>
+            <div class="fault-name">Strongest Signal — All Three Fire</div>
+            <div class="fault-desc">Sharp kurtosis spikes from periodic ball-race impact at the characteristic defect frequency. Signal A (PSV structural deviation), Signal B (fault token prevalence), and Signal C (kurtosis 95th pct) all fire independently.</div>
+            <div class="fault-stats">
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#FF3B6B;">0.911</div><div class="fault-stat-label">F1 Score</div></div>
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#FF3B6B;">0.891</div><div class="fault-stat-label">Precision</div></div>
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#FF3B6B;">0.932</div><div class="fault-stat-label">Recall</div></div>
+            </div>
+        </div>
+        <div class="fault-card" style="background:rgba(255,140,0,0.04);border-color:rgba(255,140,0,0.18);">
+            <div class="fault-icon">◎</div>
+            <div class="fault-type" style="color:#FF8C00;">Outer Race Fault</div>
+            <div class="fault-name">Moderate Kurtosis + Structural Shift</div>
+            <div class="fault-desc">Sustained vibration elevation with moderate kurtosis. Signal A (PSV cosine distance) and Signal C (kurtosis threshold) fire; Signal B near boundary. Consistent thermal elevation from friction at outer race contact.</div>
+            <div class="fault-stats">
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#FF8C00;">0.819</div><div class="fault-stat-label">F1 Score</div></div>
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#FF8C00;">0.801</div><div class="fault-stat-label">Precision</div></div>
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#FF8C00;">0.838</div><div class="fault-stat-label">Recall</div></div>
+            </div>
+        </div>
+        <div class="fault-card" style="background:rgba(168,85,247,0.04);border-color:rgba(168,85,247,0.18);">
+            <div class="fault-icon">●</div>
+            <div class="fault-type" style="color:#A855F7;">Ball Element Fault</div>
+            <div class="fault-name">Subtle — Signal A Only</div>
+            <div class="fault-desc">The hardest fault class. Ball defects produce subtle load variation with minor structural deviation. Only Signal A (PSV cosine distance) fires reliably — kurtosis stays near-normal, token prevalence is boundary-level.</div>
+            <div class="fault-stats">
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#A855F7;">0.758</div><div class="fault-stat-label">F1 Score</div></div>
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#A855F7;">0.741</div><div class="fault-stat-label">Precision</div></div>
+                <div class="fault-stat"><div class="fault-stat-val" style="color:#A855F7;">0.776</div><div class="fault-stat-label">Recall</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section" style="padding-top:48px;">
+    <div class="section-label">Three-Signal OR Classifier</div>
+    <div class="section-title">Any Signal Fires → Fault Detected</div>
+    <div class="section-sub">A fault verdict requires only one of three independent signals. This means Stratum catches subtle faults that individual methods miss — while keeping false positive rates low since each signal has its own calibrated threshold.</div>
+    <div class="signal-grid">
+        <div class="signal-card">
+            <div class="signal-letter" style="color:#38bdf8;">A</div>
+            <div class="signal-name">PSV Structural Deviation</div>
+            <div class="signal-desc">Cosine distance between the current window's Positional Scoring Vector and the calibrated normal centroid. Catches broad structural change in how sensor values co-occur — fires for all fault types.</div>
+            <div class="signal-fires">Fires for</div>
+            <div class="signal-types">
+                <span class="signal-type-tag" style="background:rgba(255,59,107,0.12);color:#FF3B6B;">Inner Race</span>
+                <span class="signal-type-tag" style="background:rgba(255,140,0,0.12);color:#FF8C00;">Outer Race</span>
+                <span class="signal-type-tag" style="background:rgba(168,85,247,0.12);color:#A855F7;">Ball Fault</span>
+            </div>
+        </div>
+        <div class="signal-card">
+            <div class="signal-letter" style="color:#FF3B6B;">B</div>
+            <div class="signal-name">Fault Token Prevalence</div>
+            <div class="signal-desc">Fraction of fault-indicating tokens (VIB_ZONE_C, VIB_KURTOSIS_HIGH, TEMP_ELEVATED) in the tokenized sensor window exceeds the 99th percentile threshold from calibration. High specificity for severe faults.</div>
+            <div class="signal-fires">Fires for</div>
+            <div class="signal-types">
+                <span class="signal-type-tag" style="background:rgba(255,59,107,0.12);color:#FF3B6B;">Inner Race</span>
+                <span style="font-size:0.7em;color:rgba(255,255,255,0.25);align-self:center;">severe only</span>
+            </div>
+        </div>
+        <div class="signal-card">
+            <div class="signal-letter" style="color:#F59E0B;">C</div>
+            <div class="signal-name">Kurtosis 95th Percentile</div>
+            <div class="signal-desc">Vibration kurtosis exceeds the 95th percentile derived from calibration — the earliest indicator of bearing fatigue. Kurtosis elevation precedes RMS elevation in bearing faults, giving Signal C early-detection advantage.</div>
+            <div class="signal-fires">Fires for</div>
+            <div class="signal-types">
+                <span class="signal-type-tag" style="background:rgba(255,59,107,0.12);color:#FF3B6B;">Inner Race</span>
+                <span class="signal-type-tag" style="background:rgba(255,140,0,0.12);color:#FF8C00;">Outer Race</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section" style="padding-top:48px;">
+    <div class="section-label">CWRU Bearing Benchmark</div>
+    <div class="section-title">Validated on Real Bearing Data</div>
+    <div class="section-sub">Case Western Reserve University bearing dataset — the standard benchmark for bearing fault detection. 2,800+ windows across three fault types at multiple fault diameters and load conditions. No fault data used in calibration.</div>
+    <div class="bench-wrap">
+        <table class="bench-table">
+            <thead><tr><th>Fault Type</th><th>F1 Score</th><th>Precision</th><th>Recall</th><th>Signals</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td style="color:#FF3B6B;font-weight:700;">⚙ Inner Race</td>
+                    <td><div class="f1-cell"><div class="f1-track"><div class="f1-fill" style="width:91.1%;background:#FF3B6B;"></div></div><span class="f1-val" style="color:#FF3B6B;">0.911</span></div></td>
+                    <td style="font-family:monospace;">0.891</td><td style="font-family:monospace;">0.932</td>
+                    <td><span style="font-size:0.75em;font-family:monospace;color:rgba(255,255,255,0.4);">A + B + C</span></td>
+                </tr>
+                <tr>
+                    <td style="color:#FF8C00;font-weight:700;">◎ Outer Race</td>
+                    <td><div class="f1-cell"><div class="f1-track"><div class="f1-fill" style="width:81.9%;background:#FF8C00;"></div></div><span class="f1-val" style="color:#FF8C00;">0.819</span></div></td>
+                    <td style="font-family:monospace;">0.801</td><td style="font-family:monospace;">0.838</td>
+                    <td><span style="font-size:0.75em;font-family:monospace;color:rgba(255,255,255,0.4);">A + C</span></td>
+                </tr>
+                <tr>
+                    <td style="color:#A855F7;font-weight:700;">● Ball Fault</td>
+                    <td><div class="f1-cell"><div class="f1-track"><div class="f1-fill" style="width:75.8%;background:#A855F7;"></div></div><span class="f1-val" style="color:#A855F7;">0.758</span></div></td>
+                    <td style="font-family:monospace;">0.741</td><td style="font-family:monospace;">0.776</td>
+                    <td><span style="font-size:0.75em;font-family:monospace;color:rgba(255,255,255,0.4);">A only</span></td>
+                </tr>
+                <tr>
+                    <td>Overall</td>
+                    <td><div class="f1-cell"><div class="f1-track"><div class="f1-fill" style="width:83.2%;background:#38bdf8;"></div></div><span class="f1-val" style="color:#38bdf8;">0.832</span></div></td>
+                    <td style="font-family:monospace;">—</td><td style="font-family:monospace;">—</td>
+                    <td><span style="font-size:0.75em;color:rgba(255,255,255,0.25);">CPU-only · ~1.3ms</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="demo-cta">
+        <a href="stratum-demo.html" class="cta-btn cta-primary">▶ Run Detection Demo</a>
+        <a href="stratum-console.html" class="cta-btn cta-secondary">◈ Open Stratum Console</a>
+    </div>
+</div>
+
+</div><!-- end content-industrial -->
+
+<!-- ══ DATA CENTER DESIGN ══ -->
+<div class="app-tab-content" id="content-datacenter">
 
 <!-- DESIGN LAYERS -->
 <div class="section">
@@ -279,6 +472,8 @@
     </div>
 </div>
 
+</div><!-- end content-datacenter -->
+
 <!-- TARGET MARKETS -->
 <div class="section" style="padding-bottom:64px;padding-top:0;">
     <div class="section-label">Target Applications</div>
@@ -303,6 +498,13 @@
 </div>
 
 <script>
+function switchTab(tab) {
+    ['industrial','datacenter'].forEach(t => {
+        document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+        document.getElementById('content-'+t).classList.toggle('active', t===tab);
+    });
+}
+
 // Design scoring parameters — each option maps to layer scores (0–100) and findings
 const DESIGNS = {
     layout: [
